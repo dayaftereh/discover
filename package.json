@@ -1,7 +1,7 @@
 {
     "name": "Discover",
     "version": "0.0.1",
-    "description": "",
+    "description": "A 2d in browser multiplyer shooter to discover the space",
     "repository": {
         "type": "git",
         "url": "https://github.com/dayaftereh"
