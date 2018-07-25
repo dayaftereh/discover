@@ -50,6 +50,7 @@ build: dependencies
 
 dependencies:
 	$(GOGET) gopkg.in/yaml.v2
+	$(GOGET) github.com/gorilla/mux
 
 clean:
 	@-rm -r $(BIN_DIR)
