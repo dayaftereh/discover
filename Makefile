@@ -5,7 +5,7 @@ RELEASE = $(shell date '+%d-%m-%Y %H:%M:%S')
 # define recursive wildcards
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 # GO Files
-FILES = $(call rwildcard, , *.go)
+FILES = $(call rwildcard, ,*.go)
 # Main files
 MAIN_FILES = $(wildcard *.go)
 
@@ -51,6 +51,7 @@ build: dependencies
 dependencies:
 	$(GOGET) gopkg.in/yaml.v2
 	$(GOGET) github.com/gorilla/mux
+	$(GOGET) github.com/gorilla/sessions
 
 clean:
 	@-rm -r $(BIN_DIR)

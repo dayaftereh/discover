@@ -16,7 +16,7 @@ type HttpServer struct {
 	RouterFactory *RouterFactory
 }
 
-func NewHttpServer(config *Config, routerFactory *RouterFactory) *HttpServer {
+func NewHttpServer(routerFactory *RouterFactory, config *Config) *HttpServer {
 	return &HttpServer{
 		Config:        config,
 		RouterFactory: routerFactory,
