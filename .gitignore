@@ -1,12 +1,13 @@
 # IDEs and editors
-/.idea
-/.vscode
+.idea/
+.vscode/
 
 # compiled output
-/dist
-/tmp
-/out-tsc
+dist/
+tmp/
+out-tsc/
 
 # dependencies
-/node_modules
+vendor/
+node_modules/
 **/node_modules

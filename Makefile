@@ -2,56 +2,71 @@
 VERSION	= 0.0.1
 RELEASE = $(shell date '+%d-%m-%Y %H:%M:%S')
 
-# define recursive wildcards
-rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
-# GO Files
-FILES = $(call rwildcard, ,*.go)
-# Main files
-MAIN_FILES = $(wildcard *.go)
+# Main package
+MAIN_PKG =  github.com/dayaftereh/discover/server/main
 
 # Executabels
-EXECUTABLE = discover
+NAME = discover
+
+GOBIN = $(GOPATH)/bin
 
 # GO commands
 GO			= go
 GOGET		= $(GO) get
+GORUN 		= $(GO) run
 GOBUILD		= $(GO) build
-GOFMT		= gofmt
+GOPKG 		= $(GOBIN)/dep
 _GOOS		= linux
 _GOARCH		= amd64
 
 # GO FLAGS
 GO_LD_FLAGS  = -X "main.VERSION=$(VERSION)"  -X 'main.RELEASE=$(RELEASE)'
 
-# $(CURDIR)
-BIN_DIR = $(CURDIR)/dist
+# destination directory
+DIST_DIR = $(CURDIR)/dist
+
+OUTPUT = 
 
 # Default Build variables
 EXE_ENDOING =
 
 .PHONY: clean
 
-all: build-windows
+all: build-windows build-linux
+
+# ------- release -------
 
 release: GO_LD_FLAGS += -s -w
-release: build-windows
+release: build-windows build-linux
 
-fmt:
-	$(GOFMT) -l -e -w $(FILES)
+# ------- build -------
 
 build-windows: _GOOS=windows
-build-windows: EXE_ENDOING=.exe
-build-windows: 	
-	$(MAKE) GO_LD_FLAGS="$(GO_LD_FLAGS)" EXE_ENDOING=$(EXE_ENDOING) _GOOS=$(_GOOS) _GOARCH=$(_GOARCH) build
+build-windows: OUTPUT=$(DIST_DIR)/$(NAME)-$(_GOOS)-$(_GOARCH)-$(VERSION).exe
+build-windows: dependencies
+	$(MAKE) GO_LD_FLAGS="$(GO_LD_FLAGS)" EXE_ENDOING=$(EXE_ENDOING) _GOOS=$(_GOOS) OUTPUT=$(OUTPUT) _GOARCH=$(_GOARCH) build
 
-build: OUTOUT=$(EXECUTABLE)-$(_GOOS)-$(_GOARCH)$(EXE_ENDOING)
-build: dependencies	
-	@GOOS=$(_GOOS) GOARCH=$(_GOARCH) $(GOBUILD) -buildmode=exe -ldflags "$(GO_LD_FLAGS)" -o $(BIN_DIR)/$(OUTOUT) $(MAIN_FILES)
+build-linux: OUTPUT=$(DIST_DIR)/$(NAME)-$(_GOOS)-$(_GOARCH)-$(VERSION)
+build-linux: dependencies
+	$(MAKE) GO_LD_FLAGS="$(GO_LD_FLAGS)" EXE_ENDOING=$(EXE_ENDOING) _GOOS=$(_GOOS) OUTPUT=$(OUTPUT) _GOARCH=$(_GOARCH) build
 
-dependencies:
-	$(GOGET) gopkg.in/yaml.v2
-	$(GOGET) github.com/gorilla/mux
-	$(GOGET) github.com/gorilla/sessions
+build: 	
+	@GOOS=$(_GOOS) GOARCH=$(_GOARCH) $(GOBUILD) -buildmode=exe -ldflags "$(GO_LD_FLAGS)" -o $(OUTPUT) $(MAIN_PKG)
+
+# ------- run -------
+
+run-server: dependencies
+	$(GORUN) $(MAIN_PKG)
+
+# ------- dependencies -------
+
+dependencies: gopkg
+	$(GOPKG) ensure
+
+gopkg:
+	$(GOGET) github.com/golang/dep/cmd/dep
+
+# ------- clean -------
 
 clean:
-	@-rm -r $(BIN_DIR)
+	@-rm -r $(DIST_DIR)
