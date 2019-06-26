@@ -1,6 +1,6 @@
 # Discover
 
-A webbased 2D browser multiplyer shooter at space.
+A webbased 3D browser multiplyer shooter to discover the space.
 
 ## Supported Platforms
 

@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "es6",
+      "lib": [
+        "es6",
+        "esnext.asynciterable"
+      ],
+      "typeRoots": [
+        "../node_modules/@types"
+      ],
+      "moduleResolution": "node",
+      "noImplicitAny": false
+    }
+  }
+  
