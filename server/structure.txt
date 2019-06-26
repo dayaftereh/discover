@@ -1,0 +1,26 @@
+server
+    -> main
+    -> config
+    -> api
+        -> session
+        -> handler
+        -> connection
+    -> backend
+        -> game - handler
+    -> game
+        -> data
+        -> player
+        -> star-system
+        -> game-object
+            -> planet
+            -> ship
+            -> missile
+        -> engine
+            -> physics
+            -> scene
+            -> geometry
+    -> persistence
+    -> math 
+        -> Vec3
+        -> Point3
+        -> Mathf

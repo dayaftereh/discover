@@ -2,6 +2,38 @@
 
 
 [[projects]]
+  digest = "1:dbbeb8ddb0be949954c8157ee8439c2adfd8dc1c9510eb44a6e58cb68c3dce28"
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  pruneopts = ""
+  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:ec5262e6c65f9fcedc01d7789ee4e18ad429dde822cfd50e57e3fd77c4d70c73"
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  pruneopts = ""
+  revision = "ed099d42384823742bba0bf9a72b53b55c9e2e38"
+  version = "v1.7.2"
+
+[[projects]]
+  digest = "1:51a1d17ba9fe6648d9fdd5b822baa616d6ec7f28c8669c2091126d206796b5ae"
+  name = "github.com/gorilla/securecookie"
+  packages = ["."]
+  pruneopts = ""
+  revision = "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:4e1c7e6877107c08296ca6ee3d3c4c07d1ff5e46565a186aa8e9342e435301be"
+  name = "github.com/gorilla/sessions"
+  packages = ["."]
+  pruneopts = ""
+  revision = "f57b7e2d29c6211d16ffa52a0998272f75799030"
+  version = "v1.1.3"
+
+[[projects]]
   digest = "1:1d7e1867c49a6dd9856598ef7c3123604ea3daabf5b83f303ff457bcbc410b1d"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -12,6 +44,10 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/pkg/errors"]
+  input-imports = [
+    "github.com/gorilla/mux",
+    "github.com/gorilla/sessions",
+    "github.com/pkg/errors",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
