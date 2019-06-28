@@ -19,3 +19,13 @@ func NotFound(response http.ResponseWriter) error {
 	response.WriteHeader(http.StatusNotFound)
 	return nil
 }
+
+func Unauthorized(response http.ResponseWriter) error {
+	response.WriteHeader(http.StatusUnauthorized)
+	return nil
+}
+
+func Forbidden(response http.ResponseWriter) error {
+	response.WriteHeader(http.StatusForbidden)
+	return nil
+}

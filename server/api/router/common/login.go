@@ -33,8 +33,8 @@ func (common *commonRouter) login(ctx context.Context, response http.ResponseWri
 		return errors.Errorf("fail to login user, because name is missing")
 	}
 
-	// set the correkt name for the player
-	player.Name = login.Name
+	// set the name for the player
+	player.SetName(login.Name)
 
 	return api.SuccessEmpty(response)
 }

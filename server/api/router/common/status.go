@@ -30,8 +30,8 @@ func (common *commonRouter) status(ctx context.Context, response http.ResponseWr
 
 	// create the status
 	status := types.Status{
-		Id:   player.Id,
-		Name: player.Name,
+		Id:   player.ID,
+		Name: player.GetName(),
 	}
 
 	// write the status as json response

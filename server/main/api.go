@@ -1,7 +1,11 @@
 package main
 
 import (
+	"github.com/dayaftereh/discover/server/api/connection/dispatch"
+	"github.com/dayaftereh/discover/server/api/connection/dispatch/handler"
+	"github.com/dayaftereh/discover/server/api/connection/handler/movement"
 	"github.com/dayaftereh/discover/server/api/router/common"
+	"github.com/dayaftereh/discover/server/api/router/connection"
 	"github.com/dayaftereh/discover/server/api/server"
 	"github.com/dayaftereh/discover/server/api/server/middleware"
 	"github.com/dayaftereh/discover/server/api/server/router"
@@ -54,14 +58,39 @@ func createSessionManager() (*session.Manager, error) {
 }
 
 func initRouters(game *game.Game, server *server.Server) error {
+	// create the connection dispatcher
+	dispatcher := dispatch.NewDispatcher()
+
+	// initialize the dispatcher
+	err := initDispatcher(game, dispatcher)
+	if err != nil {
+		return err
+	}
+
 	// create the routers for the server
 	routers := []router.Router{
 		// common
 		common.NewRouter(game),
+		// connection
+		connection.NewRouter(game, dispatcher),
 	}
 
 	// register the routers
 	server.UseRouter(routers...)
+
+	return nil
+}
+
+func initDispatcher(game *game.Game, dispatcher *dispatch.Dispatcher) error {
+
+	// create the handler for dispatcher
+	handlers := []handler.Handler{
+		// movement
+		movement.NewHandler(game),
+	}
+
+	// register handlers
+	dispatcher.UseHandlers(handlers...)
 
 	return nil
 }

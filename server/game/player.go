@@ -35,3 +35,7 @@ func (game *Game) DropPlayer(id string) error {
 
 	return nil
 }
+
+func (game *Game) Movement(player *player.Player, x float64, y float64, z float64) {
+
+}
