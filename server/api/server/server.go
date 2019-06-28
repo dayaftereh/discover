@@ -1,4 +1,4 @@
-package http
+package server
 
 import (
 	"context"
@@ -7,29 +7,34 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/dayaftereh/discover/server/api/server/middleware"
+	"github.com/dayaftereh/discover/server/api/server/router"
 )
 
 type Server struct {
 	Server *http.Server
 	Errors chan error
-	Router *mux.Router
+
+	routers     []router.Router
+	middlewares []middleware.Middleware
 }
 
-func NewServer(router *mux.Router) *Server {
-	return &Server{
-		Router: router,
-	}
+// NewServer creates a new Server
+func NewServer() *Server {
+	return &Server{}
 }
 
+// Init initlize the server with the given configuration
 func (server *Server) Init() error {
 	// build bind address
-	address := fmt.Sprintf(":%d", 400)
+	address := fmt.Sprintf(":%d", 4000)
+
+	router := server.createMux()
 
 	// create the http server
 	server.Server = &http.Server{
 		Addr:         address,
-		Handler:      server.Router,
+		Handler:      router,
 		WriteTimeout: 10,
 		ReadTimeout:  10,
 		IdleTimeout:  10,
@@ -38,6 +43,7 @@ func (server *Server) Init() error {
 	return nil
 }
 
+// Serve start the serving of the server
 func (server *Server) Serve() {
 	go func() {
 		log.Printf("Listening on %v", server.Server.Addr)
@@ -48,6 +54,7 @@ func (server *Server) Serve() {
 	}()
 }
 
+// Destroy and shutdown the started server
 func (server *Server) Destroy() error {
 	if server.Server == nil {
 		return nil

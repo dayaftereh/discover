@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-
-	"github.com/pkg/errors"
 )
 
 var (
@@ -17,7 +15,10 @@ func main() {
 
 	log.Println(VERSION, RELEASE)
 
-	if false {
-		errors.New("Error")
+	// start discovery
+	err := start()
+	if err != nil {
+		log.Fatalf("%s\n", err)
 	}
+	
 }
