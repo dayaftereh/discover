@@ -1,9 +1,8 @@
 package shape
 
-import "github.com/dayaftereh/discover/server/math"
+import "github.com/dayaftereh/discover/server/mathf"
 
 type Shape struct {
-	ID string
-
-	Location math.Vec3
+	ID       int64
+	Location mathf.Vec3
 }
