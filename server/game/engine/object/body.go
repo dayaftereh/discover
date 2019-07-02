@@ -18,19 +18,19 @@ type Body struct {
 	FixedRotation bool
 
 	// World space position of the body.
-	Position         mathf.Vec3
-	PreviousPosition mathf.Vec3
+	Position         *mathf.Vec3
+	PreviousPosition *mathf.Vec3
 
 	// World space velocity of the body.
-	Velocity mathf.Vec3
+	Velocity *mathf.Vec3
 	// Linear force on the body in world space.
-	Force mathf.Vec3
+	Force *mathf.Vec3
 
 	// World space rotational force on the body, around center of mass.
-	Torque mathf.Vec3
+	Torque *mathf.Vec3
 
 	// World space rotational force on the body, around center of mass.
-	Quaternion mathf.Quaternion
+	Quaternion *mathf.Quaternion
 
 	shapes []shape.Shape
 
@@ -38,28 +38,45 @@ type Body struct {
 	BoundingRadius float64
 }
 
-func (body *Body) PointToLocalFrame(vec *mathf.Vec3) *mathf.Vec3 {
-	return nil
+func (body *Body) PointToLocalFrame(worldPoint *mathf.Vec3) *mathf.Vec3 {
+	p := worldPoint.Subtract(body.Position)
+	r := body.Quaternion.Conjugate().MultiplyVec(p)
+	return r
 }
 
-func (body *Body) VectorToLocalFrame(vec *mathf.Vec3) *mathf.Vec3 {
-	return nil
+func (body *Body) VectorToLocalFrame(worldVector *mathf.Vec3) *mathf.Vec3 {
+	r := body.Quaternion.Conjugate().MultiplyVec(worldVector)
+	return r
 }
 
-func (body *Body) PointToWorldFrame(vec *mathf.Vec3) *mathf.Vec3 {
-	return nil
+func (body *Body) PointToWorldFrame(localPoint *mathf.Vec3) *mathf.Vec3 {
+	p := body.Quaternion.MultiplyVec(localPoint)
+	r := p.Add(body.Position)
+	return r
 }
 
-func (body *Body) VectorToWorldFrame(vec *mathf.Vec3) *mathf.Vec3 {
-	return nil
+func (body *Body) VectorToWorldFrame(localVector *mathf.Vec3) *mathf.Vec3 {
+	r := body.Quaternion.MultiplyVec(localVector)
+	return r
 }
 
 func (body *Body) AddShape(shape *shape.Shape) {
+	body.shapes = append(body.shapes, *shape)
 
+	body.UpdateMassProperties()
+	body.UpdateBoundingRadius()
 }
 
 func (body *Body) UpdateBoundingRadius() {
-
+	radius := float64(0)
+	for _, shape := range body.shapes {
+		shape.UpdateBoundingSphereRadius()
+		r := shape.BoundingSphereRadius()
+		if r > radius {
+			radius = r
+		}
+	}
+	body.BoundingRadius = radius
 }
 
 func (body *Body) UpdateMassProperties() {

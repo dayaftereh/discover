@@ -9,6 +9,10 @@ type World struct {
 	Bodies map[int64]*object.Body
 }
 
+func NewWorld() *World {
+	return &World{}
+}
+
 func (world *World) AddBody(body *object.Body) {
 	world.Bodies[body.ID] = body
 }

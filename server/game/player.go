@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/dayaftereh/discover/server/game/player"
+	"github.com/dayaftereh/discover/server/mathf"
 	"github.com/pkg/errors"
 )
 
@@ -33,9 +34,34 @@ func (game *Game) DropPlayer(id string) error {
 		return errors.Errorf("unable to drop player, because current player with id [ %s ] not found", id)
 	}
 
+	starSystem := game.universe.DefaultStarSystem()
+	if starSystem == nil {
+		return nil
+	}
+
+	game.universe.DropPlayerStarSystem(player)
+
+	starSystem.DropPlayer(player)
+
 	return nil
 }
 
-func (game *Game) Movement(player *player.Player, x float64, y float64, z float64) {
+func (game *Game) JoinPlayer(player *player.Player) {
+	starSystem := game.universe.DefaultStarSystem()
+	if starSystem == nil {
+		return
+	}
 
+	game.universe.SetPlayerStarSystem(player, starSystem.ID)
+
+	starSystem.JoinPlayer(player)
+}
+
+func (game *Game) Movement(player *player.Player, lookAt *mathf.Vec3) {
+	starSystem := game.universe.GetPlayerStarSystem(player)
+	if starSystem == nil {
+		return
+	}
+
+	starSystem.UpdatePlayer(player, lookAt)
 }
