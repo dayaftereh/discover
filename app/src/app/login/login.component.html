@@ -1,0 +1,12 @@
+<form (ngSubmit)="login()">
+    <div class="p-grid">
+        <div class="p-col">
+            <input type="text" [(ngModel)]="username" placeholder="Username" pInputText />
+        </div>
+    </div>
+    <div class="p-grid">
+        <div class="p-col">
+            <button pButton type="submit" class="ui-button-success">Login</button>
+        </div>
+    </div>
+</form>
