@@ -1,42 +1,53 @@
 package universe
 
 import (
-	"github.com/dayaftereh/discover/server/game/player"
+	"sync"
+
+	"github.com/dayaftereh/discover/server/game/data"
 	"github.com/dayaftereh/discover/server/game/universe/starsystem"
-	"github.com/dayaftereh/discover/server/utils"
 )
 
 type Universe struct {
-	starSystem  int64
-	counter     *utils.IDCounter
-	players     map[string]int64
+	lock        sync.RWMutex
 	starSystems map[int64]*starsystem.StarSystem
 }
 
 func NewUniverse() *Universe {
 	universe := &Universe{
-		starSystem:  0,
-		counter:     utils.NewIDCounter(),
-		players:     make(map[string]int64),
 		starSystems: make(map[int64]*starsystem.StarSystem),
 	}
-
-	universe.starSystem = universe.GenerateStarSystem()
 
 	return universe
 }
 
-func (universe *Universe) DefaultStarSystem() *starsystem.StarSystem {
-	return universe.GetStarSystem(universe.starSystem)
+func (universe *Universe) LoadStarSystems(starSystems []*data.StarSystem) {
+	universe.lock.Lock()
+	defer universe.lock.Unlock()
+
+	for _, starSystem := range starSystems {
+		universe.starSystems[starSystem.ID] = starsystem.NewStarSystem(starSystem.ID)
+	}
 }
 
-func (universe *Universe) GenerateStarSystem() int64 {
-	id := universe.counter.Next()
-	universe.starSystems[id] = starsystem.NewStarSystem(id)
-	return id
+func (universe *Universe) GetStarSystems() []*data.StarSystem {
+	starSystems := make([]*data.StarSystem, 0)
+
+	universe.lock.RLock()
+	defer universe.lock.RUnlock()
+
+	for _, starSystem := range universe.starSystems {
+		starSystems = append(starSystems, &data.StarSystem{
+			ID: starSystem.ID,
+		})
+	}
+
+	return starSystems
 }
 
 func (universe *Universe) GetStarSystem(id int64) *starsystem.StarSystem {
+	universe.lock.RLock()
+	defer universe.lock.RUnlock()
+
 	startSystem, ok := universe.starSystems[id]
 	if !ok {
 		return nil
@@ -44,22 +55,11 @@ func (universe *Universe) GetStarSystem(id int64) *starsystem.StarSystem {
 	return startSystem
 }
 
-func (universe *Universe) GetPlayerStarSystem(player *player.Player) *starsystem.StarSystem {
-	starSystemID, ok := universe.players[player.ID]
-	if !ok {
-		return nil
-	}
+func (universe *Universe) Shutdown() {
+	universe.lock.RLock()
+	defer universe.lock.RUnlock()
 
-	return universe.GetStarSystem(starSystemID)
-}
-
-func (universe *Universe) SetPlayerStarSystem(player *player.Player, id int64) {
-	universe.players[player.ID] = id
-}
-
-func (universe *Universe) DropPlayerStarSystem(player *player.Player) {
-	_, ok := universe.players[player.ID]
-	if ok {
-		delete(universe.players, player.ID)
+	for _, starSystem := range universe.starSystems {
+		starSystem.Shutdown()
 	}
 }

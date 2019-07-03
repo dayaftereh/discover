@@ -15,10 +15,7 @@ func (common *commonRouter) logout(ctx context.Context, response http.ResponseWr
 	}
 
 	// drop the player from game
-	err = common.backend.DropPlayer(sessionID)
-	if err != nil {
-		return err
-	}
+	common.backend.DropPlayerSession(sessionID)
 
 	return api.SuccessEmpty(response)
 }

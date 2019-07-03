@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/dayaftereh/discover/server/api/connection/dispatch"
 	"github.com/dayaftereh/discover/server/api/connection/dispatch/handler"
 	"github.com/dayaftereh/discover/server/api/connection/handler/movement"
@@ -28,6 +30,17 @@ func initAPI(game *game.Game) (*server.Server, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// init the server
+	err = server.Init()
+	if err != nil {
+		return nil, err
+	}
+
+	// star serve of the server
+	server.Serve()
+
+	log.Println("api initialized")
 
 	return server, nil
 }
@@ -93,4 +106,10 @@ func initDispatcher(game *game.Game, dispatcher *dispatch.Dispatcher) error {
 	dispatcher.UseHandlers(handlers...)
 
 	return nil
+}
+
+func shutdownAPI(server *server.Server) error {
+	log.Println("shutdown api...")
+	err := server.Shutdown()
+	return err
 }

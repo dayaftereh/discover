@@ -1,23 +1,23 @@
 package player
 
+import (
+	"github.com/dayaftereh/discover/server/game/data"
+)
+
 type Player struct {
-	ID string
+	ID   string
+	Name string
+	// game
+	StarSystem *int64
 	// private
-	name        *string
 	connections map[string]Connection
 }
 
-func NewPlayer(id string) *Player {
+func NewPlayer(id string, data *data.Player) *Player {
 	return &Player{
 		ID:          id,
+		Name:        data.Name,
+		StarSystem:  data.StarSystem,
 		connections: make(map[string]Connection),
 	}
-}
-
-func (player *Player) GetName() *string {
-	return player.name
-}
-
-func (player *Player) SetName(name *string) {
-	player.name = name
 }

@@ -1,63 +1,110 @@
 package player
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/dayaftereh/discover/server/game/data"
+)
 
 type Manager struct {
-	lock    sync.RWMutex
-	players map[string]*Player
+	lock     sync.RWMutex
+	sessions map[string]*Player
+	storage  map[string]*data.Player
 }
 
 func NewPlayerManager() *Manager {
-	return &Manager{
-		players: make(map[string]*Player),
+	return &Manager{}
+}
+
+func (manager *Manager) LoadPlayers(players []*data.Player) {
+	// lock for write
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
+
+	// store all players
+	for _, player := range players {
+		manager.storage[player.Name] = player
 	}
 }
 
-// Get the player for the given id, otherwise null
-func (manager *Manager) Get(id string) *Player {
+func (manager *Manager) GetPlayers() []*data.Player {
 	// lock for read
 	manager.lock.RLock()
 	defer manager.lock.RUnlock()
 
-	player, ok := manager.players[id]
+	// create the empty array
+	players := []*data.Player{}
+
+	// get each player
+	for _, player := range manager.storage {
+		players = append(players, player)
+	}
+
+	return players
+}
+
+func (manager *Manager) SessionByName(id string, name string) *Player {
+	// lock for read
+	manager.lock.RLock()
+
+	// check if player has already a session
+	player, ok := manager.sessions[id]
+
+	// if session exists
+	if ok {
+		manager.lock.RUnlock()
+		return player
+	}
+
+	// if not lock for write
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
+
+	// get the player data
+	playerData, ok := manager.storage[name]
+
+	// create a new player in storage
+	if !ok {
+		// create a new player
+		playerData = &data.Player{}
+		playerData.Name = name
+		// storage the player
+		manager.storage[name] = playerData
+	}
+
+	// create a new player
+	player = NewPlayer(id, playerData)
+	// store a new session for the player
+	manager.sessions[id] = player
+
+	return player
+
+}
+
+// GetSession the player for the given id, otherwise null
+func (manager *Manager) GetSession(id string) *Player {
+	// lock for read
+	manager.lock.RLock()
+	defer manager.lock.RUnlock()
+
+	player, ok := manager.sessions[id]
 	if !ok {
 		return nil
 	}
 	return player
 }
 
-func (manager *Manager) Remove(id string) *Player {
+func (manager *Manager) DropSession(id string) *Player {
 	// lock for read
 	manager.lock.Lock()
 	defer manager.lock.Unlock()
 
 	// get the player
-	player, ok := manager.players[id]
+	player, ok := manager.sessions[id]
 	if !ok {
 		return nil
 	}
 	// remove the player
-	delete(manager.players, id)
-	return player
-}
-
-func (manager *Manager) GetOrCreate(id string) *Player {
-	// lock for read
-	manager.lock.RLock()
-	// get the player
-	player, ok := manager.players[id]
-	// unlock from read
-	manager.lock.RUnlock()
-
-	if !ok {
-		// create a new player
-		player = NewPlayer(id)
-		// lock for write
-		manager.lock.Lock()
-		defer manager.lock.Unlock()
-		// store the player
-		manager.players[id] = player
-	}
-
+	delete(manager.sessions, id)
 	return player
 }

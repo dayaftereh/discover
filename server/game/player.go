@@ -3,62 +3,57 @@ package game
 import (
 	"github.com/dayaftereh/discover/server/game/player"
 	"github.com/dayaftereh/discover/server/mathf"
-	"github.com/pkg/errors"
 )
 
-func (game *Game) HasPlayer(id string) bool {
-	// get or create the player
-	player := game.playerManager.Get(id)
-	return player != nil
+func (game *Game) SessionByName(id string, name string) *player.Player {
+	// get or create the player session for the given name
+	player := game.playerManager.SessionByName(id, name)
+	return player
 }
 
-// GetPlayer or create for given id
-func (game *Game) GetPlayer(id string) (*player.Player, error) {
-	// get or create the player
-	player := game.playerManager.GetOrCreate(id)
+// GetPlayerSession returns the session for the player
+func (game *Game) GetPlayerSession(id string) *player.Player {
+	// get the player session
+	player := game.playerManager.GetSession(id)
 
-	// check if player found
-	if player == nil {
-		return nil, errors.Errorf("unable to find player for id [ %s ]", id)
-	}
-
-	return player, nil
+	return player
 }
 
-// DropPlayer for given id from Game
-func (game *Game) DropPlayer(id string) error {
+// DropPlayerSession for given id from Game
+func (game *Game) DropPlayerSession(id string) {
 	// remove the player
-	player := game.playerManager.Remove(id)
+	player := game.playerManager.DropSession(id)
+
 	// check for player found
 	if player == nil {
-		return errors.Errorf("unable to drop player, because current player with id [ %s ] not found", id)
-	}
-
-	starSystem := game.universe.DefaultStarSystem()
-	if starSystem == nil {
-		return nil
-	}
-
-	game.universe.DropPlayerStarSystem(player)
-
-	starSystem.DropPlayer(player)
-
-	return nil
-}
-
-func (game *Game) JoinPlayer(player *player.Player) {
-	starSystem := game.universe.DefaultStarSystem()
-	if starSystem == nil {
 		return
 	}
 
-	game.universe.SetPlayerStarSystem(player, starSystem.ID)
+	// get the player star system
+	starSystem := game.universe.GetStarSystem(*player.StarSystem)
+	// check if a star system exists
+	if starSystem == nil {
+		return
+	}
+	// drop the player from star system
+	starSystem.DropPlayer(player)
+}
 
+func (game *Game) JoinPlayer(player *player.Player) {
+	// get the player star system
+	starSystem := game.universe.GetStarSystem(*player.StarSystem)
+	// check if a star system exists
+	if starSystem == nil {
+		return
+	}
+	// let the player join the star system
 	starSystem.JoinPlayer(player)
 }
 
 func (game *Game) Movement(player *player.Player, lookAt *mathf.Vec3) {
-	starSystem := game.universe.GetPlayerStarSystem(player)
+	// get the player star system
+	starSystem := game.universe.GetStarSystem(*player.StarSystem)
+	// check if a star system exists
 	if starSystem == nil {
 		return
 	}

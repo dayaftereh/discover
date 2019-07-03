@@ -77,3 +77,7 @@ func (starSystem *StarSystem) DropPlayer(player *player.Player) {
 		return nil
 	}
 }
+
+func (starSystem *StarSystem) Shutdown() {
+	starSystem.close <- true
+}

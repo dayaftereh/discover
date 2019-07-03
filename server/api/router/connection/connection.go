@@ -28,6 +28,10 @@ func (connection *connectionRouter) Routes() []router.Route {
 	return connection.routes
 }
 
+func (connection *connectionRouter) Close() {
+	connection.dispatcher.Close()
+}
+
 func (connection *connectionRouter) initRoutes() {
 	connection.routes = []router.Route{
 		router.NewGetRoute("/ws", connection.websocket),

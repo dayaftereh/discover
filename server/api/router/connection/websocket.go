@@ -19,13 +19,10 @@ func (connection *connectionRouter) websocket(ctx context.Context, response http
 	}
 
 	// get player for session
-	player, err := connection.backend.GetPlayer(sessionID)
-	if err != nil {
-		return err
-	}
+	player := connection.backend.GetPlayerSession(sessionID)
 
 	// check if player login
-	if player.GetName() == nil {
+	if player == nil {
 		// do not allow befor login
 		return api.Forbidden(response)
 	}

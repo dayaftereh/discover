@@ -21,6 +21,10 @@ func (common *commonRouter) Routes() []router.Route {
 	return common.routes
 }
 
+func (common *commonRouter) Close() {
+
+}
+
 func (common *commonRouter) initRoutes() {
 	common.routes = []router.Route{
 		//GET

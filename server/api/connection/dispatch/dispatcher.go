@@ -86,3 +86,12 @@ func (dispatcher *Dispatcher) dispatch(connection *connection.Connection, conten
 	err = dispatcher.execute(connection, *message.Type, content)
 	return errors.Wrapf(err, "executed message handler returnes with an error")
 }
+
+func (dispatcher *Dispatcher) Close() {
+	dispatcher.lock.RLock()
+	defer dispatcher.lock.RUnlock()
+
+	for _, connection := range dispatcher.connections {
+		connection.Close()
+	}
+}

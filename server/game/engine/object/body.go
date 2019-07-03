@@ -29,6 +29,8 @@ type Body struct {
 	// World space rotational force on the body, around center of mass.
 	Torque *mathf.Vec3
 
+	Inertia *mathf.Vec3
+
 	// World space rotational force on the body, around center of mass.
 	Quaternion *mathf.Quaternion
 

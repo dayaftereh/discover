@@ -55,9 +55,14 @@ func (server *Server) Serve() {
 }
 
 // Destroy and shutdown the started server
-func (server *Server) Destroy() error {
+func (server *Server) Shutdown() error {
 	if server.Server == nil {
 		return nil
+	}
+
+	// close all routers
+	for _, router := range server.routers {
+		router.Close()
 	}
 
 	var wait = time.Second * 5

@@ -23,18 +23,22 @@ func (common *commonRouter) login(ctx context.Context, response http.ResponseWri
 		return err
 	}
 
-	// get the player
-	player, err := common.backend.GetPlayer(sessionID)
-	if err != nil {
-		return err
-	}
 	// check if name exists
 	if login.Name == nil {
 		return errors.Errorf("fail to login user, because name is missing")
 	}
 
-	// set the name for the player
-	player.SetName(login.Name)
+	// get the player
+	player := common.backend.SessionByName(sessionID, *login.Name)
 
-	return api.SuccessEmpty(response)
+	// create the status
+	status := types.Status{
+		Id:         player.ID,
+		Name:       &player.Name,
+		StarSystem: player.StarSystem,
+	}
+
+	// write the status as json response
+	err = api.WriteJSON(response, http.StatusOK, &status)
+	return err
 }
