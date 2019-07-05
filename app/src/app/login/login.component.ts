@@ -14,13 +14,11 @@ export class LoginComponent implements OnInit {
         private readonly router: Router) { }
 
     async ngOnInit(): Promise<void> {
-        try {
-            const status: Status = await this.commonService.status()
-            if (status && status.name) {
-                await this.gotoGame()
-            }
-        } catch (e) {
-            console.log("not login")
+        // check if already login
+        const login: boolean = await this.commonService.isLogin()
+        if (login) {
+            // go to game
+            await this.gotoGame()
         }
     }
 

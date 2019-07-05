@@ -14,6 +14,9 @@ func (server *Server) createMux() *mux.Router {
 	// create the router mux
 	m := mux.NewRouter()
 
+	// create a sub router for the api
+	apiRouter := m.PathPrefix("api")
+
 	// get all registered routers
 	for _, router := range server.routers {
 		// get the routes from the router
@@ -21,7 +24,7 @@ func (server *Server) createMux() *mux.Router {
 			// make the route handler to a handlerFunc
 			handlerFunc := server.makeHTTPHandler(route.Handler())
 			// register the handler for the given route
-			m.Path(route.Path()).Methods(route.Method()).Handler(handlerFunc)
+			apiRouter.Path(route.Path()).Methods(route.Method()).Handler(handlerFunc)
 		}
 	}
 

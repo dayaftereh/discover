@@ -1,12 +1,13 @@
 import { Subject } from "rxjs";
 import { Message } from "./message";
+import { URLSService } from "../urls/urls.service";
 
 export class ConnectionService {
 
     private websocket: WebSocket | undefined
     private subject: Subject<Message> | undefined
 
-    constructor() {
+    constructor(private readonly urlsService: URLSService) {
 
     }
 
@@ -16,9 +17,15 @@ export class ConnectionService {
 
     connect(): Promise<void> {
         let completed: boolean = false
+
+        // return a promise to wait for websocket open
         return new Promise((resolve, reject) => {
             this.subject = new Subject<Message>();
-            this.websocket = new WebSocket("/ws")
+
+            // get the websocket url
+            const url: string = this.urlsService.websocketUrl()
+            // create the websocket
+            this.websocket = new WebSocket(url)
 
             this.websocket!.addEventListener('open', () => {
                 if (!completed) {
@@ -48,7 +55,7 @@ export class ConnectionService {
                 if (this.subject) {
                     this.subject.complete()
                 }
-                
+
                 this.subject = undefined
                 this.websocket = undefined
             })
