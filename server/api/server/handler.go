@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/dayaftereh/discover/server/api"
@@ -26,6 +27,7 @@ func (server *Server) makeHTTPHandler(handler api.Function) http.HandlerFunc {
 
 		// check if the handler function has an error
 		if err != nil {
+			fmt.Println(err)
 			// response the error
 			api.MakeErrorHandler(err)(w, r)
 		}

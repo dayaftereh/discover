@@ -11,19 +11,11 @@ export class CommonService {
         private readonly urlsService: URLSService
     ) { }
 
-    async isLogin(): Promise<boolean> {
-        try {
-            // get the status
-            const status: Status = await this.status()
-            // check if status and name available
-            if (status && status.name) {
-                return true
-            }
-        } catch (e) {
-            // return false because of error
-            return false
-        }
-        return false
+    async isAuthenticated(): Promise<boolean> {
+        // get the status
+        const status: Status = await this.status()
+        // check if authenticated
+        return status.authenticated
     }
 
     async status(): Promise<Status> {

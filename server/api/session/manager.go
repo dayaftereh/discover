@@ -1,6 +1,7 @@
 package session
 
 import (
+	"encoding/gob"
 	"log"
 	"net/http"
 
@@ -24,6 +25,9 @@ func NewSessionManager() (*Manager, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to generated random bytes for cookie store")
 	}
+
+	// register the http session
+	gob.Register(&HttpSession{})
 
 	manager := &Manager{
 		sessionName: "discover",

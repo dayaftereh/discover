@@ -1,9 +1,10 @@
 package common
 
 type Status struct {
-	Id         string  `json:"id"`
-	Name       *string `json:"name"`
-	StarSystem *int64  `json:"starSystem"`
+	ID            string  `json:"id"`
+	Authenticated bool    `json:"authenticated"`
+	Name          *string `json:"name"`
+	StarSystem    *int64  `json:"starSystem"`
 }
 
 func NewStatus() *Status {

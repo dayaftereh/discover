@@ -28,10 +28,12 @@
         "primeng": "^8.0.0",
         "core-js": "^3.1.4",
         "rxjs": "^6.5.2",
-        "zone.js": "^0.9.1"
+        "zone.js": "^0.9.1",
+        "three": "~0.106.2"
     },
     "devDependencies": {
         "@types/node": "~10.5.3",
+        "@types/three": "~0.103.2",
         "@angular/compiler-cli": "^8.0.2",
         "@angular/cli": "^8.0.4",
         "@angular/language-service": "^8.0.2",

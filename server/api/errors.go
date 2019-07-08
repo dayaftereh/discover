@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -11,7 +12,8 @@ func GetHTTPErrorStatusCode(err error) int {
 func MakeErrorHandler(err error) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		statusCode := GetHTTPErrorStatusCode(err)
-		http.Error(w, "status.", statusCode)
+		text := fmt.Sprintf("Status-Code: %d, err: %s", statusCode, err.Error())
+		http.Error(w, text, statusCode)
 	}
 }
 

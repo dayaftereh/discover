@@ -33,9 +33,10 @@ func (common *commonRouter) login(ctx context.Context, response http.ResponseWri
 
 	// create the status
 	status := types.Status{
-		Id:         player.ID,
-		Name:       &player.Name,
-		StarSystem: player.StarSystem,
+		Authenticated: true,
+		ID:            player.ID,
+		Name:          &player.Name,
+		StarSystem:    player.StarSystem,
 	}
 
 	// write the status as json response

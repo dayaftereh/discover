@@ -15,18 +15,19 @@ func (common *commonRouter) status(ctx context.Context, response http.ResponseWr
 		return err
 	}
 
-	// check if the player exists
-	player := common.backend.GetPlayerSession(sessionID)
-	if player == nil {
-		// response not found
-		return api.NotFound(response)
-	}
-
 	// create the status
 	status := types.Status{
-		Id:         player.ID,
-		Name:       &player.Name,
-		StarSystem: player.StarSystem,
+		Authenticated: false,
+	}
+
+	// check if the player exists
+	player := common.backend.GetPlayerSession(sessionID)
+	if player != nil {
+		// set authenticated to true
+		status.Authenticated = true
+		status.ID = player.ID
+		status.Name = &player.Name
+		status.StarSystem = player.StarSystem
 	}
 
 	// write the status as json response

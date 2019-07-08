@@ -1,6 +1,8 @@
 package common
 
-import "github.com/dayaftereh/discover/server/api/server/router"
+import (
+	"github.com/dayaftereh/discover/server/api/server/router"
+)
 
 type commonRouter struct {
 	backend Backend
@@ -28,7 +30,7 @@ func (common *commonRouter) Close() {
 func (common *commonRouter) initRoutes() {
 	common.routes = []router.Route{
 		//GET
-		router.NewPostRoute("/common/status", common.status),
+		router.NewGetRoute("/common/status", common.status),
 		// POST
 		router.NewPostRoute("/common/login", common.login),
 		router.NewPostRoute("/common/logout", common.logout),
