@@ -3,7 +3,7 @@ import { GO_CONFIG } from './go-config';
 import * as shell from 'gulp-shell';
 import * as path from "path"
 import { promisify } from 'util';
-import { exec } from 'child_process';
+import { exec, spawn, ChildProcess } from 'child_process';
 import { SERVER_CONFIG } from './server-config';
 
 const execAsync = promisify(exec);
@@ -19,13 +19,13 @@ export namespace Server {
         ldflags.push('-X', `'main.VERSION=${SERVER_CONFIG.VERSION}'`, "-X", `'main.RELEASE=${now}'`)
 
         const command: string[] = [
-            `${GO_CONFIG.GO_BUILD}`,            
+            `${GO_CONFIG.GO_BUILD}`,
             "-buildmode=exe"
         ]
 
         const ldFlagsString: string = ldflags.join(" ")
         command.push("-ldflags", `"${ldFlagsString}"`)
-        
+
         let name: string = `${SERVER_CONFIG.NAME}-${os}-${arch}`
         if (os === "windows") {
             name = `${name}.exe`
@@ -46,8 +46,31 @@ export namespace Server {
         })
     }
 
+    export async function run() {
+        return new Promise((resolve, reject) => {
+            const process: ChildProcess = spawn(
+                GO_CONFIG.GO, [
+                    "run",
+                    SERVER_CONFIG.MAIN_PKG
+                ], {
+                    stdio: 'inherit'
+                })
+
+            process.on("error", (err: Error) => {
+                reject(err)
+            })
+
+            process.on("exit", (code: number, signal: string) => {
+                if (code !== 0) {
+                    return reject(new Error(`go run exists with code [ ${code} ]`))
+                }
+                resolve()
+            })
+        })
+    }
+
     export function defaultTasks(): void {
-        
+
         gulp.task("server:dependencies", gulp.series(
             ["go:install:dep"],
             shell.task(`${GO_CONFIG.GO_PKG} ensure`)
@@ -57,10 +80,9 @@ export namespace Server {
             return Server.build("windows", "amd64")
         }))
 
-        gulp.task("server:run", gulp.series(
-            ["server:dependencies"],
-            shell.task(`${GO_CONFIG.GO_RUN} ${SERVER_CONFIG.MAIN_PKG}`)
-        ))
+        gulp.task("server:run", gulp.series(["server:dependencies"], () => {
+            return Server.run()
+        }))
     }
 
 }

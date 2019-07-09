@@ -27,7 +27,10 @@
               "app/src/assets"
             ],
             "styles": [
-              "app/src/styles.scss"
+              "app/src/styles.scss",
+              "node_modules/primeicons/primeicons.css",
+              "node_modules/primeng/resources/themes/nova-light/theme.css",
+              "node_modules/primeng/resources/primeng.min.css"
             ],
             "scripts": []
           },
@@ -70,8 +73,8 @@
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",          
-          "options": {            
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
             "tsConfig": [
               "app/src/tsconfig.app.json",
               "app/src/tsconfig.spec.json"

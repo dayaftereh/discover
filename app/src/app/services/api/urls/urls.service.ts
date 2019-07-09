@@ -19,8 +19,14 @@ export class URLSService {
         }).filter((x: string) => x.length > 0).join('/')
     }
 
-    websocketUrl(): string {
-        return this.apiJoin("/ws")
+    apiWebsocketUrl(): string {
+        return this.websocketUrl("/api/ws")
+    }
+
+    private websocketUrl(path: string): string {
+        const url: URL = new URL(path, window.location.href)
+        url.protocol = url.protocol.replace('http', 'ws')
+        return url.href
     }
 
 }

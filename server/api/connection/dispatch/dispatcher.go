@@ -25,6 +25,12 @@ func NewDispatcher() *Dispatcher {
 }
 
 func (dispatcher *Dispatcher) EmitOpen(connection *connection.Connection) {
+	// add the connection to the player
+	connection.Player.AddConnection(connection)
+
+	// log the connection
+	log.Printf("connection [ %s ] successful established for player [ %s ]\n", connection.ID, connection.Player.Name)
+
 	// lock for adding connection
 	dispatcher.lock.Lock()
 	defer dispatcher.lock.Unlock()
@@ -50,6 +56,9 @@ func (dispatcher *Dispatcher) dispatchLoop(connection *connection.Connection) {
 }
 
 func (dispatcher *Dispatcher) drop(connection *connection.Connection) {
+	// make a log
+	log.Printf("connection [ %s ] terminated by player [ %s ]\n", connection.ID, connection.Player.Name)
+
 	// lock for removeing of the connection
 	dispatcher.lock.Lock()
 	defer dispatcher.lock.Unlock()

@@ -44,8 +44,5 @@ func (connection *connectionRouter) websocket(ctx context.Context, response http
 	// notify dispatcher about new websocket connection
 	connection.dispatcher.EmitOpen(websocketConn)
 
-	// add the connection to the player
-	player.AddConnection(websocketConn)
-
 	return nil
 }

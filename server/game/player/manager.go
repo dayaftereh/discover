@@ -13,7 +13,10 @@ type Manager struct {
 }
 
 func NewPlayerManager() *Manager {
-	return &Manager{}
+	return &Manager{
+		sessions: make(map[string]*Player),
+		storage:  make(map[string]*data.Player),
+	}
 }
 
 func (manager *Manager) LoadPlayers(players []*data.Player) {
@@ -50,9 +53,11 @@ func (manager *Manager) SessionByName(id string, name string) *Player {
 	// check if player has already a session
 	player, ok := manager.sessions[id]
 
+	// unlock read
+	manager.lock.RUnlock()
+
 	// if session exists
 	if ok {
-		manager.lock.RUnlock()
 		return player
 	}
 

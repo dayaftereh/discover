@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/dayaftereh/discover/server/api"
@@ -39,7 +40,11 @@ func (common *commonRouter) login(ctx context.Context, response http.ResponseWri
 		StarSystem:    player.StarSystem,
 	}
 
+	// log the login
+	log.Printf("user [ %s ] with session [ %s ] successful login\n", player.Name, player.ID)
+
 	// write the status as json response
 	err = api.WriteJSON(response, http.StatusOK, &status)
+
 	return err
 }

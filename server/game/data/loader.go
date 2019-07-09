@@ -25,9 +25,8 @@ func Load(dataPath string) (*Game, error) {
 	if !ok {
 		return NewGame(), nil
 	}
-
 	// read the file
-	bytes, err := ioutil.ReadFile(dataPath)
+	bytes, err := ioutil.ReadFile(dataFile)
 
 	if err != nil {
 		return nil, err

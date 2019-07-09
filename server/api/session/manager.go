@@ -41,7 +41,10 @@ func (manager *Manager) Get(response http.ResponseWriter, request *http.Request)
 	// get the session from store
 	session, err := manager.store.Get(request, manager.sessionName)
 	if err != nil {
-		return nil, err
+		// check if the decode failed
+		if session == nil {
+			return nil, err
+		}
 	}
 
 	// check if a new session

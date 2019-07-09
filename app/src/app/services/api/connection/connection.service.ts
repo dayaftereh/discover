@@ -23,7 +23,7 @@ export class ConnectionService {
             this.subject = new Subject<Message>();
 
             // get the websocket url
-            const url: string = this.urlsService.websocketUrl()
+            const url: string = this.urlsService.apiWebsocketUrl()
             // create the websocket
             this.websocket = new WebSocket(url)
 

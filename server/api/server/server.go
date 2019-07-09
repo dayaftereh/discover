@@ -35,9 +35,9 @@ func (server *Server) Init() error {
 	server.Server = &http.Server{
 		Addr:         address,
 		Handler:      router,
-		WriteTimeout: 10,
-		ReadTimeout:  10,
-		IdleTimeout:  10,
+		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  10 * time.Second,
+		IdleTimeout:  10 * time.Second,
 	}
 
 	return nil
