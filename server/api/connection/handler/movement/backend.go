@@ -6,5 +6,5 @@ import (
 )
 
 type Backend interface {
-	Movement(player *player.Player, lookAt *mathf.Vec3)
+	Movement(player *player.Player, move *mathf.Vec3, rotation *mathf.Vec3)
 }

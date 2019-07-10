@@ -6,9 +6,6 @@ import (
 )
 
 type Body struct {
-	// ID is the unique identifier for the body
-	ID int64
-
 	Mass float64
 
 	// Whether to produce contact forces when in contact with other bodies
@@ -38,6 +35,13 @@ type Body struct {
 
 	// Total bounding radius of the Body including its shapes, relative to body.position.
 	BoundingRadius float64
+}
+
+func NewBody(position *mathf.Vec3, mass float64) *Body {
+	return &Body{
+		Mass:     mass,
+		Position: position,
+	}
 }
 
 func (body *Body) PointToLocalFrame(worldPoint *mathf.Vec3) *mathf.Vec3 {

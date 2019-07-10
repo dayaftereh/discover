@@ -39,7 +39,7 @@ func (game *Game) DropPlayerSession(id string) {
 	starSystem.DropPlayer(player)
 }
 
-func (game *Game) JoinPlayer(player *player.Player) {
+func (game *Game) Ready(player *player.Player) {
 	// get the player star system
 	starSystem := game.universe.GetStarSystem(*player.StarSystem)
 	// check if a star system exists
@@ -50,7 +50,7 @@ func (game *Game) JoinPlayer(player *player.Player) {
 	starSystem.JoinPlayer(player)
 }
 
-func (game *Game) Movement(player *player.Player, lookAt *mathf.Vec3) {
+func (game *Game) Movement(player *player.Player, move *mathf.Vec3, rotation *mathf.Vec3) {
 	// get the player star system
 	starSystem := game.universe.GetStarSystem(*player.StarSystem)
 	// check if a star system exists
@@ -58,5 +58,5 @@ func (game *Game) Movement(player *player.Player, lookAt *mathf.Vec3) {
 		return
 	}
 
-	starSystem.UpdatePlayer(player, lookAt)
+	starSystem.UpdatePlayer(player, move, rotation)
 }

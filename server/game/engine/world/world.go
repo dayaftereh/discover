@@ -14,7 +14,7 @@ func NewWorld() *World {
 }
 
 func (world *World) AddBody(body *object.Body) {
-	world.Bodies[body.ID] = body
+
 }
 
 func (world *World) RemoveBody(id int64) *object.Body {

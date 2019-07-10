@@ -8,6 +8,7 @@ import (
 	"github.com/dayaftereh/discover/server/api/connection/handler/movement"
 	"github.com/dayaftereh/discover/server/api/router/common"
 	"github.com/dayaftereh/discover/server/api/router/connection"
+	gameRouter "github.com/dayaftereh/discover/server/api/router/game"
 	"github.com/dayaftereh/discover/server/api/server"
 	"github.com/dayaftereh/discover/server/api/server/middleware"
 	"github.com/dayaftereh/discover/server/api/server/router"
@@ -86,6 +87,8 @@ func initRouters(game *game.Game, server *server.Server) error {
 		common.NewRouter(game),
 		// connection
 		connection.NewRouter(game, dispatcher),
+		// game
+		gameRouter.NewRouter(game),
 	}
 
 	// register the routers

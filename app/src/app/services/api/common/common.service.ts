@@ -34,7 +34,7 @@ export class CommonService {
 
     async logout(): Promise<void> {
         const url: string = this.urlsService.apiJoin('common', 'logout')
-        await this.http.post(url, {})
+        await this.http.post(url, {}).toPromise()
     }
 
 }

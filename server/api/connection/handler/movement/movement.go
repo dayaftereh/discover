@@ -3,8 +3,6 @@ package movement
 import (
 	"encoding/json"
 
-	"github.com/dayaftereh/discover/server/mathf"
-
 	"github.com/dayaftereh/discover/server/api/connection"
 	"github.com/dayaftereh/discover/server/api/connection/dispatch/handler"
 	types "github.com/dayaftereh/discover/server/api/types/connection"
@@ -37,13 +35,8 @@ func (handler *movementHandler) Handler() connection.Function {
 			return errors.Wrapf(err, "fail to unmarshal movement message")
 		}
 
-		lookAt := mathf.NewVec3(
-			movement.X,
-			movement.Y,
-			movement.Z)
-
 		// emit via backend
-		handler.backend.Movement(connection.Player, lookAt)
+		handler.backend.Movement(connection.Player, movement.Move, movement.Rotation)
 
 		return nil
 	}

@@ -1,6 +1,6 @@
-import { Subject } from "rxjs";
-import { Message } from "./message";
+import { Subject, Subscription } from "rxjs";
 import { URLSService } from "../urls/urls.service";
+import { Message } from "./messages/message";
 
 export class ConnectionService {
 
@@ -28,6 +28,7 @@ export class ConnectionService {
             this.websocket = new WebSocket(url)
 
             this.websocket!.addEventListener('open', () => {
+                console.error("open")
                 if (!completed) {
                     completed = true
                     resolve()
@@ -35,12 +36,14 @@ export class ConnectionService {
             })
 
             this.websocket!.addEventListener('message', (event: MessageEvent) => {
+                console.error("message")
                 if (event.data && this.subject) {
                     this.subject.next(event.data)
                 }
             })
 
             this.websocket!.addEventListener('error', (e) => {
+                console.error(e)
                 if (!completed) {
                     completed = true
                     return reject(e)
@@ -52,6 +55,7 @@ export class ConnectionService {
             })
 
             this.websocket!.addEventListener('close', () => {
+                console.error("close")
                 if (this.subject) {
                     this.subject.complete()
                 }
@@ -68,10 +72,11 @@ export class ConnectionService {
         }
     }
 
-    onMessage(fn: (message: Message) => void) {
+    onMessage(fn: (message: Message) => void): Subscription | undefined {
         if (this.subject) {
-            this.subject.subscribe(fn)
+            return this.subject.subscribe(fn)
         }
+        return undefined
     }
 
     send(message: Message): void {

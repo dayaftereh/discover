@@ -20,7 +20,14 @@ type Connection struct {
 
 func NewConnection(id string, player *player.Player, conn *websocket.Conn) *Connection {
 	connection := &Connection{
-		ID:   id,
+		ID:     id,
+		Player: player,
+		// Events
+		OnClose:         make(chan bool),
+		OnError:         make(chan error),
+		InBoundMessage:  make(chan string),
+		OutBoundMessage: make(chan string),
+		// private
 		conn: conn,
 	}
 

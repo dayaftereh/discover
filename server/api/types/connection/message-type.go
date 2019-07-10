@@ -3,5 +3,6 @@ package connection
 type MessageType string
 
 const (
-	Move MessageType = "move"
+	Move   MessageType = "move"
+	Update MessageType = "update"
 )

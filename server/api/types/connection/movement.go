@@ -1,8 +1,10 @@
 package connection
 
+import (
+	"github.com/dayaftereh/discover/server/mathf"
+)
+
 type Movement struct {
-	X            float64 `json:"x"`
-	Y            float64 `json:"y"`
-	Z            float64 `json:"z"`
-	Acceleration int     `json:"acceleration"`
+	Move     *mathf.Vec3 `json:"move"`
+	Rotation *mathf.Vec3 `json:"rotation"`
 }

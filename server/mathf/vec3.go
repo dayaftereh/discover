@@ -6,9 +6,9 @@ import (
 
 // Vec3 is a 3-dimensional vector
 type Vec3 struct {
-	X float64
-	Y float64
-	Z float64
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+	Z float64 `json:"z"`
 }
 
 // NewVec3 create a vector with theiven values

@@ -1,6 +1,8 @@
 package connection
 
 import (
+	"net/http"
+
 	"github.com/dayaftereh/discover/server/api/connection/dispatch"
 	"github.com/dayaftereh/discover/server/api/server/router"
 	"github.com/gorilla/websocket"
@@ -17,6 +19,11 @@ func NewRouter(backend Backend, dispatcher *dispatch.Dispatcher) router.Router {
 	router := &connectionRouter{
 		backend:    backend,
 		dispatcher: dispatcher,
+		upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		},
 	}
 
 	router.initRoutes()
