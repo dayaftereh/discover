@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 
 	types "github.com/dayaftereh/discover/server/api/types/connection"
+	"github.com/dayaftereh/discover/server/game/engine"
 	"github.com/dayaftereh/discover/server/game/player"
 	"github.com/dayaftereh/discover/server/mathf"
 
@@ -24,9 +25,8 @@ type StarSystem struct {
 	// players
 	players       map[string]*player.Player
 	playersObject map[string]int64
-	// objects
-	objects map[int64]object.GameObject
 	// Engine
+	clock *engine.Clock
 	world *world.World
 	// events
 	close chan bool
@@ -41,10 +41,9 @@ func NewStarSystem(id int64) *StarSystem {
 		// players
 		playersObject: make(map[string]int64),
 		players:       make(map[string]*player.Player),
-		// objects
-		objects: make(map[int64]object.GameObject),
 
 		world: world.NewWorld(),
+		clock: engine.NewClock(),
 
 		close: make(chan bool),
 		queue: make(chan StarSystemFunction),
@@ -73,35 +72,24 @@ func (starSystem *StarSystem) loop() {
 func (starSystem *StarSystem) execute(function StarSystemFunction) {
 	err := function(starSystem)
 	if err != nil {
+		log.Printf("fail to execute function in star-system [ %d ], because %v", starSystem.ID, err)
 	}
 }
 
 func (starSystem *StarSystem) update() {
+	// get the delta for the update
+	delta := starSystem.clock.Delta()
 
+	// update the world
+	starSystem.world.Update(delta)
+
+	// push the world update for the players
+	starSystem.pushWorldUpdates()
 }
 
-func (starSystem *StarSystem) pushWorldUpdate() {
+func (starSystem *StarSystem) pushWorldUpdates() {
 	// current server time
 	now := utils.SystemMillis()
-
-	// map with all game objects
-	gameObjects := make(map[int64]*types.GameObject)
-	for gameObjectID, gameObject := range starSystem.objects {
-		body := gameObject.Body()
-
-		radius := body.BoundingRadius
-
-		// get location and roation
-		position := body.Position.Clone()
-		rotation := body.Quaternion.ToEuler()
-
-		// create the outgoing gameobject
-		gameObjects[gameObjectID] = &types.GameObject{
-			Radius:   &radius,
-			Position: position,
-			Rotation: rotation,
-		}
-	}
 
 	// update each player
 	for playerID, player := range starSystem.players {
@@ -111,17 +99,27 @@ func (starSystem *StarSystem) pushWorldUpdate() {
 		if !ok {
 			continue
 		}
-		// get the outgoing game object
-		gameObject := gameObjects[playerObjectID]
+		// get the player game object
+		gameObject := starSystem.world.GetGameObject(playerObjectID)
 
-		tick := int64(0)
+		// convert the player gameobject to outbound object
+		playerGameObject := gameObjectToOutbound(gameObject)
+
+		// get all objects in player range
+		playerObjects := starSystem.world.GetGameObjectsInSphere(gameObject, 100.0)
+
+		// convert game objects for outbound
+		gameObjects := gameObjectsToOutbound(playerObjects)
+
+		// get the world update tick
+		tick := starSystem.world.GetTick()
 
 		// push the update
 		update := &types.WorldUpdate{
 			Type:    types.Update,
 			Tick:    &tick,
 			Time:    &now,
-			Player:  gameObject,
+			Player:  playerGameObject,
 			Objects: gameObjects,
 		}
 
@@ -146,10 +144,14 @@ func (starSystem *StarSystem) JoinPlayer(player *player.Player) {
 		id := starSystem.nextID()
 
 		// create player game object
-		starSystem.objects[id] = object.NewPlayer(id, mathf.NewZeroVec3())
+		gameObject := object.NewPlayer(id, mathf.NewZeroVec3())
+
+		// add the game object to world
+		starSystem.world.AddGameObject(gameObject)
 
 		// map player to game object
 		starSystem.playersObject[player.ID] = id
+
 		return nil
 	}
 }
@@ -170,11 +172,10 @@ func (starSystem *StarSystem) UpdatePlayer(player *player.Player, move *mathf.Ve
 		}
 
 		// finally get the game object
-		_, ok = starSystem.objects[gameObjectID]
+		gameObject := starSystem.world.GetGameObject(gameObjectID)
 
-		// check if game object exists
-		if !ok {
-			return errors.Errorf("unable to find game-object [ %d ] for player [ %s ]", gameObjectID, player.Name)
+		if gameObject == nil {
+			return errors.Errorf("unable to find game-object with id [ %d ] for player [ %s ]", gameObjectID, player.Name)
 		}
 
 		return nil
@@ -199,8 +200,8 @@ func (starSystem *StarSystem) DropPlayer(player *player.Player) {
 		}
 		// remove the mapping
 		delete(starSystem.playersObject, player.ID)
-		// remove the game object
-		delete(starSystem.objects, gameObjectID)
+		// remove the game object from world
+		starSystem.world.RemoveGameObject(gameObjectID)
 
 		return nil
 	}

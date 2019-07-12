@@ -210,8 +210,8 @@ func (quaternion *Quaternion) ToEuler() *Vec3 {
 
 }
 
-// FromEuler creates the quaternion from the given euler angels
-func FromEuler(vec *Vec3) *Quaternion {
+// QuaternionFromEuler creates the quaternion from the given euler angels
+func QuaternionFromEuler(vec *Vec3) *Quaternion {
 	c1 := math.Cos(vec.X / 2.0)
 	c2 := math.Cos(vec.Y / 2.0)
 	c3 := math.Cos(vec.Z / 2.0)
@@ -228,7 +228,7 @@ func FromEuler(vec *Vec3) *Quaternion {
 }
 
 // Integrate rotate an absolute orientation quaternion given an angular velocity and a time step.
-func (quaternion *Quaternion) Integrate(angularVelocity Vec3, dt float64, angularFactor Vec3) *Quaternion {
+func (quaternion *Quaternion) Integrate(angularVelocity *Vec3, dt float64, angularFactor *Vec3) *Quaternion {
 	ax := angularVelocity.X * angularFactor.X
 	ay := angularVelocity.Y * angularFactor.Y
 	az := angularVelocity.Z * angularFactor.Z
