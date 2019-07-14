@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { LoginComponentModule } from "../login/login-component.module";
 import { LayoutComponent } from "./layout.component";
 import { GameComponentModule } from "../game/game-component.module";
+import { NavbarComponentModule } from "../navbar/navbar-component.module";
 
 @NgModule({
     imports: [
@@ -11,8 +12,9 @@ import { GameComponentModule } from "../game/game-component.module";
         RouterModule,
         BrowserModule,
         // custom
+        GameComponentModule,
         LoginComponentModule,
-        GameComponentModule
+        NavbarComponentModule,
     ],
     declarations: [
         LayoutComponent

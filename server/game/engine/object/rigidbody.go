@@ -14,6 +14,7 @@ type RigidBody struct {
 	Velocity *mathf.Vec3
 	// Angular velocity of the body, in world space. Think of the angular velocity as a vector, which the body rotates around. The length of this vector determines how fast (in radians per second) the body rotates.
 	AngularVelocity *mathf.Vec3
+
 	// Linear force on the body in world space.
 	Force *mathf.Vec3
 	// World space rotational force on the body, around center of mass.
@@ -34,11 +35,11 @@ func NewRigidBody(mass float64) *RigidBody {
 		Position: mathf.NewZeroVec3(),
 		Rotation: mathf.NewZeroQuaternion(),
 
-		Position: mathf.NewZeroVec3(),
-		Position: mathf.NewZeroVec3(),
+		Velocity:        mathf.NewZeroVec3(),
+		AngularVelocity: mathf.NewZeroVec3(),
 
-		Position: mathf.NewZeroVec3(),
-		Position: mathf.NewZeroVec3(),
+		Force:  mathf.NewZeroVec3(),
+		Torque: mathf.NewZeroVec3(),
 	}
 }
 
