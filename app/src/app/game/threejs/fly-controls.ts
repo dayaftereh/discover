@@ -77,6 +77,7 @@ export class FlyControls {
     }
 
     private handleKeyEvent(key: string, state: number): void {
+        console.log("Key:", key)
         const keyName: string = key.toLowerCase()
         switch (keyName) {
             case 'w':

@@ -1,6 +1,7 @@
 package mathf
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -248,4 +249,8 @@ func (vec *Vec3) AlmostZero(precision float64) bool {
 func (vec *Vec3) IsAntiparallelTo(other *Vec3, precision float64) bool {
 	n := vec.Negate()
 	return n.AlmostEquals(other, precision)
+}
+
+func (vec *Vec3) String() string {
+	return fmt.Sprintf("vec3 [ x: %f, y: %f, z: %f ]", vec.X, vec.Y, vec.Z)
 }

@@ -1,6 +1,10 @@
 package object
 
-import "github.com/dayaftereh/discover/server/mathf"
+import (
+	"log"
+
+	"github.com/dayaftereh/discover/server/mathf"
+)
 
 type RigidBody struct {
 	Mass float64
@@ -33,6 +37,7 @@ type RigidBody struct {
 
 func NewRigidBody(mass float64) *RigidBody {
 	return &RigidBody{
+		Mass:     mass,
 		Position: mathf.NewZeroVec3(),
 		Rotation: mathf.NewZeroQuaternion(),
 
@@ -146,8 +151,12 @@ func (rigidbody *RigidBody) ApplyLocalImpulse(localImpulse *mathf.Vec3, localPoi
 }
 
 func (rigidbody *RigidBody) Update(delta float64) {
-
 	invMassDelta := rigidbody.InverseMass() * delta
+
+	log.Printf("invMassDelta: %f", invMassDelta)
+	log.Printf("Force: %v", rigidbody.Force)
+	log.Printf("Velocity: %v", rigidbody.Velocity)
+	log.Printf("LinearFactor: %v", rigidbody.LinearFactor)
 
 	velo := mathf.NewVec3(
 		rigidbody.Velocity.X+(rigidbody.Force.X*invMassDelta*rigidbody.LinearFactor.X),
@@ -162,19 +171,19 @@ func (rigidbody *RigidBody) Update(delta float64) {
 	invInertia := rigidbody.InverseInertiaWorld()
 	e := invInertia.Elements()
 
-	angularVelo := mathf.NewVec3(
-		delta*(e[0]*tx+e[1]*ty+e[2]*tz),
-		delta*(e[3]*tx+e[4]*ty+e[5]*tz),
-		delta*(e[6]*tx+e[7]*ty+e[8]*tz),
+	rigidbody.AngularVelocity = mathf.NewVec3(
+		rigidbody.AngularVelocity.X+(delta*(e[0]*tx+e[1]*ty+e[2]*tz)),
+		rigidbody.AngularVelocity.Y+(delta*(e[3]*tx+e[4]*ty+e[5]*tz)),
+		rigidbody.AngularVelocity.Z+(delta*(e[6]*tx+e[7]*ty+e[8]*tz)),
 	)
 
 	// Use new velocity  - leap frog
 	// update position
-	veloDelta := velo.Multiply(delta)
-	rigidbody.Position = rigidbody.Position.Add(veloDelta)
+	rigidbody.Velocity = velo.Multiply(delta)
+	rigidbody.Position = rigidbody.Position.Add(rigidbody.Velocity)
 
 	// update rotation
-	rigidbody.Rotation = rigidbody.Rotation.Integrate(angularVelo, delta, rigidbody.AngularFactor)
+	rigidbody.Rotation = rigidbody.Rotation.Integrate(rigidbody.AngularVelocity, delta, rigidbody.AngularFactor)
 
 	// update the inertia world
 	rigidbody.UpdateInertiaWorld(false)

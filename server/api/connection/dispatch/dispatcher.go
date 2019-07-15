@@ -52,6 +52,7 @@ func (dispatcher *Dispatcher) dispatchLoop(connection *connection.Connection) {
 		case err := <-connection.OnError:
 			dispatcher.handleError(connection, err)
 		case <-connection.OnClose:
+			log.Println("dispatcher thread closed")
 			return
 		}
 	}

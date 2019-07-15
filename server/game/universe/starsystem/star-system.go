@@ -2,6 +2,7 @@ package starsystem
 
 import (
 	"log"
+	"sync"
 	"time"
 
 	"github.com/dayaftereh/discover/server/game/engine"
@@ -13,6 +14,7 @@ import (
 type StarSystem struct {
 	ID      int64
 	counter int64
+	lock    sync.Mutex
 	// players
 	players       map[string]*player.Player
 	playersObject map[string]int64
@@ -21,7 +23,7 @@ type StarSystem struct {
 	world *world.World
 	// events
 	close chan bool
-	queue chan StarSystemFunction
+	//
 }
 
 func NewStarSystem(id int64) *StarSystem {
@@ -37,7 +39,6 @@ func NewStarSystem(id int64) *StarSystem {
 		clock: engine.NewClock(),
 
 		close: make(chan bool),
-		queue: make(chan StarSystemFunction),
 	}
 
 	go starSystem.loop()
@@ -53,8 +54,6 @@ func (starSystem *StarSystem) loop() {
 		select {
 		case <-time.After(timer):
 			starSystem.update()
-		case f := <-starSystem.queue:
-			starSystem.execute(f)
 		case <-starSystem.close:
 			log.Printf("closing star-system [ %d ]\n", starSystem.ID)
 			return
@@ -63,10 +62,16 @@ func (starSystem *StarSystem) loop() {
 }
 
 func (starSystem *StarSystem) update() {
+	// lock the star system
+	starSystem.lock.Lock()
+	defer starSystem.lock.Unlock()
+
 	// get the delta for the update
 	delta := starSystem.clock.Delta()
 
-	log.Printf("Update: delat [ %f ]\n", delta)
+	if delta > 35.0 {
+		log.Printf("Update: delat [ %f ]\n", delta)
+	}
 
 	// update the world
 	starSystem.world.Update(delta)

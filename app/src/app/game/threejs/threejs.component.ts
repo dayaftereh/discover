@@ -177,6 +177,7 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
 
     updatePlayer(position: THREE.Vector3, rotation: THREE.Vector3): void {
         if (this.player) {
+            console.log(position, rotation)
             this.player.update0(position, rotation)
         }
     }

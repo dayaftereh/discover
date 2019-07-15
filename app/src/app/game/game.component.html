@@ -1,4 +1,9 @@
 <div class="p-grid">
+        <div class="p-col">
+            {{movement|json}}
+        </div>
+    </div>
+<div class="p-grid">
     <div class="p-col">
         <app-threejs #threeJS (onMovement)="onMovement($event)"></app-threejs>
     </div>

@@ -17,6 +17,8 @@ export class GameComponent implements OnInit, OnDestroy {
     @ViewChild("threeJS", { static: true })
     threeJS: ThreeJSComponent | undefined
 
+    movement: Movement|undefined
+
     private ready: boolean
 
     private subscription: Subscription | undefined
@@ -90,6 +92,7 @@ export class GameComponent implements OnInit, OnDestroy {
     }
 
     onMovement(movement: Movement): void {
+        this.movement = movement
         if (this.ready) {
             this.connectionService.send(movement)
         }

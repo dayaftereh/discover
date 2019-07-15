@@ -41,7 +41,7 @@ func (player *Player) RigidBody() *RigidBody {
 
 func (player *Player) Update(move *mathf.Vec3, rotation *mathf.Vec3) {
 	// apply move force
-	player.rigidbody.ApplyLocalForce(move, mathf.NewZeroVec3())
+	player.rigidbody.ApplyForce(move, mathf.NewZeroVec3())
 
 	// apply the rotaion
 	player.rigidbody.AddTorque(rotation)

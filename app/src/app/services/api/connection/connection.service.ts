@@ -28,7 +28,6 @@ export class ConnectionService {
             this.websocket = new WebSocket(url)
 
             this.websocket!.addEventListener('open', () => {
-                console.error("open")
                 if (!completed) {
                     completed = true
                     resolve()
@@ -36,7 +35,6 @@ export class ConnectionService {
             })
 
             this.websocket!.addEventListener('message', (event: MessageEvent) => {
-                console.error("message")
                 if (event.data && this.subject) {
                     this.subject.next(event.data)
                 }
