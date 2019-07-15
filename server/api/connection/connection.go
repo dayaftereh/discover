@@ -16,6 +16,7 @@ type Connection struct {
 	OutBoundMessage chan string
 
 	conn *websocket.Conn
+	open bool
 }
 
 func NewConnection(id string, player *player.Player, conn *websocket.Conn) *Connection {
@@ -29,6 +30,7 @@ func NewConnection(id string, player *player.Player, conn *websocket.Conn) *Conn
 		OutBoundMessage: make(chan string),
 		// private
 		conn: conn,
+		open: true,
 	}
 
 	connection.init()
@@ -76,10 +78,13 @@ func (connection *Connection) outBoundLoop() {
 }
 
 func (connection *Connection) Write(message string) {
-	connection.OutBoundMessage <- message
+	if connection.open {
+		connection.OutBoundMessage <- message
+	}
 }
 
 func (connection *Connection) Close() {
+	connection.open = false
 	connection.conn.Close()
 	connection.OnClose <- true
 }

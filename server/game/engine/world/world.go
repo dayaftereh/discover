@@ -10,7 +10,10 @@ type World struct {
 }
 
 func NewWorld() *World {
-	return &World{}
+	return &World{
+		tick:    0,
+		objects: make(map[int64]object.GameObject),
+	}
 }
 
 func (world *World) GetGameObject(id int64) object.GameObject {
@@ -39,16 +42,16 @@ func (world *World) RemoveGameObject(id int64) object.GameObject {
 
 func (world *World) GetGameObjectsInSphere(target object.GameObject, radius float64) map[int64]object.GameObject {
 	// get the body
-	body := target.Body()
+	rigidbody := target.RigidBody()
 
 	contains := make(map[int64]object.GameObject)
 
 	for id, gameObject := range world.objects {
 		// get the body of the game object
-		gameObjectBody := gameObject.Body()
+		gameObjectRigidbody := gameObject.RigidBody()
 
 		// clauclate the distance
-		distance := body.Position.DistanceTo(gameObjectBody.Position)
+		distance := rigidbody.Position.DistanceTo(gameObjectRigidbody.Position)
 
 		if distance <= radius {
 			contains[id] = gameObject
@@ -65,4 +68,8 @@ func (world *World) GetTick() int64 {
 func (world *World) Update(delta float64) {
 	world.tick++
 
+	for _, gameObject := range world.objects {
+		rigidbody := gameObject.RigidBody()
+		rigidbody.Update(delta)
+	}
 }

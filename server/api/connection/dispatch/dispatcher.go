@@ -49,6 +49,8 @@ func (dispatcher *Dispatcher) dispatchLoop(connection *connection.Connection) {
 		case message := <-connection.InBoundMessage:
 			// handle received message
 			dispatcher.handle(connection, message)
+		case err := <-connection.OnError:
+			dispatcher.handleError(connection, err)
 		case <-connection.OnClose:
 			return
 		}
@@ -94,6 +96,10 @@ func (dispatcher *Dispatcher) dispatch(connection *connection.Connection, conten
 	// execute the handler for the received message
 	err = dispatcher.execute(connection, *message.Type, content)
 	return errors.Wrapf(err, "executed message handler returnes with an error")
+}
+
+func (dispatcher *Dispatcher) handleError(connection *connection.Connection, err error) {
+	log.Printf("error on connection [ %s ], because %v", connection.ID, err)
 }
 
 func (dispatcher *Dispatcher) Close() {

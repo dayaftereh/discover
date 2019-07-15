@@ -5,8 +5,8 @@ import "github.com/dayaftereh/discover/server/mathf"
 type RigidBody struct {
 	Mass float64
 
+	// World space position of the body.
 	Position *mathf.Vec3
-
 	// World space rotational force on the body, around center of mass.
 	Rotation *mathf.Quaternion
 
@@ -26,6 +26,7 @@ type RigidBody struct {
 	// AngularFactor use to limit the rotational motion along any world axis. (1,1,1) will allow rotation along all axes while (0,0,0) allows none.
 	AngularFactor *mathf.Vec3
 
+	// moment of inertia components
 	Inertia      *mathf.Vec3
 	InertiaWorld *mathf.Mat3
 }
@@ -40,6 +41,12 @@ func NewRigidBody(mass float64) *RigidBody {
 
 		Force:  mathf.NewZeroVec3(),
 		Torque: mathf.NewZeroVec3(),
+
+		LinearFactor:  mathf.NewVec3(1.0, 1.0, 1.0),
+		AngularFactor: mathf.NewVec3(1.0, 1.0, 1.0),
+
+		Inertia:      mathf.NewZeroVec3(),
+		InertiaWorld: mathf.NewZeroMat3(),
 	}
 }
 
@@ -84,6 +91,11 @@ func (rigidbody *RigidBody) VectorToWorldFrame(localVector *mathf.Vec3) *mathf.V
 	return r
 }
 
+func (rigidbody *RigidBody) AddTorque(torque *mathf.Vec3) {
+	// Add rotational force
+	rigidbody.Torque = rigidbody.Torque.Add(torque)
+}
+
 func (rigidbody *RigidBody) ApplyForce(force *mathf.Vec3, relativePoint *mathf.Vec3) {
 	// Add linear force
 	rigidbody.Force = rigidbody.Force.Add(force)
@@ -92,8 +104,7 @@ func (rigidbody *RigidBody) ApplyForce(force *mathf.Vec3, relativePoint *mathf.V
 	rotForce := relativePoint.Cross(force)
 
 	// Add rotational force
-	rigidbody.Torque = rigidbody.Torque.Add(rotForce)
-
+	rigidbody.AddTorque(rotForce)
 }
 
 func (rigidbody *RigidBody) ApplyLocalForce(localForce *mathf.Vec3, localPoint *mathf.Vec3) {
@@ -132,7 +143,6 @@ func (rigidbody *RigidBody) ApplyLocalImpulse(localImpulse *mathf.Vec3, localPoi
 	relativePointWorld := rigidbody.VectorToWorldFrame(localPoint)
 
 	rigidbody.ApplyImpulse(worldImpulse, relativePointWorld)
-
 }
 
 func (rigidbody *RigidBody) Update(delta float64) {
@@ -140,9 +150,9 @@ func (rigidbody *RigidBody) Update(delta float64) {
 	invMassDelta := rigidbody.InverseMass() * delta
 
 	velo := mathf.NewVec3(
-		rigidbody.Velocity.X*invMassDelta*rigidbody.LinearFactor.X,
-		rigidbody.Velocity.Y*invMassDelta*rigidbody.LinearFactor.Y,
-		rigidbody.Velocity.Z*invMassDelta*rigidbody.LinearFactor.Z,
+		rigidbody.Velocity.X+(rigidbody.Force.X*invMassDelta*rigidbody.LinearFactor.X),
+		rigidbody.Velocity.Y+(rigidbody.Force.Y*invMassDelta*rigidbody.LinearFactor.Y),
+		rigidbody.Velocity.Z+(rigidbody.Force.Z*invMassDelta*rigidbody.LinearFactor.Z),
 	)
 
 	tx := rigidbody.Torque.X * rigidbody.AngularFactor.X
@@ -165,4 +175,23 @@ func (rigidbody *RigidBody) Update(delta float64) {
 
 	// update rotation
 	rigidbody.Rotation = rigidbody.Rotation.Integrate(angularVelo, delta, rigidbody.AngularFactor)
+
+	// update the inertia world
+	rigidbody.UpdateInertiaWorld(false)
+}
+
+func (rigidbody *RigidBody) UpdateInertiaWorld(force bool) {
+	if rigidbody.Inertia.X == rigidbody.Inertia.Y && rigidbody.Inertia.Y == rigidbody.Inertia.Z && !force {
+		// If inertia M = s*I, where I is identity and s a scalar, then
+		//    R*M*R' = R*(s*I)*R' = s*R*I*R' = s*R*R' = s*I = M
+		// where R is the rotation matrix.
+		// In other words, we don't have to transform the inertia if all
+		// inertia diagonal entries are equal.
+		return
+	}
+
+	m1 := mathf.Mat3FromQuaternion(rigidbody.Rotation)
+	m2 := m1.Transpose()
+	m1 = m1.Scale(rigidbody.Inertia)
+	rigidbody.InertiaWorld = m1.Multiply(m2)
 }

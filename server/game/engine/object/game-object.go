@@ -2,5 +2,6 @@ package object
 
 type GameObject interface {
 	ID() int64
-	Body() *Body
+	Radius() float64
+	RigidBody() *RigidBody
 }

@@ -15,14 +15,14 @@ func gameObjectsToOutbound(gameObjects map[int64]object.GameObject) map[int64]*t
 
 func gameObjectToOutbound(gameObject object.GameObject) *types.GameObject {
 	// get the body of the game object
-	body := gameObject.Body()
+	rigidbody := gameObject.RigidBody()
 
 	// get the radius of the game object
-	radius := body.BoundingRadius
+	radius := gameObject.Radius()
 
 	// get location and roation
-	position := body.Position.Clone()
-	rotation := body.Quaternion.ToEuler()
+	position := rigidbody.Position.Clone()
+	rotation := rigidbody.Rotation.ToEuler()
 
 	removeable := false
 
