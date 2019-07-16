@@ -8,6 +8,9 @@ type Player struct {
 	id        int64
 	radius    float64
 	rigidbody *RigidBody
+	//
+	move     *mathf.Vec3
+	rotation *mathf.Vec3
 }
 
 func NewPlayer(id int64, position *mathf.Vec3) *Player {
@@ -24,6 +27,8 @@ func NewPlayer(id int64, position *mathf.Vec3) *Player {
 		id:        id,
 		radius:    radius,
 		rigidbody: rigidbody,
+		move:      nil,
+		rotation:  nil,
 	}
 }
 
@@ -39,10 +44,21 @@ func (player *Player) RigidBody() *RigidBody {
 	return player.rigidbody
 }
 
-func (player *Player) Update(move *mathf.Vec3, rotation *mathf.Vec3) {
-	// apply move force
-	player.rigidbody.ApplyForce(move, mathf.NewZeroVec3())
+func (player *Player) Update(delta float64) {
+	if player.move != nil {
+		// apply move force
+		player.rigidbody.ApplyLocalForce(player.move, mathf.NewZeroVec3())
+	}
 
-	// apply the rotaion
-	player.rigidbody.AddTorque(rotation)
+	if player.rotation != nil {
+		// apply the rotaion
+		player.rigidbody.AddLocalTorque(player.rotation)
+	}
+
+	player.rigidbody.Update(delta)
+}
+
+func (player *Player) UpdateMovement(move *mathf.Vec3, rotation *mathf.Vec3) {
+	player.move = move
+	player.rotation = rotation
 }

@@ -5,11 +5,10 @@ import (
 )
 
 type Clock struct {
-	StartTime   float64
-	ElapsedTime float64
-	// private
-	oldTime float64
-	running bool
+	startTime   float64
+	elapsedTime float64
+	oldTime     float64
+	running     bool
 }
 
 func NewClock() *Clock {
@@ -18,11 +17,19 @@ func NewClock() *Clock {
 	}
 }
 
+func (clock *Clock) StarTime() float64 {
+	return clock.startTime / 1000.0 // to seconds
+}
+
+func (clock *Clock) ElapsedTime() float64 {
+	return clock.elapsedTime / 1000.0 // to seconds
+}
+
 func (clock *Clock) Start() {
 	clock.running = true
-	clock.ElapsedTime = 0.0
-	clock.StartTime = utils.SystemMillis()
-	clock.oldTime = clock.StartTime
+	clock.elapsedTime = 0.0
+	clock.startTime = utils.SystemMillis()
+	clock.oldTime = clock.startTime
 }
 
 func (clock *Clock) Stop() {
@@ -40,7 +47,7 @@ func (clock *Clock) Delta() float64 {
 	diff := newTime - clock.oldTime
 	clock.oldTime = newTime
 
-	clock.ElapsedTime += diff
+	clock.elapsedTime += diff
 
-	return diff
+	return diff / 1000.0 // to seconds
 }

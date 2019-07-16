@@ -1,7 +1,10 @@
-<div>
-    {{player?.mesh?.position|json}}
-    
-    {{player?.mesh?.quaternion|json}}
-</div>
-<canvas #canvas>
+<canvas #canvas style="width: 100%; height:100%;">
 </canvas>
+<div>
+{{player?.mesh?.position|json}}
+    {{player?.mesh?.rotation|json}}
+</div>
+<div>
+    {{camera?.rotation|json}}
+    {{camera?.position|json}}
+</div>

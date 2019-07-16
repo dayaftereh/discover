@@ -38,3 +38,7 @@ func (planet *Planet) Radius() float64 {
 func (planet *Planet) RigidBody() *RigidBody {
 	return planet.rigidbody
 }
+
+func (planet *Planet) Update(delta float64) {
+	planet.Update(delta)
+}

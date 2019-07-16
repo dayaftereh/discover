@@ -69,7 +69,6 @@ func (world *World) Update(delta float64) {
 	world.tick++
 
 	for _, gameObject := range world.objects {
-		rigidbody := gameObject.RigidBody()
-		rigidbody.Update(delta)
+		gameObject.Update(delta)
 	}
 }

@@ -61,7 +61,7 @@ func (starSystem *StarSystem) UpdatePlayer(player *player.Player, move *mathf.Ve
 	playerObject := gameObject.(*object.Player)
 
 	// update the player
-	playerObject.Update(move, rotation)
+	playerObject.UpdateMovement(move, rotation)
 
 	return nil
 }

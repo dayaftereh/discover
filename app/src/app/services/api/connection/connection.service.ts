@@ -36,12 +36,14 @@ export class ConnectionService {
 
             this.websocket!.addEventListener('message', (event: MessageEvent) => {
                 if (event.data && this.subject) {
-                    this.subject.next(event.data)
+                    const obj: any = JSON.parse(event.data)
+                    if (obj){
+                        this.subject.next(obj)
+                    }
                 }
             })
 
             this.websocket!.addEventListener('error', (e) => {
-                console.error(e)
                 if (!completed) {
                     completed = true
                     return reject(e)
@@ -53,7 +55,6 @@ export class ConnectionService {
             })
 
             this.websocket!.addEventListener('close', () => {
-                console.error("close")
                 if (this.subject) {
                     this.subject.complete()
                 }

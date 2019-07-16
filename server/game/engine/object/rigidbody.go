@@ -2,6 +2,7 @@ package object
 
 import (
 	"log"
+	"math"
 
 	"github.com/dayaftereh/discover/server/mathf"
 )
@@ -31,8 +32,8 @@ type RigidBody struct {
 	AngularFactor *mathf.Vec3
 
 	// moment of inertia components
-	Inertia      *mathf.Vec3
-	InertiaWorld *mathf.Mat3
+	Inertia             *mathf.Vec3
+	InverseInertiaWorld *mathf.Mat3
 }
 
 func NewRigidBody(mass float64) *RigidBody {
@@ -50,8 +51,8 @@ func NewRigidBody(mass float64) *RigidBody {
 		LinearFactor:  mathf.NewVec3(1.0, 1.0, 1.0),
 		AngularFactor: mathf.NewVec3(1.0, 1.0, 1.0),
 
-		Inertia:      mathf.NewZeroVec3(),
-		InertiaWorld: mathf.NewZeroMat3(),
+		Inertia:             mathf.NewZeroVec3(),
+		InverseInertiaWorld: mathf.NewIdentityMat3(),
 	}
 }
 
@@ -68,10 +69,6 @@ func (rigidbody *RigidBody) InverseInertia() *mathf.Vec3 {
 		1.0/rigidbody.Inertia.Y,
 		1.0/rigidbody.Inertia.Z,
 	)
-}
-
-func (rigidbody *RigidBody) InverseInertiaWorld() *mathf.Mat3 {
-	return rigidbody.InertiaWorld
 }
 
 func (rigidbody *RigidBody) PointToLocalFrame(worldPoint *mathf.Vec3) *mathf.Vec3 {
@@ -99,6 +96,12 @@ func (rigidbody *RigidBody) VectorToWorldFrame(localVector *mathf.Vec3) *mathf.V
 func (rigidbody *RigidBody) AddTorque(torque *mathf.Vec3) {
 	// Add rotational force
 	rigidbody.Torque = rigidbody.Torque.Add(torque)
+}
+
+func (rigidbody *RigidBody) AddLocalTorque(localTorque *mathf.Vec3) {
+	worldTorque := rigidbody.VectorToWorldFrame(localTorque)
+
+	rigidbody.AddTorque(worldTorque)
 }
 
 func (rigidbody *RigidBody) ApplyForce(force *mathf.Vec3, relativePoint *mathf.Vec3) {
@@ -130,13 +133,12 @@ func (rigidbody *RigidBody) ApplyImpulse(impulse *mathf.Vec3, relativePoint *mat
 	// Compute produced rotational impulse velocity
 	rotVelo := relativePoint.Cross(impulse)
 
-	invInertia := rigidbody.InverseInertiaWorld()
 	/*
 	   rotVelo.x *= this.invInertia.x;
 	   rotVelo.y *= this.invInertia.y;
 	   rotVelo.z *= this.invInertia.z;
 	*/
-	rotVeloInertia := invInertia.MultiplyVec(rotVelo)
+	rotVeloInertia := rigidbody.InverseInertiaWorld.MultiplyVec(rotVelo)
 
 	// Add rotational Impulse
 	rigidbody.AngularVelocity = rigidbody.AngularVelocity.Add(rotVeloInertia)
@@ -151,12 +153,24 @@ func (rigidbody *RigidBody) ApplyLocalImpulse(localImpulse *mathf.Vec3, localPoi
 }
 
 func (rigidbody *RigidBody) Update(delta float64) {
+
+	// Apply damping, see http://code.google.com/p/bullet/issues/detail?id=74 for details
+	linearDamping := math.Pow(1.0-(0.01), delta)
+	rigidbody.Velocity = rigidbody.Velocity.Multiply(linearDamping)
+
+	angularDamping := math.Pow(1.0-(0.5), delta)
+	rigidbody.AngularVelocity = rigidbody.AngularVelocity.Multiply(angularDamping)
+
 	invMassDelta := rigidbody.InverseMass() * delta
 
-	log.Printf("invMassDelta: %f", invMassDelta)
-	log.Printf("Force: %v", rigidbody.Force)
-	log.Printf("Velocity: %v", rigidbody.Velocity)
-	log.Printf("LinearFactor: %v", rigidbody.LinearFactor)
+	//log.Printf("invMassDelta: %f", invMassDelta)
+	//log.Printf("Force: %v", rigidbody.Force)
+	//log.Printf("Torque: %v", rigidbody.Torque)
+	//log.Printf("Velocity: %v", rigidbody.Velocity)
+	//log.Printf("LinearFactor: %v", rigidbody.LinearFactor)
+	//log.Printf("Position: %v", rigidbody.Position)
+	log.Printf("Rotation: %v", rigidbody.Rotation)
+	log.Printf("AngularVelocity: %v", rigidbody.AngularVelocity)
 
 	velo := mathf.NewVec3(
 		rigidbody.Velocity.X+(rigidbody.Force.X*invMassDelta*rigidbody.LinearFactor.X),
@@ -168,8 +182,7 @@ func (rigidbody *RigidBody) Update(delta float64) {
 	ty := rigidbody.Torque.Y * rigidbody.AngularFactor.Y
 	tz := rigidbody.Torque.Z * rigidbody.AngularFactor.Z
 
-	invInertia := rigidbody.InverseInertiaWorld()
-	e := invInertia.Elements()
+	e := rigidbody.InverseInertiaWorld.Elements()
 
 	rigidbody.AngularVelocity = mathf.NewVec3(
 		rigidbody.AngularVelocity.X+(delta*(e[0]*tx+e[1]*ty+e[2]*tz)),
@@ -183,14 +196,20 @@ func (rigidbody *RigidBody) Update(delta float64) {
 	rigidbody.Position = rigidbody.Position.Add(rigidbody.Velocity)
 
 	// update rotation
-	rigidbody.Rotation = rigidbody.Rotation.Integrate(rigidbody.AngularVelocity, delta, rigidbody.AngularFactor)
+	rotation := rigidbody.Rotation.Integrate(rigidbody.AngularVelocity, delta, rigidbody.AngularFactor)
+	rigidbody.Rotation = rigidbody.Rotation.Add(rotation)
 
 	// update the inertia world
 	rigidbody.UpdateInertiaWorld(false)
+
+	// clear all forces on the object
+	rigidbody.Force = mathf.NewZeroVec3()
+	rigidbody.Torque = mathf.NewZeroVec3()
 }
 
 func (rigidbody *RigidBody) UpdateInertiaWorld(force bool) {
-	if rigidbody.Inertia.X == rigidbody.Inertia.Y && rigidbody.Inertia.Y == rigidbody.Inertia.Z && !force {
+	I := rigidbody.InverseInertia()
+	if I.X == I.Y && I.Y == I.Z && !force {
 		// If inertia M = s*I, where I is identity and s a scalar, then
 		//    R*M*R' = R*(s*I)*R' = s*R*I*R' = s*R*R' = s*I = M
 		// where R is the rotation matrix.
@@ -201,6 +220,6 @@ func (rigidbody *RigidBody) UpdateInertiaWorld(force bool) {
 
 	m1 := mathf.Mat3FromQuaternion(rigidbody.Rotation)
 	m2 := m1.Transpose()
-	m1 = m1.Scale(rigidbody.Inertia)
-	rigidbody.InertiaWorld = m1.Multiply(m2)
+	m1 = m1.Scale(I)
+	rigidbody.InverseInertiaWorld = m1.Multiply(m2)
 }

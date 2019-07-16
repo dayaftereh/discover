@@ -17,7 +17,10 @@ export class GameComponent implements OnInit, OnDestroy {
     @ViewChild("threeJS", { static: true })
     threeJS: ThreeJSComponent | undefined
 
-    movement: Movement|undefined
+    movement: Movement | undefined
+
+    position: THREE.Vector3 | undefined
+    rotation: THREE.Vector3 | undefined
 
     private ready: boolean
 
@@ -73,20 +76,20 @@ export class GameComponent implements OnInit, OnDestroy {
 
     private updatePlayerObject(playerObject: GameObject): void {
         if (playerObject.position && playerObject.rotation) {
-            const position: THREE.Vector3 = new THREE.Vector3(
+            this.position = new THREE.Vector3(
                 playerObject.position.x,
                 playerObject.position.y,
                 playerObject.position.z
             )
 
-            const rotation: THREE.Vector3 = new THREE.Vector3(
+            this.rotation = new THREE.Vector3(
                 playerObject.rotation.x,
                 playerObject.rotation.y,
                 playerObject.rotation.z
             )
 
             if (this.threeJS) {
-                this.threeJS.updatePlayer(position, rotation)
+                this.threeJS.updatePlayer(this.position, this.rotation)
             }
         }
     }

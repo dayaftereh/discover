@@ -25,9 +25,9 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
 
     private scene: THREE.Scene | undefined;
     private renderer: THREE.WebGLRenderer | undefined
-    private camera: THREE.PerspectiveCamera | undefined
+    camera: THREE.PerspectiveCamera | undefined
 
-    private player: Player | undefined
+    player: Player | undefined
     private controls: FlyControls | undefined
     private followCamera: FollowCamera | undefined
 
@@ -104,8 +104,8 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
         this.player = new Player()
         this.player.init()
 
-        if (this.scene && this.player.mesh) {
-            this.scene.add(this.player.mesh)
+        if (this.scene && this.player.object) {
+            this.scene.add(this.player.object)
         }
     }
 
@@ -176,8 +176,7 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
     }
 
     updatePlayer(position: THREE.Vector3, rotation: THREE.Vector3): void {
-        if (this.player) {
-            console.log(position, rotation)
+        if (this.player) {            
             this.player.update0(position, rotation)
         }
     }

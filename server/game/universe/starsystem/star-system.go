@@ -69,7 +69,7 @@ func (starSystem *StarSystem) update() {
 	// get the delta for the update
 	delta := starSystem.clock.Delta()
 
-	if delta > 35.0 {
+	if delta > 0.035 {
 		log.Printf("Update: delat [ %f ]\n", delta)
 	}
 

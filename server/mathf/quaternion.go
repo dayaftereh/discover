@@ -1,6 +1,7 @@
 package mathf
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -41,6 +42,15 @@ func (quaternion *Quaternion) Set(x float64, y float64, z float64, w float64) *Q
 	quaternion.Z = z
 	quaternion.W = w
 	return quaternion
+}
+
+func (quaternion *Quaternion) Add(other *Quaternion) *Quaternion {
+	return &Quaternion{
+		X: quaternion.X + other.X,
+		Y: quaternion.Y + other.Y,
+		Z: quaternion.Z + other.Z,
+		W: quaternion.W + other.W,
+	}
 }
 
 // QuaternionFromAxisAngle creates the quaternion components from an axis and an angle
@@ -126,11 +136,11 @@ func (quaternion *Quaternion) Normalize() *Quaternion {
 }
 
 // Multiply this quaternion by the given
-func (quaternion *Quaternion) Multiply(other Quaternion) *Quaternion {
+func (quaternion *Quaternion) Multiply(other *Quaternion) *Quaternion {
 	return &Quaternion{
 		X: quaternion.X*other.W + quaternion.W*other.X + quaternion.Y*other.Z - quaternion.Z*other.Y,
-		Y: quaternion.Y*other.W + quaternion.W*other.Y + quaternion.Z + other.X - quaternion.X*other.Z,
-		Z: quaternion.Z*other.W + quaternion.W*other.Z + quaternion.X + other.Y - quaternion.Y*other.X,
+		Y: quaternion.Y*other.W + quaternion.W*other.Y + quaternion.Z*other.X - quaternion.X*other.Z,
+		Z: quaternion.Z*other.W + quaternion.W*other.Z + quaternion.X*other.Y - quaternion.Y*other.X,
 		W: quaternion.W*other.W - quaternion.X*other.X - quaternion.Y*other.Y - quaternion.Z*other.Z,
 	}
 }
@@ -161,6 +171,16 @@ func (quaternion *Quaternion) Conjugate() *Quaternion {
 
 // MultiplyVec multiply the quaternion by a vector
 func (quaternion *Quaternion) MultiplyVec(vec *Vec3) *Vec3 {
+	/*
+			ix =  qw * x + qy * z - qz * y,
+		    iy =  qw * y + qz * x - qx * z,
+		    iz =  qw * z + qx * y - qy * x,
+			iw = -qx * x - qy * y - qz * z;
+
+			target.x = ix * qw + iw * -qx + iy * -qz - iz * -qy;
+		    target.y = iy * qw + iw * -qy + iz * -qx - ix * -qz;
+		    target.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
+	*/
 	ix := quaternion.W*vec.X + quaternion.Y*vec.Z - quaternion.Z*vec.Y
 	iy := quaternion.W*vec.Y + quaternion.Z*vec.X - quaternion.X*vec.Z
 	iz := quaternion.W*vec.Z + quaternion.X*vec.Y - quaternion.Y*vec.X
@@ -274,4 +294,8 @@ func (quaternion *Quaternion) Slerp(toQuaternion *Quaternion, t float64) *Quater
 		Z: scale0*quaternion.Z + scale1*toQuaternion.Z,
 		W: scale0*quaternion.W + scale1*toQuaternion.W,
 	}
+}
+
+func (quaternion *Quaternion) String() string {
+	return fmt.Sprintf("Quaternion [ x: %f, y: %f, z: %f, w: %f ]", quaternion.X, quaternion.Y, quaternion.Z, quaternion.W)
 }

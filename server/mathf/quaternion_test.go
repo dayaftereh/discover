@@ -72,7 +72,27 @@ func TestQuaternionToEulerZ(t *testing.T) {
 	AssertVec3CloseEqual(t, e, 0, 0, math.Pi/4.0)
 }
 
-func TestQuaternionFromVectorsZ(t *testing.T) {
+func TestQuaternionMultiplyVecX(t *testing.T) {
+	u := mathf.NewVec3(1, 0, 0)
+	v := mathf.NewVec3(-1, 0, 0)
+
+	q := mathf.QuaternionFromVectors(u, v)
+	r := q.MultiplyVec(mathf.NewUnitX())
+
+	AssertVec3CloseEqual(t, r, -1, 0, 0)
+}
+
+func TestQuaternionMultiplyVecY(t *testing.T) {
+	u := mathf.NewVec3(0, 1, 0)
+	v := mathf.NewVec3(0, -1, 0)
+
+	q := mathf.QuaternionFromVectors(u, v)
+	r := q.MultiplyVec(mathf.NewUnitY())
+
+	AssertVec3CloseEqual(t, r, 0, -1, 0)
+}
+
+func TestQuaternionMultiplyVecZ(t *testing.T) {
 	u := mathf.NewVec3(0, 0, 1)
 	v := mathf.NewVec3(0, 0, -1)
 
@@ -80,6 +100,15 @@ func TestQuaternionFromVectorsZ(t *testing.T) {
 	r := q.MultiplyVec(mathf.NewUnitZ())
 
 	AssertVec3CloseEqual(t, r, 0, 0, -1)
+}
+
+func TestQuaternionMultiply(t *testing.T) {
+	q1 := mathf.NewQuaternion(1, 2, 3, 4)
+	q2 := mathf.NewQuaternion(4, 3, 2, 1)
+
+	r := q1.Multiply(q2)
+
+	AssertQuaternionCloseEqual(t, r, 12, 24, 6, -12)
 }
 
 func TestQuaternionSlerp(t *testing.T) {
