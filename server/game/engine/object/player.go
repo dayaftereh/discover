@@ -14,7 +14,7 @@ type Player struct {
 }
 
 func NewPlayer(id int64, position *mathf.Vec3) *Player {
-	rigidbody := NewRigidBody(1.0)
+	rigidbody := NewRigidBody(5.0)
 	rigidbody.Position = position
 
 	radius := 1.0
@@ -47,12 +47,12 @@ func (player *Player) RigidBody() *RigidBody {
 func (player *Player) Update(delta float64) {
 	if player.move != nil {
 		// apply move force
-		player.rigidbody.ApplyLocalForce(player.move, mathf.NewZeroVec3())
+		player.rigidbody.ApplyLocalForce(player.move.Multiply(100.0), mathf.NewZeroVec3())
 	}
 
 	if player.rotation != nil {
 		// apply the rotaion
-		player.rigidbody.AddLocalTorque(player.rotation)
+		player.rigidbody.AddTorque(player.rotation)
 	}
 
 	player.rigidbody.Update(delta)

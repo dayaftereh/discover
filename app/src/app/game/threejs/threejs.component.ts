@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, EventEmitter, Output, OnDestroy } from "@angular/core";
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, EventEmitter, Output, OnDestroy, OnInit } from "@angular/core";
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { FlyControls } from "./fly-controls";
@@ -11,7 +11,7 @@ import { Subscription } from "rxjs";
     selector: 'app-threejs',
     templateUrl: './threejs.component.html'
 })
-export class ThreeJSComponent implements AfterViewInit, OnDestroy {
+export class ThreeJSComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @Output("onMovement")
     onMovement: EventEmitter<Movement> | undefined
@@ -25,19 +25,33 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
 
     private scene: THREE.Scene | undefined;
     private renderer: THREE.WebGLRenderer | undefined
-    camera: THREE.PerspectiveCamera | undefined
+    private camera: THREE.PerspectiveCamera | undefined
 
-    player: Player | undefined
+    private player: Player | undefined
     private controls: FlyControls | undefined
     private followCamera: FollowCamera | undefined
 
     private subscription: Subscription | undefined
+
+    stats: any = {
+        cameraLocation: new THREE.Vector3(),
+        cameraRotation: new THREE.Euler(),
+        playerLocation: new THREE.Vector3(),
+        playerRotation: new THREE.Euler(),
+        playerQuaternion: new THREE.Quaternion(),
+    }
+
 
     constructor() {
         this.running = true
         this.clock = new THREE.Clock()
         this.onMovement = new EventEmitter<Movement>(true)
     }
+
+    ngOnInit(): void {
+
+    }
+
 
     ngAfterViewInit(): void {
         this.createScene()
@@ -70,6 +84,17 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
     private createScene(): void {
         this.scene = new THREE.Scene()
         this.scene.add(new THREE.AxesHelper(200))
+
+        const geometry = new THREE.SphereGeometry(50.0)
+        const material = new THREE.MeshBasicMaterial(
+            { color: 0x00ff00, wireframe: false }
+        )
+        const mesh = new THREE.Mesh(geometry, material)
+        const object = new THREE.Object3D()
+        object.add(mesh)
+        object.position.set(500,0,0)
+        this.scene.add(object)
+
     }
 
     private createCamera(): void {
@@ -86,7 +111,7 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
         })
 
         this.renderer.setPixelRatio(devicePixelRatio)
-        this.renderer.setSize(400, 400)
+        this.renderer.setSize(1024, 800)
     }
 
     private createControls(): void {
@@ -153,6 +178,17 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
         // update the player
         if (this.player) {
             this.player.update(delta)
+
+            if (this.player.object) {
+                this.stats.playerLocation.copy(this.player.object.position)
+                this.stats.playerRotation.copy(this.player.object.rotation)
+                this.stats.playerQuaternion.copy(this.player.object.quaternion)
+            }
+        }
+
+        if (this.camera) {
+            this.stats.cameraLocation.copy(this.camera.position)
+            this.stats.cameraRotation.copy(this.camera.rotation)
         }
 
         // update the follow camera
@@ -176,7 +212,7 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
     }
 
     updatePlayer(position: THREE.Vector3, rotation: THREE.Vector3): void {
-        if (this.player) {            
+        if (this.player) {
             this.player.update0(position, rotation)
         }
     }

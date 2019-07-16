@@ -1,20 +1,10 @@
 export interface ControlsState {
 
-    forward: number
-    backward: number
+    thruster: number
+    strafe: number
+    up:number
 
-    left: number
-    right: number
-
-    up: number
-    down: number
-
-    pitchUp: number
-    pitchDown: number
-
-    yawLeft: number
-    yawRight: number
-
-    rollLeft: number
-    rollRight: number
+    pitch: number
+    yaw: number
+    roll: number
 }

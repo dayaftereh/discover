@@ -158,7 +158,7 @@ func (rigidbody *RigidBody) Update(delta float64) {
 	linearDamping := math.Pow(1.0-(0.01), delta)
 	rigidbody.Velocity = rigidbody.Velocity.Multiply(linearDamping)
 
-	angularDamping := math.Pow(1.0-(0.5), delta)
+	angularDamping := math.Pow(1.0-(0.8), delta)
 	rigidbody.AngularVelocity = rigidbody.AngularVelocity.Multiply(angularDamping)
 
 	invMassDelta := rigidbody.InverseMass() * delta
@@ -170,7 +170,7 @@ func (rigidbody *RigidBody) Update(delta float64) {
 	//log.Printf("LinearFactor: %v", rigidbody.LinearFactor)
 	//log.Printf("Position: %v", rigidbody.Position)
 	log.Printf("Rotation: %v", rigidbody.Rotation)
-	log.Printf("AngularVelocity: %v", rigidbody.AngularVelocity)
+	//log.Printf("AngularVelocity: %v", rigidbody.AngularVelocity)
 
 	velo := mathf.NewVec3(
 		rigidbody.Velocity.X+(rigidbody.Force.X*invMassDelta*rigidbody.LinearFactor.X),
@@ -197,7 +197,7 @@ func (rigidbody *RigidBody) Update(delta float64) {
 
 	// update rotation
 	rotation := rigidbody.Rotation.Integrate(rigidbody.AngularVelocity, delta, rigidbody.AngularFactor)
-	rigidbody.Rotation = rigidbody.Rotation.Add(rotation)
+	rigidbody.Rotation = rigidbody.Rotation.Add(rotation).Normalize()
 
 	// update the inertia world
 	rigidbody.UpdateInertiaWorld(false)

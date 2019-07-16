@@ -20,18 +20,13 @@ export class FlyControls {
         this.rotation = new THREE.Vector3()
 
         this.controlsState = {
-            forward: 0.0,
-            backward: 0.0,
-            left: 0.0,
-            right: 0.0,
-            up: 0.0,
-            down: 0.0,
-            pitchUp: 0.0,
-            pitchDown: 0.0,
-            yawLeft: 0.0,
-            yawRight: 0.0,
-            rollLeft: 0.0,
-            rollRight: 0.0
+            thruster: 0,
+            strafe: 0,
+            up: 0,
+
+            pitch: 0,
+            yaw: 0,
+            roll: 0,
         } as ControlsState
     }
 
@@ -62,8 +57,8 @@ export class FlyControls {
         const halfWidth: number = dimension.size.width / 2.0
         const halfHeight: number = dimension.size.height / 2.0
 
-        this.controlsState.yawLeft = -((x - dimension.offset.x) - halfWidth) / halfWidth
-        this.controlsState.pitchDown = ((y - dimension.offset.y) - halfHeight) / halfHeight
+        this.controlsState.yaw = ((x - dimension.offset.x) - halfWidth) / halfWidth
+        this.controlsState.pitch = -((y - dimension.offset.y) - halfHeight) / halfHeight
 
         this.updateRotationVector()
     }
@@ -81,34 +76,34 @@ export class FlyControls {
         const keyName: string = key.toLowerCase()
         switch (keyName) {
             case 'w':
-                this.controlsState.forward = state; break;
+                this.controlsState.thruster = state; break;
             case 's':
-                this.controlsState.backward = state; break;
+                this.controlsState.thruster = -state; break;
 
             case 'a':
-                this.controlsState.left = state; break;
+                this.controlsState.strafe = state; break;
             case 'd':
-                this.controlsState.right = state; break;
+                this.controlsState.strafe = -state; break;
 
             case 'r':
                 this.controlsState.up = state; break;
             case 'f':
-                this.controlsState.down = state; break;
+                this.controlsState.up = -state; break;
 
             case 'arrowup':
-                this.controlsState.pitchUp = state; break;
+                this.controlsState.pitch = state; break;
             case 'arrowdown':
-                this.controlsState.pitchDown = state; break;
+                this.controlsState.pitch = -state; break;
 
             case 'arrowleft':
-                this.controlsState.yawLeft = state; break;
+                this.controlsState.yaw = state; break;
             case 'arrowright':
-                this.controlsState.yawRight = state; break;
+                this.controlsState.yaw = -state; break;
 
             case 'q':
-                this.controlsState.rollLeft = state; break;
+                this.controlsState.roll = state; break;
             case 'e':
-                this.controlsState.rollRight = state; break;
+                this.controlsState.roll = -state; break;
         }
 
         this.updateMovementVector()
@@ -116,16 +111,16 @@ export class FlyControls {
     }
 
     private updateMovementVector(): void {
-        this.move.x = (-this.controlsState.left + this.controlsState.right)
-        this.move.y = (-this.controlsState.down + this.controlsState.up)
-        this.move.z = (-this.controlsState.forward + this.controlsState.backward)
+        this.move.x = this.controlsState.strafe
+        this.move.y = this.controlsState.up
+        this.move.z = this.controlsState.thruster
 
     }
 
     private updateRotationVector(): void {
-        this.rotation.x = (-this.controlsState.pitchDown + this.controlsState.pitchUp)
-        this.rotation.y = (-this.controlsState.yawRight + this.controlsState.yawLeft)
-        this.rotation.z = (-this.controlsState.rollRight + this.controlsState.rollLeft)
+        this.rotation.x = this.controlsState.pitch
+        this.rotation.y = this.controlsState.yaw
+        this.rotation.z = this.controlsState.roll
     }
 
     private getContainerDimensions(): {

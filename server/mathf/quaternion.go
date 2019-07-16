@@ -204,28 +204,13 @@ func (quaternion *Quaternion) Clone() *Quaternion {
 
 // ToEuler convert the quaternion to euler angle representation, Order: YZX
 func (quaternion *Quaternion) ToEuler() *Vec3 {
-	test := quaternion.X*quaternion.Y + quaternion.Z*quaternion.W
-	if test > 0.499 {
-		return NewVec3(
-			0.0,
-			2.0*math.Atan2(quaternion.X, quaternion.W),
-			math.Pi/2.0)
-	}
-
-	if test < -0.499 {
-		return NewVec3(
-			0.0,
-			-2.0*math.Atan2(quaternion.X, quaternion.W),
-			-math.Pi/2.0)
-	}
-
 	sqx := quaternion.X * quaternion.X
 	sqy := quaternion.Y * quaternion.Y
 	sqz := quaternion.Z * quaternion.Z
 
 	return NewVec3(
-		math.Atan2((2.0*quaternion.X*quaternion.W)-(2.0*quaternion.Y*quaternion.Z), 1.0-2.0*sqx-2.0*sqz),
-		math.Atan2((2.0*quaternion.Y*quaternion.W)-(2.0*quaternion.X*quaternion.Z), 1.0-2.0*sqy-2.0*sqz),
+		math.Atan2(2.0*(quaternion.X*quaternion.W+quaternion.Y*quaternion.Z), 1.0-2.0*(sqx+sqy),
+		math.Atan2((2.0*(quaternion.Y*quaternion.W)-(2.0*quaternion.X*quaternion.Z), 1.0-2.0*sqy-2.0*sqz),
 		math.Asin(2.0*test))
 
 }

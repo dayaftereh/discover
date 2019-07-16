@@ -13,6 +13,13 @@ func (starSystem *StarSystem) JoinPlayer(player *player.Player) {
 	starSystem.lock.Lock()
 	defer starSystem.lock.Unlock()
 
+	// check if player already in the star system
+	_, ok := starSystem.players[player.ID]
+	if ok {
+		log.Printf("player [ %s ] already joined star-system [ %d ]", player.Name, starSystem.ID)
+		return
+	}
+
 	log.Printf("player [ %s ] joined star-system [ %d ]\n", player.Name, starSystem.ID)
 
 	// store the player
