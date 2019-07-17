@@ -1,12 +1,5 @@
 <div class="p-grid">
     <div class="p-col">
-        {{position|json}}
-        {{rotation|json}}
-        {{movement|json}}
-    </div>
-</div>
-<div class="p-grid">
-    <div class="p-col">
-        <app-threejs #threeJS (onMovement)="onMovement($event)"></app-threejs>
+        <app-threejs (onInit)="onInitThreeJS($event)" (onUpdate)="onUpdateThreeJS($event)"></app-threejs>
     </div>
 </div>

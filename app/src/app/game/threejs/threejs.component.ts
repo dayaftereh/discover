@@ -1,11 +1,8 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, EventEmitter, Output, OnDestroy, OnInit } from "@angular/core";
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, OnDestroy, Output, ViewChild } from "@angular/core";
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { FlyControls } from "./fly-controls";
-import { Player } from "./player";
-import { FollowCamera } from "./follow-camera";
-import { Movement } from "../../services/api/connection/messages/movement";
-import { Subscription } from "rxjs";
+import { ThreeJSInitEvent } from "./threejs-init-event";
+import { ThreeJSUpdateEvent } from "./threejs-update-event";
+import { Subject } from "rxjs";
 
 @Component({
     selector: 'app-threejs',
@@ -13,8 +10,11 @@ import { Subscription } from "rxjs";
 })
 export class ThreeJSComponent implements AfterViewInit, OnDestroy {
 
-    @Output("onMovement")
-    onMovement: EventEmitter<Movement> | undefined
+    @Output("onInit")
+    onInit: Subject<ThreeJSInitEvent>
+
+    @Output("onUpdate")
+    onUpdate: Subject<ThreeJSUpdateEvent>
 
     @ViewChild('canvas', { static: false })
     canvasRef: ElementRef | undefined;
@@ -27,37 +27,24 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
     private renderer: THREE.WebGLRenderer | undefined
     private camera: THREE.PerspectiveCamera | undefined
 
-    private player: Player | undefined
-    private controls: FlyControls | undefined
-    private followCamera: FollowCamera | undefined
-
-    private subscription: Subscription | undefined
-
-    stats: any = {
-        cameraLocation: new THREE.Vector3(),
-        cameraRotation: new THREE.Euler(),
-        playerLocation: new THREE.Vector3(),
-        playerRotation: new THREE.Euler(),
-        playerQuaternion: new THREE.Quaternion(),
-    }
-
-
     constructor() {
-        this.running = true
+        this.running = false
         this.clock = new THREE.Clock()
-        this.onMovement = new EventEmitter<Movement>(true)
+        this.onInit = new Subject<ThreeJSInitEvent>()
+        this.onUpdate = new Subject<ThreeJSUpdateEvent>()
     }
 
     ngAfterViewInit(): void {
+        // create scene camera and renderer
         this.createScene()
         this.createCamera()
         this.createRenderer()
 
-        this.createPlayer()
-        this.createControls()
-        this.createFollowCamera()
+        // notify about successful init
+        this.emitInit()
 
-        this.update()
+        // start the update loop
+        this.start()
     }
 
     private canvas(): HTMLCanvasElement {
@@ -78,17 +65,6 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
 
     private createScene(): void {
         this.scene = new THREE.Scene()
-        this.scene.add(new THREE.AxesHelper(200))
-
-        const geometry = new THREE.SphereGeometry(50.0)
-        const material = new THREE.MeshBasicMaterial(
-            { color: 0x00ff00, wireframe: false }
-        )
-        const mesh = new THREE.Mesh(geometry, material)
-        const object = new THREE.Object3D()
-        object.add(mesh)
-        object.position.set(200, 0, 0)
-        this.scene.add(object)
     }
 
     private createCamera(): void {
@@ -109,34 +85,6 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
         this.renderer.setSize(1024, 800)
     }
 
-    private createControls(): void {
-        const canvas: HTMLCanvasElement = this.canvas()
-
-        this.controls = new FlyControls(canvas)
-        this.controls.init()
-
-        if (this.onMovement) {
-            this.subscription = this.controls.movement.subscribe(this.onMovement)
-        }
-    }
-
-    private createPlayer(): void {
-        this.player = new Player()
-        this.player.init()
-
-        if (this.scene && this.player.object) {
-            this.scene.add(this.player.object)
-        }
-    }
-
-    private createFollowCamera(): void {
-        if (!this.camera || !this.player) {
-            return
-        }
-
-        this.followCamera = new FollowCamera(this.camera, this.player)
-    }
-
     @HostListener('window:resize', ['$event'])
     public onResize(event: Event) {
         const canvas: HTMLCanvasElement = this.canvas()
@@ -152,7 +100,29 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
         if (this.renderer) {
             this.renderer.setSize(canvas.clientWidth, canvas.clientHeight)
         }
+    }
 
+    private emitInit(): void {
+        // get the canvas
+        const canvas: HTMLCanvasElement = this.canvas()
+
+        // fire the init event
+        if (this.scene && this.renderer && this.camera) {
+            const event: ThreeJSInitEvent = {
+                canvas,
+                scene: this.scene,
+                camera: this.camera,
+                renderer: this.renderer
+            }
+            this.onInit.next(event)
+        }
+
+        this.onInit.complete()
+    }
+
+    private start(): void {
+        this.running = true
+        this.update()
     }
 
     private update(): void {
@@ -165,30 +135,20 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
         // get the delta for this loop
         const delta: number = this.clock.getDelta()
 
-        // update the controls
-        if (this.controls) {
-            this.controls.update(delta)
-        }
+        // get the canvas
+        const canvas: HTMLCanvasElement = this.canvas()
 
-        // update the player
-        if (this.player) {
-            this.player.update(delta)
-
-            if (this.player.object) {
-                this.stats.playerLocation.copy(this.player.object.position)
-                this.stats.playerRotation.copy(this.player.object.rotation)
-                this.stats.playerQuaternion.copy(this.player.object.quaternion)
+        // fire the update event
+        if (this.scene && this.renderer && this.camera) {
+            const event: ThreeJSUpdateEvent = {
+                delta,
+                canvas,
+                scene: this.scene,
+                camera: this.camera,
+                renderer: this.renderer
             }
-        }
 
-        if (this.camera) {
-            this.stats.cameraLocation.copy(this.camera.position)
-            this.stats.cameraRotation.copy(this.camera.rotation)
-        }
-
-        // update the follow camera
-        if (this.followCamera) {
-            this.followCamera.update(delta)
+            this.onUpdate.next(event)
         }
 
         this.render()
@@ -200,31 +160,12 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
         }
     }
 
-    sceneTransform(fn: (scene: THREE.Scene) => void): void {
-        if (this.scene) {
-            fn(this.scene)
-        }
-    }
-
-    updatePlayer(position: THREE.Vector3, rotation: THREE.Vector3): void {
-        if (this.player) {
-            this.player.update0(position, rotation)
-        }
-    }
-
     ngOnDestroy(): void {
         // disable update loop
         this.running = false
 
-        // unsubscribe
-        if (this.subscription) {
-            this.subscription.unsubscribe()
-        }
-
-        // dispose the player
-        if (this.player) {
-            this.player.dispose()
-        }
+        // notify about end
+        this.onUpdate.complete()
 
         // remove the renderer
         if (this.renderer) {

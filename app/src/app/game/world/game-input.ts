@@ -3,18 +3,20 @@ import { ControlsState } from "./controls-state";
 import { Subject } from 'rxjs';
 import { Movement } from '../../services/api/connection/messages/movement';
 import { MessageType } from 'src/app/services/api/connection/messages/message-type';
+import { GameComponent } from './game-component';
+import { EventEmitter } from '@angular/core';
+import { GameInputEvent } from './game-input-event';
+import { ConnectionService } from 'src/app/services/api/connection/connection.service';
 
-export class FlyControls {
-
-    movement: Subject<Movement>
+export class GameInput implements GameComponent {
 
     private move: THREE.Vector3
     private rotation: THREE.Vector3
 
     private controlsState: ControlsState
 
-    constructor(private readonly element: HTMLElement) {
-        this.movement = new Subject()
+    constructor(private readonly element: HTMLElement,
+        private readonly connectionService: ConnectionService) {
 
         this.move = new THREE.Vector3()
         this.rotation = new THREE.Vector3()
@@ -74,15 +76,19 @@ export class FlyControls {
     }
 
     private onKeyDown(event: KeyboardEvent): void {
-        this.handleKeyEvent(event.key, 1.0)
+        if (this.handleKeyEvent(event.key, 1.0)) {
+            event.preventDefault()
+        }
     }
 
     private onKeyUp(event: KeyboardEvent): void {
-        this.handleKeyEvent(event.key, 0.0)
+        if (this.handleKeyEvent(event.key, 0.0)) {
+            event.preventDefault()
+        }
     }
 
-    private handleKeyEvent(key: string, state: number): void {
-        console.log("Key:", key)
+    private handleKeyEvent(key: string, state: number): boolean {
+        let consumed: boolean = true;
         const keyName: string = key.toLowerCase()
         switch (keyName) {
             case 'w':
@@ -114,10 +120,16 @@ export class FlyControls {
                 this.controlsState.roll = -state; break;
             case 'e':
                 this.controlsState.roll = state; break;
+            default:
+                consumed = false; break;
         }
 
-        this.updateMovementVector()
-        this.updateRotationVector()
+        if (consumed) {
+            this.updateMovementVector()
+            this.updateRotationVector()
+        }
+
+        return consumed
     }
 
     private updateMovementVector(): void {
@@ -177,7 +189,11 @@ export class FlyControls {
         }
 
         // notify about new movement
-        this.movement.next(movement)
+        this.connectionService.send(movement)
+    }
+
+    dispose(): void {
+
     }
 
 }

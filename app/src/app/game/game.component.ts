@@ -1,43 +1,27 @@
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ConnectionService } from "../services/api/connection/connection.service";
-import { Movement } from "../services/api/connection/messages/movement";
-import { Subscription } from "rxjs";
-import { Message } from "../services/api/connection/messages/message";
-import { MessageType } from "../services/api/connection/messages/message-type";
-import { Update, GameObject } from "../services/api/connection/messages/update";
-import { ThreeJSComponent } from "./threejs/threejs.component";
-import * as THREE from 'three';
 import { GameService } from "../services/api/game/game.service";
+import { ThreeJSInitEvent } from "./threejs/threejs-init-event";
+import { ThreeJSUpdateEvent } from "./threejs/threejs-update-event";
+import { Game } from "./world/game";
 
 @Component({
     templateUrl: './game.component.html'
 })
 export class GameComponent implements OnInit, OnDestroy {
 
-    @ViewChild("threeJS", { static: true })
-    threeJS: ThreeJSComponent | undefined
-
-    movement: Movement | undefined
-
-    position: THREE.Vector3 | undefined
-    rotation: THREE.Vector3 | undefined
-
-    private ready: boolean
-
-    private subscription: Subscription | undefined
+    private game: Game
 
     constructor(private readonly connectionService: ConnectionService,
         private readonly gameService: GameService) {
-        this.ready = false
+        this.game = new Game(connectionService)
     }
 
-    async  ngOnInit(): Promise<void> {
+    async ngOnInit(): Promise<void> {
         // handle server connection
         await this.connect()
         // notify server about ready
         await this.gameService.ready()
-        // mark it as ready
-        this.ready = true
     }
 
     private async connect(): Promise<void> {
@@ -48,64 +32,18 @@ export class GameComponent implements OnInit, OnDestroy {
         }
         // connect via websocket
         await this.connectionService.connect()
-
-        // connect the dispatcher
-        this.registerDispatcher()
     }
 
-    private registerDispatcher(): void {
-        // register for the on message
-        this.subscription = this.connectionService.onMessage((message: Message) => {
-            this.dispatch(message)
-        })
+    onInitThreeJS(event: ThreeJSInitEvent): void {
+        this.game.init(event)
     }
 
-    private dispatch(message: Message): void {
-        // check if the message is an update
-        if (message.type !== MessageType.UPDATE) {
-            return
-        }
-        // convert the message to the update
-        const update: Update = message as Update;
-
-        // update the player if exists
-        if (update.player) {
-            this.updatePlayerObject(update.player)
-        }
-    }
-
-    private updatePlayerObject(playerObject: GameObject): void {
-        if (playerObject.position && playerObject.rotation) {
-            this.position = new THREE.Vector3(
-                playerObject.position.x,
-                playerObject.position.y,
-                playerObject.position.z
-            )
-
-            this.rotation = new THREE.Vector3(
-                playerObject.rotation.x,
-                playerObject.rotation.y,
-                playerObject.rotation.z
-            )
-
-            if (this.threeJS) {
-                this.threeJS.updatePlayer(this.position, this.rotation)
-            }
-        }
-    }
-
-    onMovement(movement: Movement): void {
-        this.movement = movement
-        if (this.ready) {
-            this.connectionService.send(movement)
-        }
+    onUpdateThreeJS(event: ThreeJSUpdateEvent): void {        
+        this.game.update(event)
     }
 
     ngOnDestroy(): void {
-        this.ready = false;
-        if (this.subscription) {
-            this.subscription.unsubscribe()
-        }
+        this.game.dispose()
     }
 
 }
