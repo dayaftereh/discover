@@ -30,6 +30,7 @@ export class Game {
     }
 
     init(event: ThreeJSInitEvent): void {
+        console.log("Init")
         this.components = this.createComponents(event)
         this.components.forEach((element: GameComponent) => {
             element.init()
@@ -38,6 +39,7 @@ export class Game {
 
 
     update(event: ThreeJSUpdateEvent): void {
+        console.log("game")
         this.components.forEach((element: GameComponent) => {
             element.update(event.delta)
         })

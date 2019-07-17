@@ -70,9 +70,11 @@ export class GameInput implements GameComponent {
     }
 
     private onMouseOut(): void {
-        this.rotation.x = 0.0
-        this.rotation.y = 0.0
-        this.rotation.z = 0.0
+        this.controlsState.yaw = 0.0
+        this.controlsState.pitch = 0.0
+        this.controlsState.roll = 0.0
+
+        this.updateRotationVector()
     }
 
     private onKeyDown(event: KeyboardEvent): void {
@@ -140,6 +142,8 @@ export class GameInput implements GameComponent {
     }
 
     private updateRotationVector(): void {
+        console.log("updateRotationVector")
+
         this.rotation.x = this.controlsState.pitch
         this.rotation.y = this.controlsState.yaw
         this.rotation.z = this.controlsState.roll

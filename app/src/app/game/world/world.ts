@@ -14,14 +14,13 @@ export class World implements GameComponent {
     }
 
     init(): void {
-        this.scene.add(this.player.gameObject())
         this.scene.add(new THREE.AxesHelper(100))
     }
 
     worldUpdate(tick: number, player: GameObject, objects: { [key: number]: GameObject }): void {
         // check if world tick
         if (!(this.tick < tick)) {
-           // return
+            return
         }
         // update tick
         this.tick = tick;
@@ -33,7 +32,7 @@ export class World implements GameComponent {
         const keys: number[] = Object.keys(objects).map((key: string) => Number(key))
         keys.forEach((key: number) => {
             const gameObject: GameObject = objects[key]
-            //this.updateObject(key, gameObject)
+            this.updateObject(key, gameObject)
         })
     }
 
@@ -51,7 +50,7 @@ export class World implements GameComponent {
         }
 
         // create a new game object
-        //this.createGameObject(key, gameObject)
+        this.createGameObject(key, gameObject)
     }
 
     private removeGameObject(key: number): void {
@@ -73,18 +72,26 @@ export class World implements GameComponent {
         }
 
         if (gameObject.rotation) {
-            object.rotation.set(gameObject.rotation.x, gameObject.rotation.y, gameObject.rotation.z)
+            object.quaternion.setFromEuler(new THREE.Euler(gameObject.rotation.x, gameObject.rotation.y, gameObject.rotation.z))
         }
     }
 
     private updatePlayerObject(gameObject: GameObject): void {
-        const playerObject: THREE.Object3D = this.player.gameObject()
+
         if (gameObject.position) {
-            playerObject.position.set(gameObject.position.x, gameObject.position.y, gameObject.position.z)
+            this.player.updatePositon(new THREE.Vector3(
+                gameObject.position.x,
+                gameObject.position.y,
+                gameObject.position.z
+            ))
         }
 
         if (gameObject.rotation) {
-            playerObject.rotation.set(gameObject.rotation.x, gameObject.rotation.y, gameObject.rotation.z)
+            this.player.updateRotation(new THREE.Vector3(
+                gameObject.rotation.x,
+                gameObject.rotation.y,
+                gameObject.rotation.z
+            ))
         }
     }
 
@@ -103,6 +110,7 @@ export class World implements GameComponent {
         const mesh: THREE.Mesh = new THREE.Mesh(geometry, material)
 
         const object: THREE.Object3D = new THREE.Object3D()
+        object.add(new THREE.AxesHelper(radius + radius * .25))
         object.add(mesh)
 
         // add the object
@@ -110,11 +118,12 @@ export class World implements GameComponent {
 
         // update the obhect
         this.updateGameObject(key, gameObject)
+
+        this.scene.add(object)
     }
 
 
     update(delta: number): void {
-        this.player.update(delta)
     }
 
     dispose(): void { }

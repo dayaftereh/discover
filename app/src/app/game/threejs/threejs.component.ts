@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { ThreeJSInitEvent } from "./threejs-init-event";
 import { ThreeJSUpdateEvent } from "./threejs-update-event";
 import { Subject } from "rxjs";
+import { Game } from "../world/game";
+import { ConnectionService } from "src/app/services/api/connection/connection.service";
 
 @Component({
     selector: 'app-threejs',
@@ -27,9 +29,12 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
     private renderer: THREE.WebGLRenderer | undefined
     private camera: THREE.PerspectiveCamera | undefined
 
-    constructor() {
+    private game: Game
+
+    constructor(private readonly connectionService: ConnectionService) {
         this.running = false
         this.clock = new THREE.Clock()
+        this.game = new Game(connectionService)
         this.onInit = new Subject<ThreeJSInitEvent>()
         this.onUpdate = new Subject<ThreeJSUpdateEvent>()
     }
@@ -114,10 +119,11 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
                 camera: this.camera,
                 renderer: this.renderer
             }
-            this.onInit.next(event)
+            //this.onInit.next(event)
+            this.game.init(event)
         }
 
-        this.onInit.complete()
+        //this.onInit.complete()
     }
 
     private start(): void {
@@ -148,7 +154,8 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
                 renderer: this.renderer
             }
 
-            this.onUpdate.next(event)
+            this.game.update(event)
+            //this.onUpdate.next(event)
         }
 
         this.render()
@@ -163,6 +170,8 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
     ngOnDestroy(): void {
         // disable update loop
         this.running = false
+
+        this.game.dispose()
 
         // notify about end
         this.onUpdate.complete()

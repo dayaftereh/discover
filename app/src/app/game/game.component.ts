@@ -10,11 +10,11 @@ import { Game } from "./world/game";
 })
 export class GameComponent implements OnInit, OnDestroy {
 
-    private game: Game
+    // private game: Game
 
     constructor(private readonly connectionService: ConnectionService,
         private readonly gameService: GameService) {
-        this.game = new Game(connectionService)
+        //this.game = new Game(connectionService)
     }
 
     async ngOnInit(): Promise<void> {
@@ -35,15 +35,15 @@ export class GameComponent implements OnInit, OnDestroy {
     }
 
     onInitThreeJS(event: ThreeJSInitEvent): void {
-        this.game.init(event)
+        // this.game.init(event)
     }
 
-    onUpdateThreeJS(event: ThreeJSUpdateEvent): void {        
-        this.game.update(event)
+    onUpdateThreeJS(event: ThreeJSUpdateEvent): void {
+        // this.game.update(event)
     }
 
     ngOnDestroy(): void {
-        this.game.dispose()
+        // this.game.dispose()
     }
 
 }

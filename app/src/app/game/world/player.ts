@@ -6,34 +6,38 @@ import { GameComponent } from './game-component';
 
 export class Player implements GameComponent {
 
-    private object: THREE.Object3D
+    private positon: THREE.Vector3
+    private rotation: THREE.Quaternion
 
     constructor() {
-        this.object = new THREE.Object3D()
-    }
-
-    gameObject(): THREE.Object3D {
-        return this.object
+        this.positon = new THREE.Vector3()
+        this.rotation = new THREE.Quaternion()
     }
 
     init(): void {
-        const geometry: THREE.SphereGeometry = new THREE.SphereGeometry(2.0)
-        const material: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial(
-            { color: 0xff0000, wireframe: true }
-        )
-        const mesh: THREE.Mesh = new THREE.Mesh(geometry, material)
+    }
 
-        this.object.add(mesh)
-        this.object.add(new THREE.AxesHelper(3))
+    playerPosition(): THREE.Vector3 {
+        return this.positon.clone()
+    }
+
+    playerRotation(): THREE.Quaternion {
+        return this.rotation.clone()
+    }
+
+    updatePositon(positon: THREE.Vector3): void {
+        this.positon.copy(positon)
+    }
+
+    updateRotation(rotation: THREE.Vector3): void {
+        const euler: THREE.Euler = new THREE.Euler(rotation.x, rotation.y, rotation.z)
+        this.rotation.setFromEuler(euler)
     }
 
     update(delta: number): void {
-
-
     }
 
     dispose(): void {
-
     }
 
 }
