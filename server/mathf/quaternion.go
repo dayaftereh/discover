@@ -111,15 +111,19 @@ func QuaternionFromVectors(u *Vec3, v *Vec3) *Quaternion {
 	return quaternion
 }
 
-// Normalize the quaternion
-func (quaternion *Quaternion) Normalize() *Quaternion {
-	l := math.Sqrt(
+func (quaternion *Quaternion) Length() float64 {
+	return math.Sqrt(
 		quaternion.X*quaternion.X +
 			quaternion.Y*quaternion.Y +
 			quaternion.Z*quaternion.Z +
 			quaternion.W*quaternion.W)
+}
 
-	if l < 0.0 {
+// Normalize the quaternion
+func (quaternion *Quaternion) Normalize() *Quaternion {
+	l := quaternion.Length()
+
+	if l <= 0.0 {
 		return NewZeroQuaternion()
 	}
 
@@ -208,11 +212,27 @@ func (quaternion *Quaternion) ToEuler() *Vec3 {
 	sqy := quaternion.Y * quaternion.Y
 	sqz := quaternion.Z * quaternion.Z
 
-	return NewVec3(
-		math.Atan2(2.0*(quaternion.X*quaternion.W+quaternion.Y*quaternion.Z), 1.0-2.0*(sqx+sqy),
-		math.Atan2((2.0*(quaternion.Y*quaternion.W)-(2.0*quaternion.X*quaternion.Z), 1.0-2.0*sqy-2.0*sqz),
-		math.Asin(2.0*test))
+	euler := NewZeroVec3()
 
+	// roll (x-axis rotation)
+	sinrCosp := -2.0 * (quaternion.Y*quaternion.Z - quaternion.X*quaternion.W)
+	cosrCosp := 1.0 - 2.0*(sqx+sqy)
+	euler.X = math.Atan2(sinrCosp, cosrCosp)
+
+	// pitch (y-axis rotation)
+	sinp := 2.0 * (quaternion.W*quaternion.Y + quaternion.Z*quaternion.X)
+	if math.Abs(sinp) >= 1.0 {
+		euler.Y = math.Copysign(math.Pi/2.0, sinp)
+	} else {
+		euler.Y = math.Asin(sinp)
+	}
+
+	// yaw (z-axis rotation)
+	sinyCosp := -2.0 * (quaternion.X*quaternion.Y - quaternion.W*quaternion.Z)
+	cosyCosp := 1.0 - 2.0*(sqy+sqz)
+	euler.Z = math.Atan2(sinyCosp, cosyCosp)
+
+	return euler
 }
 
 // QuaternionFromEuler creates the quaternion from the given euler angels

@@ -1,6 +1,8 @@
 package object
 
 import (
+	"log"
+
 	"github.com/dayaftereh/discover/server/mathf"
 )
 
@@ -21,7 +23,7 @@ func NewPlayer(id int64, position *mathf.Vec3) *Player {
 	I := 2.0 * rigidbody.Mass * radius * radius / 5.0
 	rigidbody.Inertia = mathf.NewVec3(I, I, I)
 
-	rigidbody.UpdateInertiaWorld(true)
+	//rigidbody.UpdateInertiaWorld(true)
 
 	return &Player{
 		id:        id,
@@ -46,13 +48,18 @@ func (player *Player) RigidBody() *RigidBody {
 
 func (player *Player) Update(delta float64) {
 	if player.move != nil {
+		move := mathf.ClampVec3(player.move, -1.0, 1.0)
+		log.Printf("move: %v", move)
+		// calculate the force
+		force := move.Multiply(350.0)
 		// apply move force
-		player.rigidbody.ApplyLocalForce(player.move.Multiply(100.0), mathf.NewZeroVec3())
+		player.rigidbody.ApplyLocalForce(force, mathf.NewZeroVec3())
 	}
 
 	if player.rotation != nil {
+		torque := mathf.ClampVec3(player.rotation, -1.0, 1.0)
 		// apply the rotaion
-		player.rigidbody.AddTorque(player.rotation)
+		player.rigidbody.AddLocalTorque(torque)
 	}
 
 	player.rigidbody.Update(delta)

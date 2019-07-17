@@ -43,6 +43,10 @@ export class FlyControls {
             this.onMouseMove(event)
         })
 
+        this.element.addEventListener('mouseout', () => {
+            this.onMouseOut()
+        })
+
         this.element.addEventListener('contextmenu', (event: MouseEvent) => {
             event.preventDefault()
         })
@@ -57,10 +61,16 @@ export class FlyControls {
         const halfWidth: number = dimension.size.width / 2.0
         const halfHeight: number = dimension.size.height / 2.0
 
-        this.controlsState.yaw = ((x - dimension.offset.x) - halfWidth) / halfWidth
-        this.controlsState.pitch = -((y - dimension.offset.y) - halfHeight) / halfHeight
+        this.controlsState.yaw = -((x - dimension.offset.x) - halfWidth) / halfWidth
+        this.controlsState.pitch = ((y - dimension.offset.y) - halfHeight) / halfHeight
 
         this.updateRotationVector()
+    }
+
+    private onMouseOut(): void {
+        this.rotation.x = 0.0
+        this.rotation.y = 0.0
+        this.rotation.z = 0.0
     }
 
     private onKeyDown(event: KeyboardEvent): void {
@@ -91,9 +101,9 @@ export class FlyControls {
                 this.controlsState.up = -state; break;
 
             case 'arrowup':
-                this.controlsState.pitch = state; break;
-            case 'arrowdown':
                 this.controlsState.pitch = -state; break;
+            case 'arrowdown':
+                this.controlsState.pitch = state; break;
 
             case 'arrowleft':
                 this.controlsState.yaw = state; break;
@@ -101,9 +111,9 @@ export class FlyControls {
                 this.controlsState.yaw = -state; break;
 
             case 'q':
-                this.controlsState.roll = state; break;
-            case 'e':
                 this.controlsState.roll = -state; break;
+            case 'e':
+                this.controlsState.roll = state; break;
         }
 
         this.updateMovementVector()

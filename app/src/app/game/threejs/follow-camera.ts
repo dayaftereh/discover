@@ -5,36 +5,46 @@ export class FollowCamera {
 
     private offset: THREE.Vector3
 
-    count = 0
+    private damping: number = 2.5
+
+    private cameraOrientation: THREE.Quaternion
 
     constructor(private readonly camera: THREE.Camera,
         private readonly player: Player, offset?: THREE.Vector3) {
         if (!offset) {
-            offset = new THREE.Vector3(0, 0, 15)
+            offset = new THREE.Vector3(0, 0, -5)
         }
         this.offset = offset
-
+        // rotation for camera
+        this.cameraOrientation = new THREE.Quaternion()
+        this.cameraOrientation.setFromEuler(new THREE.Euler(0, Math.PI, 0))
     }
 
     update(delta: number): void {
-        const targetRotation: THREE.Euler = this.player.eulerRotation()
-
-        // only intresstet on y
-        //targetRotation.x = 0.0
-        //targetRotation.z = 0.0
-
-        // get the player position
-        const position: THREE.Vector3 = this.player.position()
-        // calculate camera location
+        if (!this.player || !this.player.object) {
+            return
+        }
 
         const offset: THREE.Vector3 = this.offset.clone()
-        const cameraPosition: THREE.Vector3 = position.clone().sub(offset.applyEuler(targetRotation))
 
-        // set the camera to the position
-        this.camera.position.copy(cameraPosition)
+        // calculate world point for offset
+        const position: THREE.Vector3 = this.player.object.localToWorld(offset)
 
-        // look at the position
-        this.camera.lookAt(position)
+        // update the camera location
+        this.camera.position.copy(position)
+
+        // get the player rotation
+        const playerRotation: THREE.Quaternion = this.player.rotation()
+        // calculate target rotation
+        const targetRotation: THREE.Quaternion = playerRotation.multiply(this.cameraOrientation)
+        
+        // get the current camera rotation
+        const cameraRotation: THREE.Quaternion = this.camera.quaternion.clone()
+        // slerp the rotation for daming
+        const rotation: THREE.Quaternion = cameraRotation.slerp(targetRotation, delta * this.damping)
+
+        // update the camera rotation
+        this.camera.quaternion.copy(rotation)
     }
 
 }

@@ -11,7 +11,7 @@ import { Subscription } from "rxjs";
     selector: 'app-threejs',
     templateUrl: './threejs.component.html'
 })
-export class ThreeJSComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ThreeJSComponent implements AfterViewInit, OnDestroy {
 
     @Output("onMovement")
     onMovement: EventEmitter<Movement> | undefined
@@ -47,11 +47,6 @@ export class ThreeJSComponent implements OnInit, AfterViewInit, OnDestroy {
         this.clock = new THREE.Clock()
         this.onMovement = new EventEmitter<Movement>(true)
     }
-
-    ngOnInit(): void {
-
-    }
-
 
     ngAfterViewInit(): void {
         this.createScene()
@@ -92,14 +87,14 @@ export class ThreeJSComponent implements OnInit, AfterViewInit, OnDestroy {
         const mesh = new THREE.Mesh(geometry, material)
         const object = new THREE.Object3D()
         object.add(mesh)
-        object.position.set(500,0,0)
+        object.position.set(200, 0, 0)
         this.scene.add(object)
-
     }
 
     private createCamera(): void {
         const aspectRatio: number = this.calculateAspectRatio()
         this.camera = new THREE.PerspectiveCamera(60, aspectRatio, 1, 1100)
+        this.camera.position.set(0, 0, 0)
     }
 
     private createRenderer(): void {

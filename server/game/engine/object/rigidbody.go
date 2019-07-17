@@ -164,12 +164,12 @@ func (rigidbody *RigidBody) Update(delta float64) {
 	invMassDelta := rigidbody.InverseMass() * delta
 
 	//log.Printf("invMassDelta: %f", invMassDelta)
-	//log.Printf("Force: %v", rigidbody.Force)
+	log.Printf("Force: %v", rigidbody.Force)
 	//log.Printf("Torque: %v", rigidbody.Torque)
 	//log.Printf("Velocity: %v", rigidbody.Velocity)
 	//log.Printf("LinearFactor: %v", rigidbody.LinearFactor)
 	//log.Printf("Position: %v", rigidbody.Position)
-	log.Printf("Rotation: %v", rigidbody.Rotation)
+	//log.Printf("Rotation: %v", rigidbody.Rotation)
 	//log.Printf("AngularVelocity: %v", rigidbody.AngularVelocity)
 
 	velo := mathf.NewVec3(
@@ -200,7 +200,7 @@ func (rigidbody *RigidBody) Update(delta float64) {
 	rigidbody.Rotation = rigidbody.Rotation.Add(rotation).Normalize()
 
 	// update the inertia world
-	rigidbody.UpdateInertiaWorld(false)
+	//rigidbody.UpdateInertiaWorld(false)
 
 	// clear all forces on the object
 	rigidbody.Force = mathf.NewZeroVec3()
