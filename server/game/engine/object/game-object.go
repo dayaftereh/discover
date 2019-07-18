@@ -5,4 +5,6 @@ type GameObject interface {
 	Radius() float64
 	RigidBody() *RigidBody
 	Update(delta float64)
+	Color() int64
+	Type() GameObjectType
 }

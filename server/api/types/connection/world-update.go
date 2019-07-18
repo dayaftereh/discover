@@ -9,7 +9,7 @@ type GameObject struct {
 	Position   *mathf.Vec3 `json:"position"`
 	Rotation   *mathf.Vec3 `json:"rotation"`
 	Removeable *bool       `json:"removeable"`
-	Color      *uint64     `json:"color"`
+	Color      *int64      `json:"color"`
 }
 
 type PlayerUpdate struct {

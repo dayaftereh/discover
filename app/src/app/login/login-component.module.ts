@@ -1,8 +1,9 @@
 import { NgModule } from "@angular/core";
-import { BrowserModule } from "@angular/platform-browser";
-import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from "@angular/forms";
+import { BrowserModule } from "@angular/platform-browser";
 import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { InputTextModule } from 'primeng/inputtext';
 import { LoginComponent } from "./login.component";
 
 @NgModule({
@@ -11,10 +12,11 @@ import { LoginComponent } from "./login.component";
         FormsModule,
         BrowserModule,
         // primeng
+        CardModule,
         ButtonModule,
         InputTextModule
     ],
-    declarations:[
+    declarations: [
         LoginComponent
     ],
 })

@@ -25,7 +25,7 @@ export class Game {
         const dispatcher: Dispatcher = new Dispatcher(world, this.connectionService)
 
         return [
-            player, followCamera, gameInput, world, dispatcher
+            gameInput,  player, followCamera, world, dispatcher
         ]
     }
 

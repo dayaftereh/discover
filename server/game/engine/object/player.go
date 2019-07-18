@@ -69,3 +69,11 @@ func (player *Player) UpdateMovement(move *mathf.Vec3, rotation *mathf.Vec3) {
 	player.move = move
 	player.rotation = rotation
 }
+
+func (player *Player) Color() int64 {
+	return int64(0x34ff81)
+}
+
+func (player *Player) Type() GameObjectType {
+	return PlayerObject
+}

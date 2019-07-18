@@ -5,7 +5,7 @@ import (
 )
 
 type Planet struct {
-	Color    *uint64
-	Location *mathf.Vec3
+	Color    *int64
+	Position *mathf.Vec3
 	Rotation *mathf.Vec3
 }

@@ -6,13 +6,13 @@ import (
 
 type Planet struct {
 	id        int64
+	color     int64
 	radius    float64
 	rigidbody *RigidBody
 }
 
-func NewPlanet(id int64, position *mathf.Vec3) *Planet {
+func NewPlanet(id int64, color int64) *Planet {
 	rigidbody := NewRigidBody(1e6)
-	rigidbody.Position = position
 
 	radius := 10.0
 	I := 2.0 * rigidbody.Mass * radius * radius / 5.0
@@ -22,6 +22,7 @@ func NewPlanet(id int64, position *mathf.Vec3) *Planet {
 
 	return &Planet{
 		id:        id,
+		color:     color,
 		radius:    radius,
 		rigidbody: rigidbody,
 	}
@@ -40,5 +41,13 @@ func (planet *Planet) RigidBody() *RigidBody {
 }
 
 func (planet *Planet) Update(delta float64) {
-	planet.Update(delta)
+
+}
+
+func (planet *Planet) Color() int64 {
+	return planet.color
+}
+
+func (planet *Planet) Type() GameObjectType {
+	return PlanetObject
 }

@@ -72,3 +72,13 @@ func (world *World) Update(delta float64) {
 		gameObject.Update(delta)
 	}
 }
+
+func (world *World) GetGameObjectsByType(objectTpye object.GameObjectType) []object.GameObject {
+	founds := make([]object.GameObject, 0)
+	for _, gameObject := range world.objects {
+		if gameObject.Type() == objectTpye {
+			founds = append(founds, gameObject)
+		}
+	}
+	return founds
+}

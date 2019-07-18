@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dayaftereh/discover/server/game/data"
+
 	"github.com/dayaftereh/discover/server/game/engine"
 	"github.com/dayaftereh/discover/server/game/player"
 
@@ -13,6 +15,7 @@ import (
 
 type StarSystem struct {
 	ID      int64
+	Name    string
 	counter int64
 	lock    sync.Mutex
 	// players
@@ -26,20 +29,27 @@ type StarSystem struct {
 	//
 }
 
-func NewStarSystem(id int64) *StarSystem {
+func NewStarSystem(starSystemData *data.StarSystem) *StarSystem {
+	// create the star system
 	starSystem := &StarSystem{
-		ID:      id,
+		ID:      starSystemData.ID,
+		Name:    starSystemData.Name,
 		counter: 0,
 
 		// players
 		playersObject: make(map[string]int64),
 		players:       make(map[string]*player.Player),
 
+		// engine
 		world: world.NewWorld(),
 		clock: engine.NewClock(),
 
+		// close
 		close: make(chan bool),
 	}
+
+	// load the star system from data
+	starSystem.loadData(starSystemData)
 
 	go starSystem.loop()
 

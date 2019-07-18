@@ -30,8 +30,9 @@ func (universe *Universe) LoadUniverseFromData(gameData *data.Game) {
 	universe.initialStarSystem = gameData.Universe.InitialStarSystem
 
 	// create the starSystems
-	for _, starSystem := range gameData.Universe.StarSystems {
-		universe.starSystems[starSystem.ID] = starsystem.NewStarSystem(starSystem.ID)
+	for _, starSystemData := range gameData.Universe.StarSystems {
+		// create star system from data
+		universe.starSystems[starSystemData.ID] = starsystem.NewStarSystem(starSystemData)
 	}
 }
 
@@ -46,10 +47,9 @@ func (universe *Universe) WriteUniverseToData(gameData *data.Game) {
 	}
 
 	// write the star systems to data
-	for id, starSystem := range universe.starSystems {
-		gameData.Universe.StarSystems[id] = &data.StarSystem{
-			ID: starSystem.ID,
-		}
+	for id, gameStarSystem := range universe.starSystems {
+		// write the data for the star system
+		gameData.Universe.StarSystems[id] = gameStarSystem.WriteData()
 	}
 }
 

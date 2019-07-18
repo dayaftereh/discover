@@ -48,6 +48,10 @@ func (game *Game) Ready(player *player.Player) error {
 		if err != nil {
 			return err
 		}
+
+		// update the player star system
+		game.playerManager.UpdatePlayerStarSystem(player.ID, initialStarSystem.ID)
+
 		// let the player join the star system
 		initialStarSystem.JoinPlayer(player)
 		return nil
@@ -66,6 +70,11 @@ func (game *Game) Ready(player *player.Player) error {
 }
 
 func (game *Game) Movement(player *player.Player, move *mathf.Vec3, rotation *mathf.Vec3) {
+	// check if the player has already a star system
+	if player.StarSystem == nil {
+		// if not drop the update
+		return
+	}
 	// get the player star system
 	starSystem := game.universe.GetStarSystem(*player.StarSystem)
 	// check if a star system exists
