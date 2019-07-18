@@ -5,11 +5,13 @@ import (
 
 	"github.com/dayaftereh/discover/server/game/data"
 	"github.com/dayaftereh/discover/server/game/universe/starsystem"
+	"github.com/pkg/errors"
 )
 
 type Universe struct {
-	lock        sync.RWMutex
-	starSystems map[int64]*starsystem.StarSystem
+	lock              sync.RWMutex
+	initialStarSystem *int64
+	starSystems       map[int64]*starsystem.StarSystem
 }
 
 func NewUniverse() *Universe {
@@ -20,28 +22,50 @@ func NewUniverse() *Universe {
 	return universe
 }
 
-func (universe *Universe) LoadStarSystems(starSystems []*data.StarSystem) {
+func (universe *Universe) LoadUniverseFromData(gameData *data.Game) {
 	universe.lock.Lock()
 	defer universe.lock.Unlock()
 
-	for _, starSystem := range starSystems {
+	// set the initialStarSystem
+	universe.initialStarSystem = gameData.Universe.InitialStarSystem
+
+	// create the starSystems
+	for _, starSystem := range gameData.Universe.StarSystems {
 		universe.starSystems[starSystem.ID] = starsystem.NewStarSystem(starSystem.ID)
 	}
 }
 
-func (universe *Universe) GetStarSystems() []*data.StarSystem {
-	starSystems := make([]*data.StarSystem, 0)
-
+func (universe *Universe) WriteUniverseToData(gameData *data.Game) {
 	universe.lock.RLock()
 	defer universe.lock.RUnlock()
 
-	for _, starSystem := range universe.starSystems {
-		starSystems = append(starSystems, &data.StarSystem{
-			ID: starSystem.ID,
-		})
+	// create the universe data
+	gameData.Universe = &data.Universe{
+		InitialStarSystem: universe.initialStarSystem,
+		StarSystems:       make(map[int64]*data.StarSystem),
 	}
 
-	return starSystems
+	// write the star systems to data
+	for id, starSystem := range universe.starSystems {
+		gameData.Universe.StarSystems[id] = &data.StarSystem{
+			ID: starSystem.ID,
+		}
+	}
+}
+
+func (universe *Universe) GetInitialStarSystem() (*starsystem.StarSystem, error) {
+	universe.lock.RLock()
+	defer universe.lock.RUnlock()
+
+	if universe.initialStarSystem == nil {
+		return nil, errors.Errorf("missing initial star system id")
+	}
+
+	startSystem, ok := universe.starSystems[*universe.initialStarSystem]
+	if !ok {
+		return nil, errors.Errorf("unable to find initial star system with id [ %d ]", universe.initialStarSystem)
+	}
+	return startSystem, nil
 }
 
 func (universe *Universe) GetStarSystem(id int64) *starsystem.StarSystem {

@@ -1,4 +1,4 @@
 export enum MessageType {
-    UPDATE = "update",
+    WORLD_UPDATE = "world-update",
     MOVE = "move"
 }

@@ -19,31 +19,27 @@ func NewPlayerManager() *Manager {
 	}
 }
 
-func (manager *Manager) LoadPlayers(players []*data.Player) {
+func (manager *Manager) LoadPlayersFromData(gameData *data.Game) {
 	// lock for write
 	manager.lock.Lock()
 	defer manager.lock.Unlock()
 
 	// store all players
-	for _, player := range players {
-		manager.storage[player.Name] = player
+	for name, player := range gameData.Players {
+		manager.storage[name] = player
 	}
 }
 
-func (manager *Manager) GetPlayers() []*data.Player {
+func (manager *Manager) WritePlayersToData(gameData *data.Game) {
 	// lock for read
 	manager.lock.RLock()
 	defer manager.lock.RUnlock()
 
-	// create the empty array
-	players := []*data.Player{}
-
-	// get each player
-	for _, player := range manager.storage {
-		players = append(players, player)
+	//copy players to game data
+	gameData.Players = make(map[string]*data.Player)
+	for name, player := range manager.storage {
+		gameData.Players[name] = player
 	}
-
-	return players
 }
 
 func (manager *Manager) SessionByName(id string, name string) *Player {

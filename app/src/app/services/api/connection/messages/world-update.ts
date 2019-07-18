@@ -11,11 +11,16 @@ export interface GameObject {
     position?: Vec3
     rotation?: Vec3
     removeable?: boolean
+    color?: number
 }
 
-export interface Update extends Message {
+export interface PlayerUpdate {
+    gameObjectId: number
+}
+
+export interface WorldUpdate extends Message {
     tick: number
     time: number
-    player: GameObject
+    player: PlayerUpdate
     objects: { [key: number]: GameObject }
 }

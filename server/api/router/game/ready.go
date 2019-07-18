@@ -27,7 +27,10 @@ func (game *commonGame) ready(ctx context.Context, response http.ResponseWriter,
 	log.Printf("player [ %s ] notified about ready\n", player.Name)
 
 	// mark the player as ready
-	game.backend.Ready(player)
+	err = game.backend.Ready(player)
+	if err != nil {
+		return err
+	}
 
 	// response ok
 	return api.SuccessEmpty(response)

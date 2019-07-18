@@ -1,12 +1,10 @@
 import { Subscription } from "rxjs";
 import { ConnectionService } from "src/app/services/api/connection/connection.service";
-import { World } from "./world";
 import { Message } from "src/app/services/api/connection/messages/message";
 import { MessageType } from "src/app/services/api/connection/messages/message-type";
-import { Update, GameObject } from "src/app/services/api/connection/messages/update";
-import { Player } from "./player";
+import { WorldUpdate } from "src/app/services/api/connection/messages/world-update";
 import { GameComponent } from "./game-component";
-import * as THREE from 'three';
+import { World } from "./world";
 
 export class Dispatcher implements GameComponent {
 
@@ -25,15 +23,15 @@ export class Dispatcher implements GameComponent {
 
     private dispatch(message: Message): void {
         switch (message.type) {
-            case MessageType.UPDATE:
-                this.handleUpdate(message as Update)
+            case MessageType.WORLD_UPDATE:
+                this.handleWorldUpdate(message as WorldUpdate)
                 break
         }
     }
 
-    private handleUpdate(update: Update): void {        
+    private handleWorldUpdate(update: WorldUpdate): void {
         // forword the world update
-        this.world.worldUpdate(update.tick, update.player, update.objects)
+        this.world.worldUpdate(update)
     }
 
 

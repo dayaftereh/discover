@@ -1,6 +1,6 @@
 package data
 
 type Game struct {
-	Players     map[string]*Player
-	StarSystems map[int64]*StarSystem
+	Players  map[string]*Player
+	Universe *Universe
 }

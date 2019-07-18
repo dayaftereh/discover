@@ -11,30 +11,52 @@ import (
 
 // Write the game to the given data directory
 func Write(dataPath string, game *Game) error {
-	// check if a the data directory exists
-	ok, err := utils.Exists(dataPath)
+	// write the players
+	err := wirtePlayers(dataPath, game.Players)
+	if err != nil {
+		return err
+	}
+
+	// write the universe
+	err = wirteUniverse(dataPath, game.Universe)
+	return err
+}
+
+func wirtePlayers(directory string, players map[string]*Player) error {
+	err := writeJSON(directory, playersFileName, players)
+	return err
+}
+
+func wirteUniverse(directory string, universe *Universe) error {
+	err := writeJSON(directory, universeFileName, universe)
+	return err
+}
+
+func writeJSON(directory string, fileName string, v interface{}) error {
+	// check if a data directory exists
+	ok, err := utils.Exists(directory)
 	if err != nil {
 		return err
 	}
 
 	// create directory if needed
 	if !ok {
-		err = os.MkdirAll(dataPath, os.ModePerm)
+		err = os.MkdirAll(directory, os.ModePerm)
 		if err != nil {
 			return err
 		}
 	}
 
-	// get the path to the data file
-	dataFile := path.Join(dataPath, dataFileName)
+	// get the path to the file
+	fpath := path.Join(directory, fileName)
 
-	// convert game to json
-	bytes, err := json.Marshal(game)
+	// convert data to json
+	bytes, err := json.Marshal(v)
 	if err != nil {
 		return err
 	}
 
 	// write the json file
-	err = ioutil.WriteFile(dataFile, bytes, os.ModePerm)
+	err = ioutil.WriteFile(fpath, bytes, os.ModePerm)
 	return err
 }

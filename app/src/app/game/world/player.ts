@@ -29,9 +29,8 @@ export class Player implements GameComponent {
         this.positon.copy(positon)
     }
 
-    updateRotation(rotation: THREE.Vector3): void {
-        const euler: THREE.Euler = new THREE.Euler(rotation.x, rotation.y, rotation.z)
-        this.rotation.setFromEuler(euler)
+    updateRotation(rotation: THREE.Euler): void {
+        this.rotation.setFromEuler(rotation)
     }
 
     update(delta: number): void {

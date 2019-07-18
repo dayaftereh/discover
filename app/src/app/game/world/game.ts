@@ -36,10 +36,8 @@ export class Game {
             element.init()
         })
     }
-
-
+    
     update(event: ThreeJSUpdateEvent): void {
-        console.log("game")
         this.components.forEach((element: GameComponent) => {
             element.update(event.delta)
         })

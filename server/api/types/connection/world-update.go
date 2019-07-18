@@ -9,12 +9,17 @@ type GameObject struct {
 	Position   *mathf.Vec3 `json:"position"`
 	Rotation   *mathf.Vec3 `json:"rotation"`
 	Removeable *bool       `json:"removeable"`
+	Color      *uint64     `json:"color"`
 }
 
-type WorldUpdate struct {
+type PlayerUpdate struct {
+	GameObjectId *int64 `json:"gameObjectId"`
+}
+
+type WorldUpdateMessage struct {
 	Type    MessageType           `json:"type"`
 	Tick    *int64                `json:"tick"`
 	Time    *float64              `json:"time"`
-	Player  *GameObject           `json:"player"`
+	Player  *PlayerUpdate         `json:"player"`
 	Objects map[int64]*GameObject `json:"objects"`
 }

@@ -154,7 +154,7 @@ export class ThreeJSComponent implements AfterViewInit, OnDestroy {
                 renderer: this.renderer
             }
 
-            this.game.update(event)
+            this.game.update(delta)
             //this.onUpdate.next(event)
         }
 
