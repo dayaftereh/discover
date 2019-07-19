@@ -1,28 +1,33 @@
 import * as THREE from 'three';
-import { Player } from './player';
 import { GameComponent } from './game-component';
+import { Player } from './player';
+import { GameOverlayService } from '../overlay/service/game-overlay.service';
 
 export class FollowCamera implements GameComponent {
 
     private offset: THREE.Vector3
 
-    private damping: number = 90.0
+    private damping: number = 1.0
 
     private cameraOrientation: THREE.Quaternion
 
     constructor(private readonly camera: THREE.Camera,
-        private readonly player: Player, offset?: THREE.Vector3) {
+        private readonly player: Player,
+        private readonly gameOverlayService: GameOverlayService,
+        offset?: THREE.Vector3) {
         if (!offset) {
             offset = new THREE.Vector3(0, 0, -5)
         }
         this.offset = offset
+
+        this.camera.up.set(0,-1, 0)
 
         // rotation for camera
         this.cameraOrientation = new THREE.Quaternion()
     }
 
     init(): void {
-        this.cameraOrientation.setFromEuler(new THREE.Euler(0, Math.PI, 0))
+        this.cameraOrientation.setFromEuler(new THREE.Euler(0, -Math.PI, 0))
     }
 
     update(delta: number): void {
@@ -34,7 +39,7 @@ export class FollowCamera implements GameComponent {
         const playerRotation: THREE.Quaternion = this.player.playerRotation()
 
         // calculate world point for offset
-        const position: THREE.Vector3 = playerPosition.add(offset.applyQuaternion(playerRotation.clone()))
+        const position: THREE.Vector3 = playerPosition.clone().add(offset.applyQuaternion(playerRotation.clone()))
         // update the camera location
         this.camera.position.copy(position)
 
@@ -42,11 +47,28 @@ export class FollowCamera implements GameComponent {
         const targetRotation: THREE.Quaternion = playerRotation.multiply(this.cameraOrientation)
         // get the current camera rotation
         const cameraRotation: THREE.Quaternion = this.camera.quaternion.clone()
+
+        // clamp the damping between 0.0 and 1.0
+        const damping: number = this.clamp(delta * this.damping, 0.0, 1.0)
         // slerp the rotation for daming
-        const rotation: THREE.Quaternion = cameraRotation.slerp(targetRotation, delta * this.damping)
+        const rotation: THREE.Quaternion = cameraRotation.slerp(targetRotation, damping)
 
         // update the camera rotation
-        this.camera.quaternion.copy(targetRotation)
+        // this.camera.quaternion.copy(rotation)
+
+        this.camera.lookAt(playerPosition)
+
+        // notify overlay about new location and rotation
+        this.gameOverlayService.onObjectsInfo.emit({
+            camera: {
+                position: this.camera.position.clone(),
+                rotation: this.camera.rotation.clone(),
+            }
+        })
+    }
+
+    private clamp(v: number, min: number, max: number): number {
+        return Math.min(Math.max(v, min), max)
     }
 
     dispose(): void {

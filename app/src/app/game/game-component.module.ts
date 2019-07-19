@@ -4,6 +4,7 @@ import { GameComponent } from "./game.component";
 import { ThreeJSComponentModule } from "./threejs/threejs-component.module";
 import { ConnectionServiceModule } from "../services/api/connection/connection-service.module";
 import { GameServiceModule } from "../services/api/game/game-service.module";
+import { GameOverlayComponentModule } from "./overlay/game-overlay-component.module";
 
 @NgModule({
     imports: [
@@ -12,7 +13,8 @@ import { GameServiceModule } from "../services/api/game/game-service.module";
         // custom
         GameServiceModule,
         ThreeJSComponentModule,
-        ConnectionServiceModule
+        ConnectionServiceModule,
+        GameOverlayComponentModule
     ],
     declarations: [
         GameComponent

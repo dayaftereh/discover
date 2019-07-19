@@ -1,5 +1,8 @@
 <div class="p-grid">
     <div class="p-col">
-        <app-threejs></app-threejs>
+        <div class="app-game-container">
+            <app-game-overlay></app-game-overlay>
+            <app-threejs (onInit)="onInitThreeJS($event)" (onUpdate)="onUpdateThreeJS($event)"></app-threejs>
+        </div>
     </div>
 </div>

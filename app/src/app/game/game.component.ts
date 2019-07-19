@@ -4,17 +4,24 @@ import { GameService } from "../services/api/game/game.service";
 import { ThreeJSInitEvent } from "./threejs/threejs-init-event";
 import { ThreeJSUpdateEvent } from "./threejs/threejs-update-event";
 import { Game } from "./world/game";
+import { GameOverlayService } from "./overlay/service/game-overlay.service";
 
 @Component({
-    templateUrl: './game.component.html'
+    templateUrl: './game.component.html',
+    styleUrls: [
+        './game.component.scss'
+    ]
 })
 export class GameComponent implements OnInit, OnDestroy {
 
-    // private game: Game
+    // the game
+    private game: Game
 
     constructor(private readonly connectionService: ConnectionService,
-        private readonly gameService: GameService) {
-        //this.game = new Game(connectionService)
+        private readonly gameService: GameService,
+        private readonly gameOverlayService: GameOverlayService) {
+        // create the game
+        this.game = new Game(connectionService, gameOverlayService)
     }
 
     async ngOnInit(): Promise<void> {
@@ -35,15 +42,15 @@ export class GameComponent implements OnInit, OnDestroy {
     }
 
     onInitThreeJS(event: ThreeJSInitEvent): void {
-        // this.game.init(event)
+        this.game.init(event)
     }
 
     onUpdateThreeJS(event: ThreeJSUpdateEvent): void {
-        // this.game.update(event)
+        this.game.update(event)
     }
 
     ngOnDestroy(): void {
-        // this.game.dispose()
+        this.game.dispose()
     }
 
 }

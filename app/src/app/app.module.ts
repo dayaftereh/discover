@@ -1,9 +1,9 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
-import { LayoutModule } from './layout/layout.module';
 import { AppRouting } from './app.routing';
+import { LayoutModule } from './layout/layout.module';
 
 @NgModule({
   declarations: [
@@ -12,6 +12,7 @@ import { AppRouting } from './app.routing';
   imports: [
     // angular
     BrowserModule,
+    BrowserAnimationsModule,
     // Routing
     AppRouting,
     // custom

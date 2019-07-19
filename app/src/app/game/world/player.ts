@@ -1,16 +1,17 @@
 import * as THREE from 'three';
 import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
 import { MethodCall } from '@angular/compiler';
-import { Quaternion } from 'three';
+import { Quaternion, Euler } from 'three';
 import { GameComponent } from './game-component';
+import { GameOverlayService } from '../overlay/service/game-overlay.service';
 
 export class Player implements GameComponent {
 
-    private positon: THREE.Vector3
+    private position: THREE.Vector3
     private rotation: THREE.Quaternion
 
-    constructor() {
-        this.positon = new THREE.Vector3()
+    constructor(private readonly gameOverlayService: GameOverlayService) {
+        this.position = new THREE.Vector3()
         this.rotation = new THREE.Quaternion()
     }
 
@@ -18,15 +19,15 @@ export class Player implements GameComponent {
     }
 
     playerPosition(): THREE.Vector3 {
-        return this.positon.clone()
+        return this.position.clone()
     }
 
     playerRotation(): THREE.Quaternion {
         return this.rotation.clone()
     }
 
-    updatePositon(positon: THREE.Vector3): void {
-        this.positon.copy(positon)
+    updatePositon(position: THREE.Vector3): void {
+        this.position.copy(position)
     }
 
     updateRotation(rotation: THREE.Euler): void {
@@ -34,6 +35,17 @@ export class Player implements GameComponent {
     }
 
     update(delta: number): void {
+        // caluclate euler rotation
+        const euler: THREE.Euler = new THREE.Euler()
+        euler.setFromQuaternion(this.rotation)
+
+        // notify overlay about it
+        this.gameOverlayService.onObjectsInfo.emit({
+            player: {
+                rotation: euler,
+                position: this.position.clone(),
+            }
+        })
     }
 
     dispose(): void {

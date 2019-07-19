@@ -7,6 +7,7 @@ import { GameComponent } from './game-component';
 import { EventEmitter } from '@angular/core';
 import { GameInputEvent } from './game-input-event';
 import { ConnectionService } from 'src/app/services/api/connection/connection.service';
+import { GameOverlayService } from '../overlay/service/game-overlay.service';
 
 export class GameInput implements GameComponent {
 
@@ -16,6 +17,7 @@ export class GameInput implements GameComponent {
     private controlsState: ControlsState
 
     constructor(private readonly element: HTMLElement,
+        private readonly gameOverlayService: GameOverlayService,
         private readonly connectionService: ConnectionService) {
 
         this.move = new THREE.Vector3()
@@ -54,17 +56,21 @@ export class GameInput implements GameComponent {
         })
     }
 
-    private onMouseMove(event: MouseEvent): void {
-        const x: number = event.pageX
-        const y: number = event.pageY
+    private onMouseMove(event: MouseEvent): void {        
+        const x: number = event.offsetX
+        const y: number = event.offsetY
 
         const dimension = this.getContainerDimensions()
 
         const halfWidth: number = dimension.size.width / 2.0
         const halfHeight: number = dimension.size.height / 2.0
 
+        //
+
         this.controlsState.yaw = -((x - dimension.offset.x) - halfWidth) / halfWidth
         this.controlsState.pitch = ((y - dimension.offset.y) - halfHeight) / halfHeight
+
+        console.log(this.controlsState.yaw, this.controlsState.pitch)
 
         this.updateRotationVector()
     }
@@ -109,19 +115,22 @@ export class GameInput implements GameComponent {
                 this.controlsState.up = -state; break;
 
             case 'arrowup':
-                this.controlsState.pitch = -state; break;
+                this.controlsState.yaw = -state; break;
             case 'arrowdown':
-                this.controlsState.pitch = state; break;
+                this.controlsState.yaw = state; break;
 
             case 'arrowleft':
-                this.controlsState.yaw = state; break;
+                this.controlsState.pitch = -state; break;
             case 'arrowright':
-                this.controlsState.yaw = -state; break;
+                this.controlsState.pitch = state; break;
 
             case 'q':
                 this.controlsState.roll = -state; break;
             case 'e':
                 this.controlsState.roll = state; break;
+
+            case 'f8':
+                this.gameOverlayService.onInfo.emit(!(state > 0.0)); console.log("info"); break;
             default:
                 consumed = false; break;
         }
@@ -144,8 +153,8 @@ export class GameInput implements GameComponent {
     private updateRotationVector(): void {
         console.log("updateRotationVector")
 
-        this.rotation.x = this.controlsState.pitch
-        this.rotation.y = this.controlsState.yaw
+        this.rotation.x = this.controlsState.yaw
+        this.rotation.y = this.controlsState.pitch
         this.rotation.z = this.controlsState.roll
     }
 
@@ -174,12 +183,12 @@ export class GameInput implements GameComponent {
 
         return {
             size: {
-                width: this.element.offsetWidth,
+                width: this.element.clientWidth,
                 height: this.element.offsetHeight
             },
             offset: {
-                x: this.element.offsetLeft,
-                y: this.element.offsetTop
+                x: this.element.clientLeft,
+                y: this.element.clientTop,
             }
         }
     }
@@ -194,6 +203,14 @@ export class GameInput implements GameComponent {
 
         // notify about new movement
         this.connectionService.send(movement)
+
+        // notify about the input
+        this.gameOverlayService.onObjectsInfo.emit({
+            input: {
+                position: this.move.clone(),
+                rotation: this.rotation.clone()
+            }
+        })
     }
 
     dispose(): void {

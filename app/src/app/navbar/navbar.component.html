@@ -1,7 +1,7 @@
-<div class="p-grid">
+<div class="p-grid" *ngIf="status?.authenticated">
     <div class="p-col">
-        <p-menubar [model]="items">
-
+        <p-menubar [model]="items">    
+                <button pButton class="ui-button-secondary" label="Logout" icon="pi pi-sign-out"></button>        
         </p-menubar>
     </div>
 </div>
