@@ -2,11 +2,13 @@ package object
 
 import (
 	"log"
+	"math"
 
 	"github.com/dayaftereh/discover/server/game/data"
 	"github.com/dayaftereh/discover/server/mathf"
 )
 
+// GravitationalConstant is an empirical physical constant
 var GravitationalConstant float64 = 1
 
 type Planet struct {
@@ -16,6 +18,7 @@ type Planet struct {
 	sunMass         float64
 	rigidbody       *RigidBody
 	initialPosition *mathf.Vec3
+	initialForce    *mathf.Vec3
 }
 
 func NewPlanet(id int64) *Planet {
@@ -33,18 +36,12 @@ func (planet *Planet) Load(sunMass float64, data *data.Planet) {
 	// set planet
 	planet.color = data.Color
 	planet.radius = data.Radius
+	planet.initialForce = data.Force
 	planet.initialPosition = data.Position.Clone()
-
-	planet.rigidbody.LinearDamping = 0.0
 
 	// set rigidbody
 	planet.rigidbody.Mass = data.Mass
 	planet.rigidbody.Position = data.Position.Clone()
-
-	// add inital force
-	//planet.rigidbody.ApplyLocalForce(mathf.NewVec3(0, 0, 1).Multiply(100000.0), mathf.NewZeroVec3())
-
-	planet.rigidbody.Velocity = mathf.NewVec3(0, 1, 1).Multiply(1000)
 
 	// load the Inertia
 	planet.rigidbody.Inertia = CalculateSphereInertia(planet.radius, planet.rigidbody.Mass)
@@ -64,42 +61,36 @@ func (planet *Planet) RigidBody() *RigidBody {
 }
 
 func (planet *Planet) Update(delta float64) {
-
-	log.Printf("delta:%f\n", delta)
+	// center / sun
 	center := mathf.NewZeroVec3()
 
 	// calulate distance to center of star system
 	r := planet.rigidbody.Position.DistanceTo(center)
 
-	log.Printf("R:%f\n", r)
-	log.Printf("Mass:%f\n", planet.rigidbody.Mass)
-	log.Printf("sunMass:%f\n", planet.sunMass)
-
-	if r < 10 {
-		r = 10
-	}
-
-	// calculate the force
-	force := (GravitationalConstant * planet.sunMass * planet.rigidbody.Mass) / (r * r)
-
-	log.Printf("force:%f\n", force)
+	// Newton's law of universal gravitation
+	// f = g * (M1 * M2) / r^2
+	force := GravitationalConstant * ((planet.sunMass * planet.rigidbody.Mass) / (r * r))
 
 	// get vector to center of star syste,
-	v := center.Subtract(planet.rigidbody.Position).Normalize()
+	direction := center.Subtract(planet.rigidbody.Position).Normalize()
 
-	log.Printf("force:%f\n", v)
+	// calculate force vector
+	forceVector := direction.Multiply(force)
 
-	forceV := v.Multiply(force)
+	// apply the force to the planet
+	planet.rigidbody.ApplyForce(forceVector, center)
 
-	planet.rigidbody.ApplyForce(forceV, center)
+	// apply the inital force of the planet
 
-	log.Printf("Velocity0:%v\n", planet.rigidbody.Velocity)
+	v := math.Sqrt((GravitationalConstant * planet.sunMass) / 200.0)
+	initialForce := planet.rigidbody.Mass * v / delta
+
+	planet.rigidbody.ApplyLocalForce(mathf.NewVec3(0, 0, initialForce), center)
 
 	// update the rigidbody
 	planet.rigidbody.Update(delta)
 
-	log.Printf("Position:%v\n", planet.rigidbody.Position)
-	log.Printf("Velocity:%v\n", planet.rigidbody.Velocity)
+	log.Printf("Position: %v", planet.rigidbody.Position)
 }
 
 func (planet *Planet) Color() int64 {
@@ -116,5 +107,6 @@ func (planet *Planet) Write() *data.Planet {
 		Mass:     planet.rigidbody.Mass,
 		Position: planet.initialPosition.Clone(),
 		Radius:   planet.radius,
+		Force:    planet.initialForce,
 	}
 }
