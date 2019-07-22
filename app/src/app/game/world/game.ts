@@ -24,7 +24,7 @@ export class Game {
         const world: World = new World(event.scene, player)
 
         const gameInput: GameInput = new GameInput(event.canvas, this.gameOverlayService, this.connectionService)
-        const dispatcher: Dispatcher = new Dispatcher(world, this.connectionService)
+        const dispatcher: Dispatcher = new Dispatcher(world, this.connectionService, this.gameOverlayService)
 
         return [
             gameInput, player, followCamera, world, dispatcher

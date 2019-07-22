@@ -1,6 +1,8 @@
 package player
 
 import (
+	"sync"
+
 	"github.com/dayaftereh/discover/server/game/data"
 )
 
@@ -10,6 +12,7 @@ type Player struct {
 	// game
 	StarSystem *int64
 	// private
+	look        sync.Mutex
 	connections map[string]Connection
 }
 

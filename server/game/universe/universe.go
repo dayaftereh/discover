@@ -1,6 +1,7 @@
 package universe
 
 import (
+	"log"
 	"sync"
 
 	"github.com/dayaftereh/discover/server/game/data"
@@ -80,6 +81,8 @@ func (universe *Universe) GetStarSystem(id int64) *starsystem.StarSystem {
 }
 
 func (universe *Universe) Shutdown() {
+	log.Println("shutdown universe...")
+
 	universe.lock.RLock()
 	defer universe.lock.RUnlock()
 

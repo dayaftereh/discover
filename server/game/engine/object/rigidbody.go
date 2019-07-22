@@ -1,7 +1,6 @@
 package object
 
 import (
-	"log"
 	"math"
 
 	"github.com/dayaftereh/discover/server/mathf"
@@ -34,6 +33,9 @@ type RigidBody struct {
 	// moment of inertia components
 	Inertia             *mathf.Vec3
 	InverseInertiaWorld *mathf.Mat3
+
+	LinearDamping  float64
+	AngularDamping float64
 }
 
 func NewRigidBody(mass float64) *RigidBody {
@@ -53,6 +55,9 @@ func NewRigidBody(mass float64) *RigidBody {
 
 		Inertia:             mathf.NewZeroVec3(),
 		InverseInertiaWorld: mathf.NewIdentityMat3(),
+
+		LinearDamping:  0.01,
+		AngularDamping: 0.01,
 	}
 }
 
@@ -153,30 +158,22 @@ func (rigidbody *RigidBody) ApplyLocalImpulse(localImpulse *mathf.Vec3, localPoi
 }
 
 func (rigidbody *RigidBody) Update(delta float64) {
-
 	// Apply damping, see http://code.google.com/p/bullet/issues/detail?id=74 for details
-	linearDamping := math.Pow(1.0-(0.01), delta)
+	linearDamping := math.Pow(1.0-rigidbody.LinearDamping, delta)
 	rigidbody.Velocity = rigidbody.Velocity.Multiply(linearDamping)
 
-	angularDamping := math.Pow(1.0-(0.8), delta)
+	angularDamping := math.Pow(1.0-rigidbody.AngularDamping, delta)
 	rigidbody.AngularVelocity = rigidbody.AngularVelocity.Multiply(angularDamping)
 
+	// calculate linera Velocity
 	invMassDelta := rigidbody.InverseMass() * delta
-
-	//log.Printf("invMassDelta: %f", invMassDelta)
-	log.Printf("Force: %v", rigidbody.Force)
-	//log.Printf("Torque: %v", rigidbody.Torque)
-	//log.Printf("Velocity: %v", rigidbody.Velocity)
-	//log.Printf("LinearFactor: %v", rigidbody.LinearFactor)
-	//log.Printf("Position: %v", rigidbody.Position)
-	//log.Printf("Rotation: %v", rigidbody.Rotation)
-	//log.Printf("AngularVelocity: %v", rigidbody.AngularVelocity)
-
 	velo := mathf.NewVec3(
 		rigidbody.Velocity.X+(rigidbody.Force.X*invMassDelta*rigidbody.LinearFactor.X),
 		rigidbody.Velocity.Y+(rigidbody.Force.Y*invMassDelta*rigidbody.LinearFactor.Y),
 		rigidbody.Velocity.Z+(rigidbody.Force.Z*invMassDelta*rigidbody.LinearFactor.Z),
 	)
+
+	// caluclate AngularVelocity
 
 	tx := rigidbody.Torque.X * rigidbody.AngularFactor.X
 	ty := rigidbody.Torque.Y * rigidbody.AngularFactor.Y
@@ -190,7 +187,7 @@ func (rigidbody *RigidBody) Update(delta float64) {
 		rigidbody.AngularVelocity.Z+(delta*(e[6]*tx+e[7]*ty+e[8]*tz)),
 	)
 
-	// Use new velocity  - leap frog
+	// Use new linera velocity  - leap frog
 	// update position
 	rigidbody.Velocity = velo.Multiply(delta)
 	rigidbody.Position = rigidbody.Position.Add(rigidbody.Velocity)
@@ -200,7 +197,7 @@ func (rigidbody *RigidBody) Update(delta float64) {
 	rigidbody.Rotation = rigidbody.Rotation.Add(rotation).Normalize()
 
 	// update the inertia world
-	//rigidbody.UpdateInertiaWorld(false)
+	rigidbody.UpdateInertiaWorld(false)
 
 	// clear all forces on the object
 	rigidbody.Force = mathf.NewZeroVec3()

@@ -52,7 +52,7 @@ func (dispatcher *Dispatcher) dispatchLoop(connection *connection.Connection) {
 		case err := <-connection.OnError:
 			dispatcher.handleError(connection, err)
 		case <-connection.OnClose:
-			log.Println("dispatcher thread closed")
+			log.Printf("closing dispatcher thread for connection [ %s ]\n", connection.ID)
 			return
 		}
 	}
@@ -104,10 +104,13 @@ func (dispatcher *Dispatcher) handleError(connection *connection.Connection, err
 }
 
 func (dispatcher *Dispatcher) Close() {
+	log.Printf("closing dispatcher\n")
+
 	dispatcher.lock.RLock()
 	defer dispatcher.lock.RUnlock()
 
 	for _, connection := range dispatcher.connections {
 		connection.Close()
 	}
+
 }

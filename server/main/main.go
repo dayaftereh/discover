@@ -34,6 +34,10 @@ func main() {
 	}
 
 	log.Println("Done.")
+
+	//buf := make([]byte, 1<<16)
+	//runtime.Stack(buf, true)
+	//fmt.Printf("%s", buf)
 }
 
 func wait() {
@@ -51,6 +55,8 @@ func wait() {
 
 	// wati for signals
 	<-latch
+
+	signal.Stop(signals)
 
 	log.Println("Received shutdown signal")
 }

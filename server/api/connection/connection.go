@@ -1,7 +1,10 @@
 package connection
 
 import (
+	"log"
+
 	"github.com/dayaftereh/discover/server/game/player"
+	"github.com/dayaftereh/discover/server/utils/atomic"
 	"github.com/gorilla/websocket"
 )
 
@@ -16,7 +19,7 @@ type Connection struct {
 	OutBoundMessage chan string
 
 	conn *websocket.Conn
-	open bool
+	open *atomic.AtomicBool
 }
 
 func NewConnection(id string, player *player.Player, conn *websocket.Conn) *Connection {
@@ -30,7 +33,7 @@ func NewConnection(id string, player *player.Player, conn *websocket.Conn) *Conn
 		OutBoundMessage: make(chan string),
 		// private
 		conn: conn,
-		open: true,
+		open: atomic.NewAtomicBool(false),
 	}
 
 	connection.init()
@@ -43,6 +46,9 @@ func (connection *Connection) Id() string {
 }
 
 func (connection *Connection) init() {
+	// set connection to open
+	connection.open.Set(true)
+	// start in/out bound loop
 	go connection.inBoundLoop()
 	go connection.outBoundLoop()
 }
@@ -50,10 +56,15 @@ func (connection *Connection) init() {
 func (connection *Connection) inBoundLoop() {
 	defer connection.Close()
 	for {
+
+		if !connection.open.Get() {
+			log.Printf("closing inbound thread for connection [ %s ]\n", connection.ID)
+			return
+		}
+
 		_, bytes, err := connection.conn.ReadMessage()
 		if err != nil {
 			connection.OnError <- err
-			return
 		}
 
 		message := string(bytes)
@@ -72,19 +83,29 @@ func (connection *Connection) outBoundLoop() {
 				connection.OnError <- err
 			}
 		case <-connection.OnClose:
+			log.Printf("closing outbound thread for connection [ %s ]\n", connection.ID)
 			return
 		}
 	}
 }
 
 func (connection *Connection) Write(message string) {
-	if connection.open {
+	// check if connection is open
+	if connection.open.Get() {
 		connection.OutBoundMessage <- message
 	}
 }
 
 func (connection *Connection) Close() {
-	connection.open = false
+	// check if connection is open and set to false
+	if !connection.open.GetAndSet(false) {
+		return
+	}
+
+	log.Printf("closing connection [ %s ]\n", connection.ID)
+
+	// close the underlying connection
 	connection.conn.Close()
+	// notify in/out bound loop about close
 	connection.OnClose <- true
 }

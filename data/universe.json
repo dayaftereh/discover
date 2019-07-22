@@ -1,1 +1,1 @@
-{"InitialStarSystem":1,"StarSystems":{"1":{"ID":1,"Name":"foo","Sun":null,"Planets":[{"Color":2578747,"Position":{"x":200,"y":0,"z":0},"Rotation":{"x":-0,"y":0,"z":-0}}]}}}
+{"InitialStarSystem":1,"StarSystems":{"1":{"ID":1,"Name":"foo","Sun":{"Color":1233,"Mass":1000000},"Planets":[{"Color":2578747,"Mass":10,"Radius":50,"Position":{"x":200,"y":0,"z":0}}]}}}

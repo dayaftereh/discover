@@ -175,16 +175,6 @@ func (quaternion *Quaternion) Conjugate() *Quaternion {
 
 // MultiplyVec multiply the quaternion by a vector
 func (quaternion *Quaternion) MultiplyVec(vec *Vec3) *Vec3 {
-	/*
-			ix =  qw * x + qy * z - qz * y,
-		    iy =  qw * y + qz * x - qx * z,
-		    iz =  qw * z + qx * y - qy * x,
-			iw = -qx * x - qy * y - qz * z;
-
-			target.x = ix * qw + iw * -qx + iy * -qz - iz * -qy;
-		    target.y = iy * qw + iw * -qy + iz * -qx - ix * -qz;
-		    target.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
-	*/
 	ix := quaternion.W*vec.X + quaternion.Y*vec.Z - quaternion.Z*vec.Y
 	iy := quaternion.W*vec.Y + quaternion.Z*vec.X - quaternion.X*vec.Z
 	iz := quaternion.W*vec.Z + quaternion.X*vec.Y - quaternion.Y*vec.X

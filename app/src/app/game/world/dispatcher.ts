@@ -5,13 +5,16 @@ import { MessageType } from "src/app/services/api/connection/messages/message-ty
 import { WorldUpdate } from "src/app/services/api/connection/messages/world-update";
 import { GameComponent } from "./game-component";
 import { World } from "./world";
+import { Pong } from "src/app/services/api/connection/messages/pong";
+import { GameOverlayService } from "../overlay/service/game-overlay.service";
 
 export class Dispatcher implements GameComponent {
 
     private subscription: Subscription | undefined
 
     constructor(private readonly world: World,
-        private readonly connectionService: ConnectionService) {
+        private readonly connectionService: ConnectionService,
+        private readonly gameOverlayService: GameOverlayService) {
 
     }
 
@@ -26,6 +29,9 @@ export class Dispatcher implements GameComponent {
             case MessageType.WORLD_UPDATE:
                 this.handleWorldUpdate(message as WorldUpdate)
                 break
+            case MessageType.PONG:
+                this.handlePong(message as Pong)
+                break
         }
     }
 
@@ -34,6 +40,18 @@ export class Dispatcher implements GameComponent {
         this.world.worldUpdate(update)
     }
 
+    private handlePong(pong: Pong): void {
+        const now: number = Date.now()
+
+        const clientDelta: number = now - pong.clientSendTime
+        const serverDelta: number = pong.serverSendTime - pong.serverReceiveTime
+
+        const delta: number = (clientDelta - serverDelta) / 2.0
+
+        this.gameOverlayService.onEngineStats.emit({
+            latency: delta
+        })
+    }
 
     update(delta: number): void { }
 

@@ -7,7 +7,7 @@ export class FollowCamera implements GameComponent {
 
     private offset: THREE.Vector3
 
-    private damping: number = 1.0
+    private damping: number = 10.0
 
     private cameraOrientation: THREE.Quaternion
 
@@ -20,14 +20,16 @@ export class FollowCamera implements GameComponent {
         }
         this.offset = offset
 
-        this.camera.up.set(0,-1, 0)
+        // Up-Vector (1,0,0)
+        // Move (0,0,1)
+        this.camera.up.set(1, 0, 0)
 
         // rotation for camera
         this.cameraOrientation = new THREE.Quaternion()
     }
 
     init(): void {
-        this.cameraOrientation.setFromEuler(new THREE.Euler(0, -Math.PI, 0))
+        this.cameraOrientation.setFromEuler(new THREE.Euler(0, -Math.PI, Math.PI/2.0))
     }
 
     update(delta: number): void {
@@ -46,17 +48,16 @@ export class FollowCamera implements GameComponent {
         // calculate target rotation
         const targetRotation: THREE.Quaternion = playerRotation.multiply(this.cameraOrientation)
         // get the current camera rotation
-        const cameraRotation: THREE.Quaternion = this.camera.quaternion.clone()
+        //const cameraRotation: THREE.Quaternion = this.camera.quaternion.clone()
 
         // clamp the damping between 0.0 and 1.0
-        const damping: number = this.clamp(delta * this.damping, 0.0, 1.0)
+        //const damping: number = this.clamp(delta * this.damping, 0.0, 1.0)
+        
         // slerp the rotation for daming
-        const rotation: THREE.Quaternion = cameraRotation.slerp(targetRotation, damping)
+        //const rotation: THREE.Quaternion = cameraRotation.rotateTowards(targetRotation, damping)
 
         // update the camera rotation
-        // this.camera.quaternion.copy(rotation)
-
-        this.camera.lookAt(playerPosition)
+        this.camera.quaternion.copy(targetRotation)
 
         // notify overlay about new location and rotation
         this.gameOverlayService.onObjectsInfo.emit({

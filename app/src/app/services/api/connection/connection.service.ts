@@ -1,6 +1,8 @@
 import { Subject, Subscription } from "rxjs";
 import { URLSService } from "../urls/urls.service";
 import { Message } from "./messages/message";
+import { Ping } from "./messages/ping";
+import { MessageType } from "./messages/message-type";
 
 export class ConnectionService {
 
@@ -13,6 +15,24 @@ export class ConnectionService {
 
     isConnected(): boolean {
         return !!(this.websocket) && this.websocket.readyState == WebSocket.OPEN
+    }
+
+    private pingLoop(): void {
+        // check if websocket open
+        if (!this.websocket || this.websocket.readyState != WebSocket.OPEN) {
+            return
+        }
+
+        // send next ping
+        setTimeout(() => {
+            this.pingLoop()
+        }, 1000)
+
+        // send the ping to the server
+        this.send({
+            type: MessageType.PING,
+            clientTime: Date.now()
+        } as Ping)
     }
 
     connect(): Promise<void> {
@@ -28,6 +48,9 @@ export class ConnectionService {
             this.websocket = new WebSocket(url)
 
             this.websocket!.addEventListener('open', () => {
+                // start the ping loop
+                this.pingLoop()
+                // notify about success
                 if (!completed) {
                     completed = true
                     resolve()
@@ -37,7 +60,7 @@ export class ConnectionService {
             this.websocket!.addEventListener('message', (event: MessageEvent) => {
                 if (event.data && this.subject) {
                     const obj: any = JSON.parse(event.data)
-                    if (obj){
+                    if (obj) {
                         this.subject.next(obj)
                     }
                 }

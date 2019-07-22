@@ -1,9 +1,6 @@
 import * as THREE from 'three';
-import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
-import { MethodCall } from '@angular/compiler';
-import { Quaternion, Euler } from 'three';
-import { GameComponent } from './game-component';
 import { GameOverlayService } from '../overlay/service/game-overlay.service';
+import { GameComponent } from './game-component';
 
 export class Player implements GameComponent {
 

@@ -1,8 +1,6 @@
 package object
 
 import (
-	"log"
-
 	"github.com/dayaftereh/discover/server/mathf"
 )
 
@@ -10,27 +8,34 @@ type Player struct {
 	id        int64
 	radius    float64
 	rigidbody *RigidBody
-	//
+	// movement
 	move     *mathf.Vec3
 	rotation *mathf.Vec3
+	// force
+	linearForce  *mathf.Vec3
+	angularForce *mathf.Vec3
 }
 
 func NewPlayer(id int64, position *mathf.Vec3) *Player {
 	rigidbody := NewRigidBody(5.0)
 	rigidbody.Position = position
 
-	radius := 1.0
-	I := 2.0 * rigidbody.Mass * radius * radius / 5.0
-	rigidbody.Inertia = mathf.NewVec3(I, I, I)
+	rigidbody.LinearDamping = 0.5
+	rigidbody.AngularDamping = 0.5
 
-	//rigidbody.UpdateInertiaWorld(true)
+	radius := 1.0
+	rigidbody.Inertia = CalculateSphereInertia(radius, rigidbody.Mass)
+
+	rigidbody.UpdateInertiaWorld(true)
 
 	return &Player{
-		id:        id,
-		radius:    radius,
-		rigidbody: rigidbody,
-		move:      nil,
-		rotation:  nil,
+		id:           id,
+		radius:       radius,
+		rigidbody:    rigidbody,
+		move:         nil,
+		rotation:     nil,
+		linearForce:  mathf.NewVec3(100.0, 100.0, 100.0),
+		angularForce: mathf.NewVec3(1.0, 1.0, 1.0),
 	}
 }
 
@@ -49,19 +54,21 @@ func (player *Player) RigidBody() *RigidBody {
 func (player *Player) Update(delta float64) {
 	if player.move != nil {
 		move := mathf.ClampVec3(player.move, -1.0, 1.0)
-		log.Printf("move: %v", move)
-		// calculate the force
-		force := move.Multiply(350.0)
+		// calculate the linear force
+		force := player.linearForce.MultiplyVec(move)
 		// apply move force
 		player.rigidbody.ApplyLocalForce(force, mathf.NewZeroVec3())
 	}
 
 	if player.rotation != nil {
 		torque := mathf.ClampVec3(player.rotation, -1.0, 1.0)
+		// calculate the angular force
+		force := player.angularForce.MultiplyVec(torque)
 		// apply the rotaion
-		player.rigidbody.AddLocalTorque(torque)
+		player.rigidbody.AddLocalTorque(force)
 	}
 
+	// update the rigidbody
 	player.rigidbody.Update(delta)
 }
 

@@ -1,5 +1,6 @@
 package data
 
 type Sun struct {
-	Color *uint64
+	Color int64
+	Mass  float64
 }

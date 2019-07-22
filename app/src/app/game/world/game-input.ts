@@ -56,7 +56,7 @@ export class GameInput implements GameComponent {
         })
     }
 
-    private onMouseMove(event: MouseEvent): void {        
+    private onMouseMove(event: MouseEvent): void {
         const x: number = event.offsetX
         const y: number = event.offsetY
 
@@ -65,12 +65,11 @@ export class GameInput implements GameComponent {
         const halfWidth: number = dimension.size.width / 2.0
         const halfHeight: number = dimension.size.height / 2.0
 
-        //
+        // pitch / up down
+        // yaw / left-right
 
         this.controlsState.yaw = -((x - dimension.offset.x) - halfWidth) / halfWidth
-        this.controlsState.pitch = ((y - dimension.offset.y) - halfHeight) / halfHeight
-
-        console.log(this.controlsState.yaw, this.controlsState.pitch)
+        this.controlsState.pitch = -((y - dimension.offset.y) - halfHeight) / halfHeight
 
         this.updateRotationVector()
     }
@@ -105,25 +104,28 @@ export class GameInput implements GameComponent {
                 this.controlsState.thruster = -state; break;
 
             case 'a':
-                this.controlsState.strafe = state; break;
-            case 'd':
                 this.controlsState.strafe = -state; break;
+            case 'd':
+                this.controlsState.strafe = state; break;
 
             case 'r':
                 this.controlsState.up = state; break;
             case 'f':
                 this.controlsState.up = -state; break;
 
+            // pitch / up down
             case 'arrowup':
-                this.controlsState.yaw = -state; break;
-            case 'arrowdown':
-                this.controlsState.yaw = state; break;
-
-            case 'arrowleft':
-                this.controlsState.pitch = -state; break;
-            case 'arrowright':
                 this.controlsState.pitch = state; break;
+            case 'arrowdown':
+                this.controlsState.pitch = -state; break;
 
+            // yaw / left-right
+            case 'arrowleft':
+                this.controlsState.yaw = state; break;
+            case 'arrowright':
+                this.controlsState.yaw = -state; break;
+
+            // roll
             case 'q':
                 this.controlsState.roll = -state; break;
             case 'e':
@@ -144,18 +146,34 @@ export class GameInput implements GameComponent {
     }
 
     private updateMovementVector(): void {
-        this.move.x = this.controlsState.strafe
-        this.move.y = this.controlsState.up
-        this.move.z = this.controlsState.thruster
+        // x = Up-Vector (1,0,0)
+        // z = Move-Direction (0,0,1)
+
+        // x => up / down
+        // y => strafe
+        // z => forward / backward 
+
+        this.move.x = this.clamp(this.controlsState.up, -1.0, 1.0) 
+        this.move.y = this.clamp(this.controlsState.strafe, -1.0, 1.0)
+        this.move.z = this.clamp(this.controlsState.thruster, -1.0, 1.0)
 
     }
 
     private updateRotationVector(): void {
-        console.log("updateRotationVector")
+        // x = Up-Vector (1,0,0)
+        // z = Move-Direction (0,0,1)
 
-        this.rotation.x = this.controlsState.yaw
-        this.rotation.y = this.controlsState.pitch
-        this.rotation.z = this.controlsState.roll
+        // x => yaw / left-right
+        // y => pitch / up down         
+        // z => roll
+
+        this.rotation.x = this.clamp(this.controlsState.yaw, -1.0, 1.0)
+        this.rotation.y = this.clamp(this.controlsState.pitch, -1.0, 1.0)
+        this.rotation.z = this.clamp(this.controlsState.roll, -1.0, 1.0)
+    }
+
+    private clamp(v: number, min: number, max: number): number {
+        return Math.min(Math.max(v, min), max)
     }
 
     private getContainerDimensions(): {

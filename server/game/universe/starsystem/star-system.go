@@ -18,6 +18,9 @@ type StarSystem struct {
 	Name    string
 	counter int64
 	lock    sync.Mutex
+	// starSystem
+	sunMass  float64
+	sunColor int64
 	// players
 	players       map[string]*player.Player
 	playersObject map[string]int64
@@ -59,13 +62,17 @@ func NewStarSystem(starSystemData *data.StarSystem) *StarSystem {
 func (starSystem *StarSystem) loop() {
 	// update by 30 fps
 	timer := (1000 / 30) * time.Millisecond
+
+	// start the clock
+	starSystem.clock.Start()
+
 	log.Printf("starting star-system [ %d ]\n", starSystem.ID)
 	for {
 		select {
 		case <-time.After(timer):
 			starSystem.update()
 		case <-starSystem.close:
-			log.Printf("closing star-system [ %d ]\n", starSystem.ID)
+			log.Printf("closing star-system [ %d ] thread\n", starSystem.ID)
 			return
 		}
 	}
@@ -98,5 +105,6 @@ func (starSystem *StarSystem) nextID() int64 {
 }
 
 func (starSystem *StarSystem) Shutdown() {
+	log.Printf("shutdown star-system with id [ %d ]\n", starSystem.ID)
 	starSystem.close <- true
 }

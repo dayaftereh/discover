@@ -13,10 +13,20 @@ type Connection interface {
 }
 
 func (player *Player) AddConnection(connection Connection) {
+	// lock the connection
+	player.look.Lock()
+	defer player.look.Unlock()
+
+	// add the connection to player
 	player.connections[connection.Id()] = connection
 }
 
 func (player *Player) DropConnection(connection Connection) {
+	// lock the connection
+	player.look.Lock()
+	defer player.look.Unlock()
+
+	// remove the connection from player
 	delete(player.connections, connection.Id())
 }
 
@@ -28,6 +38,10 @@ func (player *Player) Push(v interface{}) error {
 	}
 	// make a string
 	message := string(bytes)
+
+	// lock the connection
+	player.look.Lock()
+	defer player.look.Unlock()
 
 	// write to all connections
 	for _, connection := range player.connections {

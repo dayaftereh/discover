@@ -16,25 +16,21 @@ func (starSystem *StarSystem) WriteData() *data.StarSystem {
 	// get all planets from the world
 	planets := starSystem.world.GetGameObjectsByType(object.PlanetObject)
 
-	for _, planet := range planets {
-		// get the color
-		color := planet.Color()
-		// get the rigidbody
-		rigidbody := planet.RigidBody()
-		// get the ration as euler
-		rotation := rigidbody.Rotation.ToEuler()
+	for _, gameObject := range planets {
+		// cast to a planet
+		planet := gameObject.(*object.Planet)
 
 		// add a new planet
-		planetsData = append(planetsData, &data.Planet{
-			Color:    &color,
-			Rotation: rotation,
-			Position: rigidbody.Position,
-		})
+		planetsData = append(planetsData, planet.Write())
 	}
 
 	return &data.StarSystem{
 		ID:      starSystem.ID,
 		Name:    starSystem.Name,
 		Planets: planetsData,
+		Sun: &data.Sun{
+			Color: starSystem.sunColor,
+			Mass:  starSystem.sunMass,
+		},
 	}
 }

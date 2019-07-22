@@ -49,7 +49,10 @@ export class ThreeJSComponent implements OnInit, AfterViewInit, OnDestroy {
     ngOnInit(): void {
         //register for threejs stats events
         this.subscription = this.stats.onChanged.subscribe((event: { fps: number, update: number }) => {
-            this.gameOverlayService.updateEngineStats(event.fps, 0, event.update)
+            this.gameOverlayService.onEngineStats.emit({
+                fps: event.fps,
+                update: event.update,
+            })
         })
     }
 

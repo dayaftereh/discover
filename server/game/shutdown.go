@@ -1,6 +1,8 @@
 package game
 
 import (
+	"log"
+
 	"github.com/dayaftereh/discover/server/game/data"
 )
 
@@ -14,6 +16,7 @@ func (game *Game) Shutdown(directory string) error {
 }
 
 func (game *Game) writeGameData(directory string) error {
+	log.Printf("writing game data to file system at [ %s ]\n", directory)
 	// create a new game data
 	gameData := &data.Game{}
 

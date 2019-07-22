@@ -13,7 +13,6 @@ import (
 
 type Server struct {
 	Server *http.Server
-	Errors chan error
 
 	routers     []router.Router
 	middlewares []middleware.Middleware
@@ -46,10 +45,14 @@ func (server *Server) Init() error {
 // Serve start the serving of the server
 func (server *Server) Serve() {
 	go func() {
-		log.Printf("Listening on %v", server.Server.Addr)
+		log.Printf("Listening on %v\n", server.Server.Addr)
 		err := server.Server.ListenAndServe()
 		if err != nil {
-			server.Errors <- err
+			if err == http.ErrServerClosed {
+				log.Printf("server listening thread closed\n")
+			} else {
+				log.Printf("server listening thread recived an error: %v", err)
+			}
 		}
 	}()
 }
@@ -59,6 +62,8 @@ func (server *Server) Shutdown() error {
 	if server.Server == nil {
 		return nil
 	}
+
+	log.Println("shutdown server...")
 
 	// close all routers
 	for _, router := range server.routers {

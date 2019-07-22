@@ -21,7 +21,7 @@ func (starSystem *StarSystem) pushWorldUpdates() {
 		gameObject := starSystem.world.GetGameObject(playerObjectID)
 
 		// get all objects in player range
-		playerObjects := starSystem.world.GetGameObjectsInSphere(gameObject, 100.0)
+		playerObjects := starSystem.world.GetGameObjectsInSphere(gameObject, 10000.0)
 
 		// convert game objects for outbound
 		gameObjects := gameObjectsToOutbound(playerObjects)

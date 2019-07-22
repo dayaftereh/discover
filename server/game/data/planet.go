@@ -5,7 +5,8 @@ import (
 )
 
 type Planet struct {
-	Color    *int64
+	Color    int64
+	Mass     float64
+	Radius   float64
 	Position *mathf.Vec3
-	Rotation *mathf.Vec3
 }

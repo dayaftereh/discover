@@ -17,10 +17,4 @@ export class GameOverlayService {
         this.onObjectsInfo = new EventEmitter<ObjectsInfo>(true)
     }
 
-    updateEngineStats(fps: number, latency: number, update: number): void {
-        this.onEngineStats.emit({
-            fps, latency, update
-        })
-    }
-
 }
