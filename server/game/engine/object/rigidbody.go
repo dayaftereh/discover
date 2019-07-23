@@ -77,7 +77,7 @@ func (rigidbody *RigidBody) InverseInertia() *mathf.Vec3 {
 }
 
 func (rigidbody *RigidBody) PointToLocalFrame(worldPoint *mathf.Vec3) *mathf.Vec3 {
-	p := worldPoint.Subtract(rigidbody.Position)
+	p := worldPoint.SubtractVec(rigidbody.Position)
 	r := rigidbody.Rotation.Conjugate().MultiplyVec(p)
 	return r
 }
@@ -89,7 +89,7 @@ func (rigidbody *RigidBody) VectorToLocalFrame(worldVector *mathf.Vec3) *mathf.V
 
 func (rigidbody *RigidBody) PointToWorldFrame(localPoint *mathf.Vec3) *mathf.Vec3 {
 	p := rigidbody.Rotation.MultiplyVec(localPoint)
-	r := p.Add(rigidbody.Position)
+	r := p.AddVec(rigidbody.Position)
 	return r
 }
 
@@ -100,7 +100,7 @@ func (rigidbody *RigidBody) VectorToWorldFrame(localVector *mathf.Vec3) *mathf.V
 
 func (rigidbody *RigidBody) AddTorque(torque *mathf.Vec3) {
 	// Add rotational force
-	rigidbody.Torque = rigidbody.Torque.Add(torque)
+	rigidbody.Torque = rigidbody.Torque.AddVec(torque)
 }
 
 func (rigidbody *RigidBody) AddLocalTorque(localTorque *mathf.Vec3) {
@@ -111,7 +111,7 @@ func (rigidbody *RigidBody) AddLocalTorque(localTorque *mathf.Vec3) {
 
 func (rigidbody *RigidBody) ApplyForce(force *mathf.Vec3, relativePoint *mathf.Vec3) {
 	// Add linear force
-	rigidbody.Force = rigidbody.Force.Add(force)
+	rigidbody.Force = rigidbody.Force.AddVec(force)
 
 	// Compute produced rotational force
 	rotForce := relativePoint.Cross(force)
@@ -133,7 +133,7 @@ func (rigidbody *RigidBody) ApplyImpulse(impulse *mathf.Vec3, relativePoint *mat
 	velo := impulse.Multiply(rigidbody.InverseMass())
 
 	// Add linear impulse
-	rigidbody.Velocity = rigidbody.Velocity.Add(velo)
+	rigidbody.Velocity = rigidbody.Velocity.AddVec(velo)
 
 	// Compute produced rotational impulse velocity
 	rotVelo := relativePoint.Cross(impulse)
@@ -146,7 +146,7 @@ func (rigidbody *RigidBody) ApplyImpulse(impulse *mathf.Vec3, relativePoint *mat
 	rotVeloInertia := rigidbody.InverseInertiaWorld.MultiplyVec(rotVelo)
 
 	// Add rotational Impulse
-	rigidbody.AngularVelocity = rigidbody.AngularVelocity.Add(rotVeloInertia)
+	rigidbody.AngularVelocity = rigidbody.AngularVelocity.AddVec(rotVeloInertia)
 }
 
 func (rigidbody *RigidBody) ApplyLocalImpulse(localImpulse *mathf.Vec3, localPoint *mathf.Vec3) {
@@ -190,7 +190,7 @@ func (rigidbody *RigidBody) Update(delta float64) {
 	// Use new linera velocity  - leap frog
 	// update position
 	rigidbody.Velocity = velo.Multiply(delta)
-	rigidbody.Position = rigidbody.Position.Add(rigidbody.Velocity)
+	rigidbody.Position = rigidbody.Position.AddVec(rigidbody.Velocity)
 
 	// update rotation
 	rotation := rigidbody.Rotation.Integrate(rigidbody.AngularVelocity, delta, rigidbody.AngularFactor)

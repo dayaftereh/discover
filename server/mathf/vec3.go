@@ -73,8 +73,16 @@ func (vec *Vec3) SetVec(other *Vec3) *Vec3 {
 	return vec
 }
 
-// Add the given vector to this vector and retuns a new vector.
-func (vec *Vec3) Add(other *Vec3) *Vec3 {
+func (vec *Vec3) Add(x float64) *Vec3 {
+	return &Vec3{
+		X: vec.X + x,
+		Y: vec.Y + x,
+		Z: vec.Z + x,
+	}
+}
+
+// AddVec the given vector to this vector and retuns a new vector.
+func (vec *Vec3) AddVec(other *Vec3) *Vec3 {
 	return &Vec3{
 		X: vec.X + other.X,
 		Y: vec.Y + other.Y,
@@ -82,8 +90,16 @@ func (vec *Vec3) Add(other *Vec3) *Vec3 {
 	}
 }
 
-// Subtract the given vector from this vector and retuns a new vector.
-func (vec *Vec3) Subtract(other *Vec3) *Vec3 {
+func (vec *Vec3) Subtract(x float64) *Vec3 {
+	return &Vec3{
+		X: vec.X - x,
+		Y: vec.Y - x,
+		Z: vec.Z - x,
+	}
+}
+
+// SubtractVec the given vector from this vector and retuns a new vector.
+func (vec *Vec3) SubtractVec(other *Vec3) *Vec3 {
 	return &Vec3{
 		X: vec.X - other.X,
 		Y: vec.Y - other.Y,
@@ -220,6 +236,22 @@ func (vec *Vec3) Clone() *Vec3 {
 	}
 }
 
+func (vec *Vec3) Divide(scale float64) *Vec3 {
+	return &Vec3{
+		X: vec.X / scale,
+		Y: vec.Y / scale,
+		Z: vec.Z / scale,
+	}
+}
+
+func (vec *Vec3) DivideVec(other *Vec3) *Vec3 {
+	return &Vec3{
+		X: vec.X / other.X,
+		Y: vec.Y / other.Y,
+		Z: vec.Z / other.Z,
+	}
+}
+
 // Lerp do a linear interpolation between two vectors
 func (vec *Vec3) Lerp(other *Vec3, t float64) *Vec3 {
 	return &Vec3{
@@ -235,6 +267,11 @@ func (vec *Vec3) AlmostEquals(other *Vec3, precision float64) bool {
 		return false
 	}
 	return true
+}
+
+func (vec *Vec3) AngleTo(other *Vec3) float64 {
+	theta := vec.Dot(other) / (math.Sqrt(vec.SqrtLength() + other.SqrtLength()))
+	return math.Acos(Clamp(theta, -1.0, 1.0))
 }
 
 // AlmostZero check if a vector is almost zero

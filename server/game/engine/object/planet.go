@@ -2,7 +2,6 @@ package object
 
 import (
 	"log"
-	"math"
 
 	"github.com/dayaftereh/discover/server/game/data"
 	"github.com/dayaftereh/discover/server/mathf"
@@ -19,6 +18,7 @@ type Planet struct {
 	rigidbody       *RigidBody
 	initialPosition *mathf.Vec3
 	initialForce    *mathf.Vec3
+	orbit           *mathf.Orbit2
 }
 
 func NewPlanet(id int64) *Planet {
@@ -38,6 +38,8 @@ func (planet *Planet) Load(sunMass float64, data *data.Planet) {
 	planet.radius = data.Radius
 	planet.initialForce = data.Force
 	planet.initialPosition = data.Position.Clone()
+
+	planet.orbit = mathf.NewOrbitFromVectors(data.Mass, data.Position, mathf.NewVec3(0, -7000, 0))
 
 	// set rigidbody
 	planet.rigidbody.Mass = data.Mass
@@ -61,36 +63,15 @@ func (planet *Planet) RigidBody() *RigidBody {
 }
 
 func (planet *Planet) Update(delta float64) {
-	// center / sun
-	center := mathf.NewZeroVec3()
 
-	// calulate distance to center of star system
-	r := planet.rigidbody.Position.DistanceTo(center)
+	log.Println("before")
+	planet.orbit.Update(delta)
+	log.Println("after")
 
-	// Newton's law of universal gravitation
-	// f = g * (M1 * M2) / r^2
-	force := GravitationalConstant * ((planet.sunMass * planet.rigidbody.Mass) / (r * r))
-
-	// get vector to center of star syste,
-	direction := center.Subtract(planet.rigidbody.Position).Normalize()
-
-	// calculate force vector
-	forceVector := direction.Multiply(force)
-
-	// apply the force to the planet
-	planet.rigidbody.ApplyForce(forceVector, center)
-
-	// apply the inital force of the planet
-
-	v := math.Sqrt((GravitationalConstant * planet.sunMass) / 200.0)
-	initialForce := planet.rigidbody.Mass * v / delta
-
-	planet.rigidbody.ApplyLocalForce(mathf.NewVec3(0, 0, initialForce), center)
-
+	planet.rigidbody.Position = planet.orbit.Position()
+	log.Printf("Position: %v\n", planet.rigidbody.Position)
 	// update the rigidbody
-	planet.rigidbody.Update(delta)
-
-	log.Printf("Position: %v", planet.rigidbody.Position)
+	//planet.rigidbody.Update(delta)
 }
 
 func (planet *Planet) Color() int64 {

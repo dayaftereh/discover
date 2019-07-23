@@ -56,7 +56,7 @@ func TestVec3Add(t *testing.T) {
 	v1 := mathf.NewVec3(82, 97.5, -23.77)
 	v2 := mathf.NewVec3(42.0, -31.3, 7)
 
-	v := v1.Add(v2)
+	v := v1.AddVec(v2)
 
 	AssertVec3CloseEqual(t, v, (42.0 + 82), (97.5 + (-31.3)), ((-23.77) + 7))
 }
@@ -65,7 +65,7 @@ func TestVec3Subtract(t *testing.T) {
 	v1 := mathf.NewVec3(82, 97.5, -23.77)
 	v2 := mathf.NewVec3(42.0, -31.3, 7)
 
-	v := v1.Subtract(v2)
+	v := v1.SubtractVec(v2)
 
 	AssertVec3CloseEqual(t, v, (82 - 42), (97.5 - (-31.3)), ((-23.77) - 7))
 }
