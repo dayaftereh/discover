@@ -10,6 +10,26 @@ func (starSystem *StarSystem) WriteData() *data.StarSystem {
 	starSystem.lock.Lock()
 	defer starSystem.lock.Unlock()
 
+	// write the planets
+	planets := starSystem.writePlanets()
+
+	// get the sun RigidBody
+	sunRigidBody := starSystem.sun.RigidBody()
+
+	// create the sun system data
+	return &data.StarSystem{
+		ID:      starSystem.ID,
+		Name:    starSystem.Name,
+		Planets: planets,
+		Sun: &data.Sun{
+			Mass:   sunRigidBody.Mass,
+			Color:  starSystem.sun.Color(),
+			Radius: starSystem.sun.Radius(),
+		},
+	}
+}
+
+func (starSystem *StarSystem) writePlanets() []*data.Planet {
 	// list for the planet data
 	planetsData := make([]*data.Planet, 0)
 
@@ -24,13 +44,5 @@ func (starSystem *StarSystem) WriteData() *data.StarSystem {
 		planetsData = append(planetsData, planet.Write())
 	}
 
-	return &data.StarSystem{
-		ID:      starSystem.ID,
-		Name:    starSystem.Name,
-		Planets: planetsData,
-		Sun: &data.Sun{
-			Color: starSystem.sunColor,
-			Mass:  starSystem.sunMass,
-		},
-	}
+	return planetsData
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/dayaftereh/discover/server/game/engine"
 	"github.com/dayaftereh/discover/server/game/player"
 
+	"github.com/dayaftereh/discover/server/game/engine/object"
 	"github.com/dayaftereh/discover/server/game/engine/world"
 )
 
@@ -19,8 +20,7 @@ type StarSystem struct {
 	counter int64
 	lock    sync.Mutex
 	// starSystem
-	sunMass  float64
-	sunColor int64
+	sun *object.Sun
 	// players
 	players       map[string]*player.Player
 	playersObject map[string]int64
