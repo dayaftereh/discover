@@ -1,5 +1,7 @@
 package mathf
 
+import "fmt"
+
 // Mat3 is a 3x3 matrix.
 type Mat3 struct {
 	elements []float64
@@ -155,4 +157,11 @@ func (mat *Mat3) Transpose() *Mat3 {
 	}
 
 	return product
+}
+
+func (mat *Mat3) String() string {
+	s := fmt.Sprintf("[ %f, %f, %f ]\n", mat.elements[0], mat.elements[1], mat.elements[2])
+	s = fmt.Sprintf("%s[ %f, %f, %f ]\n", s, mat.elements[3], mat.elements[4], mat.elements[5])
+	s = fmt.Sprintf("%s[ %f, %f, %f ]\n", s, mat.elements[6], mat.elements[7], mat.elements[8])
+	return s
 }

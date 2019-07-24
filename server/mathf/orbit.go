@@ -6,8 +6,6 @@ import (
 	"math"
 )
 
-var GravitationalConstant float64 = 6.673e-11
-
 // http://quantumg.net/orbelems.cpp
 
 type Orbit struct {
