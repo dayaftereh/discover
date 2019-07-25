@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/dayaftereh/discover/server/game/data"
+	"github.com/dayaftereh/discover/server/game/universe/starsystem/objects"
 
 	"github.com/dayaftereh/discover/server/game/engine"
 	"github.com/dayaftereh/discover/server/game/player"
 
-	"github.com/dayaftereh/discover/server/game/engine/object"
 	"github.com/dayaftereh/discover/server/game/engine/world"
 )
 
@@ -20,7 +20,7 @@ type StarSystem struct {
 	counter int64
 	lock    sync.Mutex
 	// starSystem
-	sun *object.Sun
+	sun *objects.Sun
 	// players
 	players       map[string]*player.Player
 	playersObject map[string]int64
@@ -85,10 +85,6 @@ func (starSystem *StarSystem) update() {
 
 	// get the delta for the update
 	delta := starSystem.clock.Delta()
-
-	if delta > 0.035 {
-		log.Printf("Update: delat [ %f ]\n", delta)
-	}
 
 	// update the world
 	starSystem.world.Update(delta)

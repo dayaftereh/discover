@@ -12,7 +12,7 @@ type Orbit struct {
 	r                 *mathf.Vec3 // position
 	v                 *mathf.Vec3 // velocity
 	mu                float64     // mu = G*M
-	centralBodyRadius float64
+	CentralBodyRadius float64
 }
 
 func NewOrbit(r *mathf.Vec3, v *mathf.Vec3, mu float64, centralBodyRadius float64) *Orbit {
@@ -20,7 +20,7 @@ func NewOrbit(r *mathf.Vec3, v *mathf.Vec3, mu float64, centralBodyRadius float6
 		r:                 r,
 		v:                 v,
 		mu:                mu,
-		centralBodyRadius: centralBodyRadius,
+		CentralBodyRadius: centralBodyRadius,
 	}
 }
 
@@ -172,7 +172,7 @@ func (orbit *Orbit) Update(dt float64) *Orbit {
 		r:                 r,
 		v:                 v,
 		mu:                mu,
-		centralBodyRadius: orbit.centralBodyRadius,
+		CentralBodyRadius: orbit.CentralBodyRadius,
 	}
 }
 

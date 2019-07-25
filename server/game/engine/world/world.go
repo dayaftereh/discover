@@ -1,60 +1,57 @@
 package world
 
-import (
-	"github.com/dayaftereh/discover/server/game/engine/object"
-)
-
 type World struct {
 	tick    int64
-	objects map[int64]object.GameObject
+	objects map[int64]Object
 }
 
 func NewWorld() *World {
 	return &World{
 		tick:    0,
-		objects: make(map[int64]object.GameObject),
+		objects: make(map[int64]Object),
 	}
 }
 
-func (world *World) GetGameObject(id int64) object.GameObject {
-	gameObject, ok := world.objects[id]
+func (world *World) GetObject(id int64) Object {
+	object, ok := world.objects[id]
 	if !ok {
 		return nil
 	}
-	return gameObject
+	return object
 }
 
-func (world *World) AddGameObject(gameObject object.GameObject) {
-	id := gameObject.ID()
-	world.objects[id] = gameObject
+func (world *World) AddObject(object Object) {
+	id := object.ID()
+	world.objects[id] = object
 }
 
-func (world *World) RemoveGameObject(id int64) object.GameObject {
-	gameObject, ok := world.objects[id]
+func (world *World) RemoveObject(id int64) Object {
+	object, ok := world.objects[id]
 	if !ok {
 		return nil
 	}
 
 	delete(world.objects, id)
 
-	return gameObject
+	return object
 }
 
-func (world *World) GetGameObjectsInSphere(target object.GameObject, radius float64) map[int64]object.GameObject {
-	// get the body
-	rigidbody := target.RigidBody()
+func (world *World) GetGameObjectsInSphere(target Object, radius float64) map[int64]Object {
+	// get the rigidbody
+	targetRigidbody := target.RigidBody()
+	// get the radius
+	targetRadius := target.Radius()
 
-	contains := make(map[int64]object.GameObject)
-
-	for id, gameObject := range world.objects {
+	contains := make(map[int64]Object)
+	for id, object := range world.objects {
 		// get the body of the game object
-		gameObjectRigidbody := gameObject.RigidBody()
+		objectRigidbody := object.RigidBody()
 
 		// clauclate the distance
-		distance := rigidbody.Position.DistanceTo(gameObjectRigidbody.Position)
+		distance := targetRigidbody.Position.DistanceTo(objectRigidbody.Position)
 
-		if distance <= radius {
-			contains[id] = gameObject
+		if (distance - targetRadius) <= radius {
+			contains[id] = object
 		}
 	}
 
@@ -65,20 +62,13 @@ func (world *World) GetTick() int64 {
 	return world.tick
 }
 
+func (world *World) GetObjects() map[int64]Object {
+	return world.objects
+}
+
 func (world *World) Update(delta float64) {
 	world.tick++
-
 	for _, gameObject := range world.objects {
 		gameObject.Update(delta)
 	}
-}
-
-func (world *World) GetGameObjectsByType(objectTpye object.GameObjectType) []object.GameObject {
-	founds := make([]object.GameObject, 0)
-	for _, gameObject := range world.objects {
-		if gameObject.Type() == objectTpye {
-			founds = append(founds, gameObject)
-		}
-	}
-	return founds
 }

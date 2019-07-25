@@ -1,4 +1,4 @@
-package object
+package physics
 
 import (
 	"math"
@@ -38,9 +38,9 @@ type RigidBody struct {
 	AngularDamping float64
 }
 
-func NewRigidBody(mass float64) *RigidBody {
+func NewRigidBody() *RigidBody {
 	return &RigidBody{
-		Mass:     mass,
+		Mass:     1.0,
 		Position: mathf.NewZeroVec3(),
 		Rotation: mathf.NewZeroQuaternion(),
 

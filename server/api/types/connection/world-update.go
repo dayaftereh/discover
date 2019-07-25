@@ -5,6 +5,7 @@ import (
 )
 
 type GameObject struct {
+	Type       *string     `json:"type"`
 	Radius     *float64    `json:"radius"`
 	Position   *mathf.Vec3 `json:"position"`
 	Rotation   *mathf.Vec3 `json:"rotation"`

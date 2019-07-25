@@ -2,7 +2,7 @@ package starsystem
 
 import (
 	"github.com/dayaftereh/discover/server/game/data"
-	"github.com/dayaftereh/discover/server/game/engine/object"
+	"github.com/dayaftereh/discover/server/game/universe/starsystem/objects"
 )
 
 func (starSystem *StarSystem) WriteData() *data.StarSystem {
@@ -13,19 +13,15 @@ func (starSystem *StarSystem) WriteData() *data.StarSystem {
 	// write the planets
 	planets := starSystem.writePlanets()
 
-	// get the sun RigidBody
-	sunRigidBody := starSystem.sun.RigidBody()
+	// convert the sun to data
+	sun := starSystem.sun.Write()
 
 	// create the sun system data
 	return &data.StarSystem{
 		ID:      starSystem.ID,
 		Name:    starSystem.Name,
+		Sun:     sun,
 		Planets: planets,
-		Sun: &data.Sun{
-			Mass:   sunRigidBody.Mass,
-			Color:  starSystem.sun.Color(),
-			Radius: starSystem.sun.Radius(),
-		},
 	}
 }
 
@@ -34,11 +30,11 @@ func (starSystem *StarSystem) writePlanets() []*data.Planet {
 	planetsData := make([]*data.Planet, 0)
 
 	// get all planets from the world
-	planets := starSystem.world.GetGameObjectsByType(object.PlanetObject)
+	planets := starSystem.findGameObjectsByType(objects.GameObjectPlanet)
 
 	for _, gameObject := range planets {
 		// cast to a planet
-		planet := gameObject.(*object.Planet)
+		planet := gameObject.(*objects.Planet)
 
 		// add a new planet
 		planetsData = append(planetsData, planet.Write())

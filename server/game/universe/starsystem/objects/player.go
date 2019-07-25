@@ -1,13 +1,16 @@
-package object
+package objects
 
 import (
+	"github.com/dayaftereh/discover/server/game/engine/physics"
 	"github.com/dayaftereh/discover/server/mathf"
 )
+
+var GameObjectPlayer GameObjectType = "planet"
 
 type Player struct {
 	id        int64
 	radius    float64
-	rigidbody *RigidBody
+	rigidbody *physics.RigidBody
 	// movement
 	move     *mathf.Vec3
 	rotation *mathf.Vec3
@@ -17,14 +20,14 @@ type Player struct {
 }
 
 func NewPlayer(id int64, position *mathf.Vec3) *Player {
-	rigidbody := NewRigidBody(5.0)
+	rigidbody := physics.NewRigidBody()
 	rigidbody.Position = position
 
 	rigidbody.LinearDamping = 0.5
 	rigidbody.AngularDamping = 0.5
 
 	radius := 1.0
-	rigidbody.Inertia = CalculateSphereInertia(radius, rigidbody.Mass)
+	rigidbody.Inertia = physics.CalculateSphereInertia(radius, rigidbody.Mass)
 
 	rigidbody.UpdateInertiaWorld(true)
 
@@ -47,7 +50,7 @@ func (player *Player) Radius() float64 {
 	return player.radius
 }
 
-func (player *Player) RigidBody() *RigidBody {
+func (player *Player) RigidBody() *physics.RigidBody {
 	return player.rigidbody
 }
 
@@ -82,5 +85,9 @@ func (player *Player) Color() int64 {
 }
 
 func (player *Player) Type() GameObjectType {
-	return PlayerObject
+	return GameObjectPlayer
+}
+
+func (player *Player) Destroy() {
+
 }

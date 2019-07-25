@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/dayaftereh/discover/server/mathf"
 	"encoding/base64"
 	"math/rand"
 	"time"
@@ -34,4 +35,20 @@ func RandString(size int64) (string, error) {
 	str := base64.StdEncoding.EncodeToString(buffer)
 	value := str[:size]
 	return value, nil
+}
+
+func RandIntn(n int) int {
+	return random.Intn(n)
+}
+
+func RandInt64(min int64, max int64) int64 {
+	return min + random.Int63n(max-min)
+}
+
+func RandFloat64(min float64, max float64) float64 {
+	return min + random.Float64()*(max-min)
+}
+
+func RandFromRange(r *mathf.Range) float64{
+	return RandFloat64(r.Min, r.Max)
 }

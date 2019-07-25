@@ -61,6 +61,32 @@ func TestOrbitSimulationEllipticOrbit(t *testing.T) {
 	Simulate(t, orbit, "elliptic-orbit")
 }
 
+func TestOrbitSimulationEllipticOrbitPe(t *testing.T) {
+	centralBodyMass := 10.0   // kg
+	centralBodyRadius := 10.0 // m
+	
+	mu := mathf.GravitationalConstant * centralBodyMass
+	apogee := 69.0  // m
+	perigee := 25.0 // m
+	eccentricity := 0.7
+	inclination := 92.5           // deg
+	rightAscension := 157.6       // deg
+	argumentOfPeriapsis := 210.42 // deg
+
+	orbit := orbit.OrbitFromParams(&orbit.OrbitParameter{
+		MU:                  &mu,
+		CentralBodyRadius:   &centralBodyRadius,
+		Apogee:              &apogee,
+		Perigee:             &perigee,
+		Eccentricity:        &eccentricity,
+		Inclination:         &inclination,
+		RightAscension:      &rightAscension,
+		ArgumentOfPeriapsis: &argumentOfPeriapsis,
+	})
+
+	Simulate(t, orbit, "elliptic-orbit")
+}
+
 func Simulate(t *testing.T, orbit *orbit.Orbit, name string) {
 	// get period and position
 	period := orbit.Period()

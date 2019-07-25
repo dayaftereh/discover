@@ -18,13 +18,13 @@ func (starSystem *StarSystem) pushWorldUpdates() {
 			continue
 		}
 		// get the player game object
-		gameObject := starSystem.world.GetGameObject(playerObjectID)
+		playerObject := starSystem.world.GetObject(playerObjectID)
 
 		// get all objects in player range
-		playerObjects := starSystem.world.GetGameObjectsInSphere(gameObject, 10000.0)
+		worldObjects := starSystem.world.GetGameObjectsInSphere(playerObject, 10000.0)
 
-		// convert game objects for outbound
-		gameObjects := gameObjectsToOutbound(playerObjects)
+		// convert objects to outbound
+		outboundObjects := objectsToOutbound(worldObjects)
 
 		// get the world update tick
 		tick := starSystem.world.GetTick()
@@ -40,7 +40,7 @@ func (starSystem *StarSystem) pushWorldUpdates() {
 			Tick:    &tick,
 			Time:    &now,
 			Player:  playerUpdate,
-			Objects: gameObjects,
+			Objects: outboundObjects,
 		}
 
 		// push the update for the player

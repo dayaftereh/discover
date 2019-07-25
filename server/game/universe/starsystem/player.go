@@ -3,8 +3,8 @@ package starsystem
 import (
 	"log"
 
-	"github.com/dayaftereh/discover/server/game/engine/object"
 	"github.com/dayaftereh/discover/server/game/player"
+	"github.com/dayaftereh/discover/server/game/universe/starsystem/objects"
 	"github.com/dayaftereh/discover/server/mathf"
 	"github.com/pkg/errors"
 )
@@ -29,10 +29,10 @@ func (starSystem *StarSystem) JoinPlayer(player *player.Player) {
 	id := starSystem.nextID()
 
 	// create player game object
-	gameObject := object.NewPlayer(id, mathf.NewZeroVec3())
+	gameObject := objects.NewPlayer(id, mathf.NewZeroVec3())
 
 	// add the game object to world
-	starSystem.world.AddGameObject(gameObject)
+	starSystem.world.AddObject(gameObject)
 
 	// map player to game object
 	starSystem.playersObject[player.ID] = id
@@ -57,15 +57,23 @@ func (starSystem *StarSystem) UpdatePlayer(player *player.Player, move *mathf.Ve
 		return errors.Errorf("unable to find game-object id for player [ %s ]", player.Name)
 	}
 
-	// finally get the game object
-	gameObject := starSystem.world.GetGameObject(gameObjectID)
+	// finally get the object from the world
+	object := starSystem.world.GetObject(gameObjectID)
 
-	if gameObject == nil {
+	if object == nil {
 		return errors.Errorf("unable to find game-object with id [ %d ] for player [ %s ]", gameObjectID, player.Name)
 	}
 
+	// cast to game object
+	gameObject := object.(objects.GameObject)
+
+	// check if game object a player
+	if gameObject.Type() != objects.GameObjectPlayer {
+		return errors.Errorf("ugame-object with id [ %d ] is not a player object", gameObjectID, player.Name)
+	}
+
 	// convert game object to player
-	playerObject := gameObject.(*object.Player)
+	playerObject := gameObject.(*objects.Player)
 
 	// update the player
 	playerObject.UpdateMovement(move, rotation)
@@ -97,7 +105,7 @@ func (starSystem *StarSystem) DropPlayer(player *player.Player) error {
 	// remove the mapping
 	delete(starSystem.playersObject, player.ID)
 	// remove the game object from world
-	starSystem.world.RemoveGameObject(gameObjectID)
+	starSystem.world.RemoveObject(gameObjectID)
 
 	return nil
 

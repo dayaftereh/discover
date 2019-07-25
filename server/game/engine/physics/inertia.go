@@ -1,4 +1,4 @@
-package object
+package physics
 
 import (
 	"github.com/dayaftereh/discover/server/mathf"

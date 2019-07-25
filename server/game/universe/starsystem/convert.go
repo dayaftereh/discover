@@ -2,18 +2,20 @@ package starsystem
 
 import (
 	types "github.com/dayaftereh/discover/server/api/types/connection"
-	"github.com/dayaftereh/discover/server/game/engine/object"
+	"github.com/dayaftereh/discover/server/game/engine/world"
+	"github.com/dayaftereh/discover/server/game/universe/starsystem/objects"
 )
 
-func gameObjectsToOutbound(gameObjects map[int64]object.GameObject) map[int64]*types.GameObject {
+func objectsToOutbound(gameObjects map[int64]world.Object) map[int64]*types.GameObject {
 	outbound := make(map[int64]*types.GameObject)
-	for id, gameObject := range gameObjects {
+	for id, object := range gameObjects {
+		gameObject := object.(objects.GameObject)
 		outbound[id] = gameObjectToOutbound(gameObject)
 	}
 	return outbound
 }
 
-func gameObjectToOutbound(gameObject object.GameObject) *types.GameObject {
+func gameObjectToOutbound(gameObject objects.GameObject) *types.GameObject {
 	// get the body of the game object
 	rigidbody := gameObject.RigidBody()
 
@@ -26,10 +28,13 @@ func gameObjectToOutbound(gameObject object.GameObject) *types.GameObject {
 
 	color := gameObject.Color()
 
+	objectType := string(gameObject.Type())
+
 	removeable := false
 
 	// create the outgoing gameobject
 	return &types.GameObject{
+		Type:       &objectType,
 		Radius:     &radius,
 		Color:      &color,
 		Position:   position,

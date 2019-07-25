@@ -7,6 +7,7 @@ export interface Vec3 {
 }
 
 export interface GameObject {
+    type?:string
     radius?: number
     position?: Vec3
     rotation?: Vec3
