@@ -2,7 +2,6 @@ package generator
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/dayaftereh/discover/server/game/data"
 	"github.com/dayaftereh/discover/server/utils"
@@ -25,8 +24,6 @@ func randStarSystemName() string {
 	counter := utils.RandInt64(1, 999)
 	return fmt.Sprintf("%s-%3.d", prefix, counter)
 }
-
-
 
 /**
 Stellar Fusion Requirements: https://sites.uni.edu/morgans/astro/course/Notes/section2/fusion.html

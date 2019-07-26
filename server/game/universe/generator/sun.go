@@ -1,40 +1,60 @@
 package generator
 
 import (
-	"github.com/dayaftereh/discover/server/game/data"
+	"fmt"
+	"math"
+
 	"github.com/dayaftereh/discover/server/utils"
 )
 
-const (
-	// SolarMass is the factor to convert M to kg
-	SolarMass float64 = 1.98847e30
-	// SolarRadius is the factor to convert R to meter
-	SolarRadius float64 = 6.957e8
-)
+type Sun struct {
+	Mass       float64
+	Luminosity float64
+	REcosphere float64
+	Life       float64
+	Age        float64
+}
 
-func randSun() *data.Sun {
-	// get a random stellar class
-	class := RandStellarClass()
-
-	// generate a random mass based on the stellar classification in kg
-	mass := utils.RandFromRange(class.Mass) * SolarMass
-
-	// generate a random radius based on the stellar classification in meter
-	radius := utils.RandFromRange(class.Radius) * SolarRadius
-
-	// generate a random temperature based on the stellar classification in kelvins
-	temperature := utils.RandFromRange(class.Temperature) * 1000.0
-
-	// generate a random luminosity based on the stellar classification in L
-	luminosity := utils.RandFromRange(class.Luminosity)
-
-	// create the sun data
-	return &data.Sun{
-		Class:       class.Class,
-		Color:       class.Color,
-		Mass:        mass,
-		Radius:      radius,
-		Temperature: temperature,
-		Luminosity:  luminosity,
+func luminosity(stellMassRatio float64) float64 {
+	n := 0.5*(2.0-stellMassRatio) + 4.4
+	if stellMassRatio < 1.0 {
+		n = 1.75*(stellMassRatio-0.1) + 3.325
 	}
+	return (math.Pow(stellMassRatio, n))
+}
+
+func NewSun(mass float64) *Sun {
+	// caluclate luminosity
+	luminosity := luminosity(mass)
+
+	// calculate the life of the sun
+	life := 1e10 * (mass / luminosity)
+
+	// check if life lager then max age
+	maxAge := MaxSunAge
+	if life > maxAge {
+		maxAge = life
+	}
+
+	// generate a random age of the sun
+	age := utils.RandFloat64(MinSunAge, maxAge)
+
+	return &Sun{
+		Mass:       mass,
+		Luminosity: luminosity,
+		REcosphere: math.Sqrt(luminosity),
+		Life:       life,
+		Age:        age,
+	}
+}
+
+func (sun *Sun) String() string {
+	s := fmt.Sprintf("Sun: [\n")
+	s = fmt.Sprintf("%s Mass: %f\n", s, sun.Mass)
+	s = fmt.Sprintf("%s Luminosity: %f\n", s, sun.Luminosity)
+	s = fmt.Sprintf("%s REcosphere: %f\n", s, sun.REcosphere)
+	s = fmt.Sprintf("%s Life: %f\n", s, sun.Life)
+	s = fmt.Sprintf("%s Age: %f\n", s, sun.Age)
+	s = fmt.Sprintf("%s]\n", s)
+	return s
 }
