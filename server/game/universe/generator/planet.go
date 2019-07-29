@@ -1,15 +1,13 @@
 package generator
 
-import "fmt"
+import (
+	"bytes"
+	"encoding/json"
+)
 
 type PlanetType string
 
 type OrbitZone int
-
-type Gas struct {
-	Num          int64
-	SurfPressure float64
-}
 
 type Planet struct {
 	PlanetNO             int64
@@ -51,10 +49,10 @@ type Planet struct {
 	Hydrosphere          float64 /* fraction of surface covered		 */
 	CloudCover           float64 /* fraction of surface covered		 */
 	IceCover             float64 /* fraction of surface covered		 */
-	Gases                int     /* Count of gases in the atmosphere: */
-	Atmosphere           *Gas
+	Atmosphere           []*Gas
 	Type                 PlanetType /* Type code						 */
 	Moons                []*Planet
+	Breathability        Oxygen
 	/*   ZEROES end here               */
 	NextPlanet *Planet
 }
@@ -80,13 +78,12 @@ const (
 )
 
 func (planet *Planet) String() string {
-	s := fmt.Sprintf("Planet: [\n")
-	s = fmt.Sprintf("%s A: %f\n", s, planet.A)
-	s = fmt.Sprintf("%s E: %f\n", s, planet.A)
-	s = fmt.Sprintf("%s Mass: %.19f\n", s, planet.Mass)
-	s = fmt.Sprintf("%s GasGiant: %v\n", s, planet.GasGiant)
-	s = fmt.Sprintf("%s DustMass: %f\n", s, planet.DustMass)
-	s = fmt.Sprintf("%s GasMass: %f\n", s, planet.GasMass)
-	s = fmt.Sprintf("%s]\n", s)
-	return s
+
+	buffer := new(bytes.Buffer)
+	encoder := json.NewEncoder(buffer)
+	encoder.SetIndent("", "  ")
+
+	encoder.Encode(planet)
+
+	return buffer.String()
 }

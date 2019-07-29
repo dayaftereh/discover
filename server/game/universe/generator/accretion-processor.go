@@ -1,15 +1,19 @@
 package generator
 
 import (
+	"container/list"
 	"math"
 
 	"github.com/dayaftereh/discover/server/utils"
+	"github.com/dayaftereh/discover/server/utils/container"
 )
 
 type AccretionProcessor struct {
 	CloudEccentricity float64
 	DustBand          *DustBand
 	Planet            *Planet
+	Planets           *list.List
+	DustBands         *list.List
 }
 
 func NewAccretionProcessor() *AccretionProcessor {
@@ -17,6 +21,8 @@ func NewAccretionProcessor() *AccretionProcessor {
 		CloudEccentricity: 0.2,
 		Planet:            nil,
 		DustBand:          nil,
+		DustBands:         list.New(),
+		Planets:           list.New(),
 	}
 }
 
@@ -41,7 +47,7 @@ func (accretionProcessor *AccretionProcessor) farthestPlanet(stellMassRatio floa
 	return (50.0 * math.Pow(stellMassRatio, (1.0/3.0)))
 }
 
-func (accretionProcessor *AccretionProcessor) randEccentricity() float64 {
+func randEccentricity() float64 {
 	E := 1.0 - math.Pow(utils.RandFloat64(0.0, 1.0), EccentricityCoeff)
 	if E > 0.9999 {
 		E = 0.999
@@ -61,17 +67,16 @@ func (accretionProcessor *AccretionProcessor) outerEffectLimit(a, e, mass float6
 
 func (accretionProcessor *AccretionProcessor) isDustAvailable(insideRange, outsideRange float64) bool {
 
-	dustBand := accretionProcessor.DustBand
-	dustHere := false
-
-	for dustBand != nil && dustBand.OuterEdge < insideRange {
-		dustBand = dustBand.NextBand
-	}
+	dustBand := container.Some(accretionProcessor.DustBands, func(element *list.Element, index int64) bool {
+		return !(element.Value.(*DustBand).OuterEdge < insideRange)
+	})
 
 	// no dust band found
 	if dustBand == nil {
 		return false
 	}
+
+	dustHere := false
 
 	dustHere = dustBand.DustPresent
 
@@ -448,7 +453,7 @@ func (accretionProcessor *AccretionProcessor) DistPlanetaryMasses(stellMassRatio
 	dustLeft := true
 	for dustLeft {
 		a := utils.RandFloat64(planetInnerBound, planetOuterBound)
-		e := accretionProcessor.randEccentricity()
+		e := randEccentricity()
 
 		mass := ProtoPlanetMass
 
