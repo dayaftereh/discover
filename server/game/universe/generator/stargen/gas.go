@@ -1,4 +1,4 @@
-package generator
+package stargen
 
 type Gas struct {
 	Num          int64
@@ -9,7 +9,7 @@ type Atom struct {
 	Num        int64
 	Symbol     string
 	Name       string
-	Weigth     float64
+	Weight     float64
 	Meth       float64
 	Boil       float64
 	Density    float64

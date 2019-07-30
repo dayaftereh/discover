@@ -1,4 +1,4 @@
-package generator
+package stargen
 
 import (
 	"math"
@@ -22,11 +22,11 @@ type StellarClass struct {
 var StellarClassification []*StellarClass = []*StellarClass{
 	&StellarClass{
 		Class:       "O",
-		Color:       255,                                // blue
-		Mass:        mathf.NewRange(16.0, math.Inf(1)),  // >= 16 M
-		Radius:      mathf.NewRange(6.6, math.Inf(1)),   // >= 6.6 R
-		Temperature: mathf.NewRange(30, math.Inf(1)),    // >= 30 *1000 K
-		Luminosity:  mathf.NewRange(30000, math.Inf(1)), // >= 30000 L
+		Color:       255,                                    // blue
+		Mass:        mathf.NewRange(16.0, 120.0),            // >= 16 M
+		Radius:      mathf.NewRange(6.6, math.MaxFloat64),   // >= 6.6 R
+		Temperature: mathf.NewRange(30, 50),                 // >= 30 *1000 K
+		Luminosity:  mathf.NewRange(30000, math.MaxFloat64), // >= 30000 L
 	},
 	&StellarClass{
 		Class:       "B",

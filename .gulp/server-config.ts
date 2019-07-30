@@ -6,6 +6,7 @@ export const SERVER_CONFIG: any = {
     VERSION: PACKAGE_JSON.version,
 
     MAIN_PKG: "github.com/dayaftereh/discover/server/main",
+    STARGEN_MAIN_PKG: "github.com/dayaftereh/discover/server/game/universe/generator/stargen/main",
 
     OUTPUT: CONFIG.OUTPUT,
 }

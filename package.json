@@ -14,7 +14,8 @@
         "app:start": "ng serve",
         "server:run": "gulp server:run",
         "server:build": "gulp server:build",
-        "install": "gulp server:dependencies"
+        "install": "gulp server:dependencies",
+        "stargen": "gulp server:stargen"
     },
     "dependencies": {
         "@angular/animations": "~8.1.1",

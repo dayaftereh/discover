@@ -69,6 +69,29 @@ export namespace Server {
         })
     }
 
+    export async function runStargen() {
+        return new Promise((resolve, reject) => {
+            const process: ChildProcess = spawn(
+                GO_CONFIG.GO, [
+                    "run",
+                    SERVER_CONFIG.STARGEN_MAIN_PKG
+                ], {
+                    stdio: 'inherit'
+                })
+
+            process.on("error", (err: Error) => {
+                reject(err)
+            })
+
+            process.on("exit", (code: number, signal: string) => {
+                if (code !== 0) {
+                    return reject(new Error(`go run exists with code [ ${code} ]`))
+                }
+                resolve()
+            })
+        })
+    }
+
     export function defaultTasks(): void {
 
         gulp.task("server:dependencies", gulp.series(
@@ -82,6 +105,10 @@ export namespace Server {
 
         gulp.task("server:run", gulp.series(["server:dependencies"], () => {
             return Server.run()
+        }))
+
+        gulp.task("server:stargen", gulp.series(["server:dependencies"], () => {
+            return Server.runStargen()
         }))
     }
 

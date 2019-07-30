@@ -1,13 +1,14 @@
-package generator
+package stargen
 
 const (
-	K                  float64 = 50.0     //K = gas/dust ratio
-	B                  float64 = 1.2E-5   //Used in Crit_mass calc
-	N                  float64 = 3.0      // Used in density calcs
-	Alpha              float64 = 5.0      // Used in density calcs
-	ProtoPlanetMass    float64 = 1.0e-15  // Units of solar masses
-	EccentricityCoeff  float64 = 0.077    /* Dole's was 0.077			*/
-	ChangeInErthAngVel float64 = -1.3E-15 /* Units of radians/sec/year*/
+	K                       float64 = 50.0     //K = gas/dust ratio
+	B                       float64 = 1.2E-5   //Used in Crit_mass calc
+	N                       float64 = 3.0      // Used in density calcs
+	Alpha                   float64 = 5.0      // Used in density calcs
+	ProtoPlanetMass         float64 = 1.0e-15  // Units of solar masses
+	EccentricityCoefficient float64 = 0.077    /* Dole's was 0.077			*/
+	ChangeInErthAngVel      float64 = -1.3E-15 /* Units of radians/sec/year*/
+	DustDensityCoefficient  float64 = 2.0e-3   /* A in Dole's paper		*/
 
 	GasRetentionThreshold float64 = 6.0 /* ratio of esc vel to RMS vel */
 
@@ -23,7 +24,7 @@ const (
 	EarthAcceleration        float64 = 980.7    /* Units of cm/sec2			*/
 	EarthAxialTilt           float64 = 23.4     /* Units of degrees*/
 	EarthAverageCelsius      float64 = 14.0     /* Average Earth Temperature */
-	EarthAverageKelvin       float64 = EarthAverageCelsius + FreeezingPointOfWater
+	EarthAverageKelvin       float64 = EarthAverageCelsius + FreezingPointOfWater
 	EarthEffectiveTemp       float64 = 250.0 /* Units of degrees Kelvin (was 255)	*/
 	EarthSurfPersInMilliBars float64 = 1013.25
 	EarthConvectionFactor    float64 = 0.43     /* from Hart, eq.20			*/
@@ -45,13 +46,13 @@ const (
 	WaterAlbedo             float64 = 0.04
 	GasGaintAlbedo          float64 = 0.5 /* albedo of a gas giant	*/
 
-	FreeezingPointOfWater float64 = 273.15 /* Units of degrees Kelvin	*/
-	MilliBarsPerBar       float64 = 1000.0
+	FreezingPointOfWater float64 = 273.15 /* Units of degrees Kelvin	*/
+	MilliBarsPerBar      float64 = 1000.0
 
-	GravConstant   float64 = 6.672E-8 /* units of dyne cm2/gram2	*/
-	MolarGasConst  float64 = 8314.41  /* units: g*m2/(sec2*K*mol) */
-	J              float64 = 1.46E-19 /* Used in day-length calcs (cm2/sec2 g) */
-	SecondsPerHour float64 = 3600.0
+	GravityConstant float64 = 6.672E-8 /* units of dyne cm2/gram2	*/
+	MolarGasConst   float64 = 8314.41  /* units: g*m2/(sec2*K*mol) */
+	J               float64 = 1.46E-19 /* Used in day-length calcs (cm2/sec2 g) */
+	SecondsPerHour  float64 = 3600.0
 
 	CMPerAU    float64 = 1.495978707e13 /* number of cm in an AU	*/
 	CMPerKM    float64 = 1.0e5          /* number of cm in a km		*/
