@@ -100,7 +100,7 @@ const (
 	PPMPressure        float64 = EarthSurfPersInMilliBars / 1000000.0
 	MMHG2MilliBars     float64 = EarthSurfPersInMilliBars / EarthSurfPersInMMHG
 	// Gas IPP
-	MinO2IPP  float64 = 72.0 * MMHG2MilliBars    /* Dole p. 15      */
+	MinO2IPP  float64 = (72.0 * MMHG2MilliBars)  /* Dole p. 15      */
 	MaxO2IPP  float64 = 400.0 * MMHG2MilliBars   /* Dole p. 15      */
 	MaxHeIPP  float64 = 61000.0 * MMHG2MilliBars /* Dole p. 16      */
 	MaxNeIPP  float64 = 3900.0 * MMHG2MilliBars  /* Dole p. 16      */

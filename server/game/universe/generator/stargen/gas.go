@@ -1,5 +1,10 @@
 package stargen
 
+import (
+	"bytes"
+	"encoding/json"
+)
+
 type Gas struct {
 	Num          int64
 	SurfPressure float64
@@ -17,6 +22,16 @@ type Atom struct {
 	Abunds     float64
 	Reactivity float64
 	MaxIpp     float64 // Max inspired partial pressure im millibars
+}
+
+func (atom *Atom) String() string {
+	buffer := new(bytes.Buffer)
+	encoder := json.NewEncoder(buffer)
+	encoder.SetIndent("", "  ")
+
+	encoder.Encode(atom)
+
+	return buffer.String()
 }
 
 var GasesTable map[int64]*Atom = map[int64]*Atom{

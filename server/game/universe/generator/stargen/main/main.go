@@ -15,12 +15,14 @@ type Statistics struct {
 	UnknownMoons   int64
 	Oxygen         map[stargen.Oxygen]int64
 	Types          map[stargen.PlanetType]int64
+	Gases          map[int64]int64
 }
 
 func NewStatistics() *Statistics {
 	statistics := &Statistics{
 		Types:  make(map[stargen.PlanetType]int64),
 		Oxygen: make(map[stargen.Oxygen]int64),
+		Gases:  make(map[int64]int64),
 	}
 
 	// set all planet types to zero
@@ -59,14 +61,24 @@ func (statistics *Statistics) String() string {
 
 	// find found types
 	for typ, count := range statistics.Types {
-		s = fmt.Sprintf("%s %v: %d, %1.3f\n", s, typ, count, float64(count)/float64(statistics.Executions))
+		s = fmt.Sprintf("%s\t%v: %d, %1.3f\n", s, typ, count, float64(count)/float64(statistics.Executions))
 	}
 
-	s = fmt.Sprintf("%s Oxygen:\n", s)
+	s = fmt.Sprintf("\n%s Oxygen:\n", s)
 
 	// find found types
 	for oxygen, count := range statistics.Oxygen {
-		s = fmt.Sprintf("%s %v: %d, %1.3f\n", s, oxygen, count, float64(count)/float64(statistics.Executions))
+		s = fmt.Sprintf("%s\t%v: %d, %1.3f\n", s, oxygen, count, float64(count)/float64(statistics.Executions))
+	}
+
+	s = fmt.Sprintf("\n%s Gases:\n", s)
+
+	// print the found gases
+	for gasNum, count := range statistics.Gases {
+		gas, ok := stargen.GasesTable[gasNum]
+		if ok {
+			s = fmt.Sprintf("%s\t%v: %d, %1.3f\n", s, gas.Symbol, count, float64(count)/float64(statistics.Executions))
+		}
 	}
 
 	s = fmt.Sprintf("%s\n\n", s)
@@ -87,6 +99,15 @@ func InspectPlanet(statistics *Statistics, planet *stargen.Planet) {
 		statistics.Oxygen[planet.Breathability] = count + 1
 	} else {
 		statistics.Oxygen[planet.Breathability] = 1
+	}
+
+	for _, gas := range planet.Atmosphere {
+		count, ok = statistics.Gases[gas.Num]
+		if ok {
+			statistics.Gases[gas.Num] = count + 1
+		} else {
+			statistics.Gases[gas.Num] = 1
+		}
 	}
 }
 

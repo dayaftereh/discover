@@ -383,7 +383,7 @@ func (accretionProcessor *AccretionProcessor) coalescePlanetesimals(a, e, mass, 
 				// check if the mas is crit
 				if mass < critMass {
 					// check if the mass fits into the values
-					if (mass*SunMassInEarthMasses) < 2.5 && (mass*SunMassInEarthMasses) > 0.0001 && existingMass < (planet.Mass*0.05) {
+					if (mass*SunMassInEarthMasses) < 2.5 && (mass*SunMassInEarthMasses) > 0.000001 && existingMass < (planet.Mass*0.05) {
 						moon := &Planet{
 							Type:     PlanetUnknown,
 							Mass:     mass,

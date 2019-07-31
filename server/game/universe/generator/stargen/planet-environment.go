@@ -614,7 +614,8 @@ func (planetEnvironment *PlanetEnvironment) calculateGases(planet *Planet, sun *
 	amount := make(map[int64]float64)
 	pressure := planet.SurfacePressure / MilliBarsPerBar
 	for _, gas := range GasesTable {
-		yp := gas.Boil / (373.0*((math.Log(pressure)+0.001)/-5050.5) + (10 / 373.0))
+
+		yp := gas.Boil / (373.0*(math.Log(pressure+0.001)/-5050.5) + (1.0 / 373.0))
 		// check if the gas stay on the planet
 		if !((yp >= 0.0 && yp < planet.LowTemperature) && gas.Weight >= planet.MolecularWeight) {
 			continue
@@ -630,11 +631,11 @@ func (planetEnvironment *PlanetEnvironment) calculateGases(planet *Planet, sun *
 			abund = abund * (0.001 + (planet.GasMass / planet.Mass))
 			pres2 := (0.75 + pressure)
 			react = math.Pow(1.0/(1.0+gas.Reactivity), sun.Age/2e9*pres2)
-		} else if (gas.Symbol == "O" || gas.Symbol == "O2") && sun.Age > 2e9 && planet.SurfaceAcceleration > 270.0 && planet.SurfaceAcceleration < 400.0 {
+		} else if (gas.Symbol == "O" || gas.Symbol == "O2") && sun.Age > 2e9 && planet.SurfaceTemperature > 270.0 && planet.SurfaceTemperature < 400.0 {
 			// 	pres2 = (0.65 + pressure/2); //Breathable - M: .55-1.4
 			pres2 := (0.89 + pressure/4.0) // Breathable - M: .6 -1.8
 			react = math.Pow(1.0/(1.0+gas.Reactivity), math.Pow(sun.Age/2e9, 0.25)*pres2)
-		} else if gas.Symbol == "CO2" && sun.Age > 2e9 && planet.SurfaceAcceleration > 270.0 && planet.SurfaceAcceleration < 400.0 {
+		} else if gas.Symbol == "CO2" && sun.Age > 2e9 && planet.SurfaceTemperature > 270.0 && planet.SurfaceTemperature < 400.0 {
 			pres2 := (0.75 + pressure)
 			react = math.Pow(1.0/(1.0+gas.Reactivity), math.Pow(sun.Age/2e9, 0.5)*pres2)
 			react *= 1.5
@@ -673,13 +674,23 @@ func (planetEnvironment *PlanetEnvironment) calculateGases(planet *Planet, sun *
 	return atmosphere
 }
 
-func (planetEnvironment *PlanetEnvironment) inspiredPartialPressure(gasPressure, surfPressure float64) float64 {
+// inspiredPartialPressure taking into account humidification of the air in the nasal passage and throat
+func (planetEnvironment *PlanetEnvironment) inspiredPartialPressure(surfPressure, gasPressure float64) float64 {
+	// This formula is on Dole's p. 14
 	pH20 := H2OAssumedPressure
 	fraction := gasPressure / surfPressure
 	return (surfPressure - pH20) * fraction
 }
 
+// breathability verifies if the planet has breathability gases
 func (planetEnvironment *PlanetEnvironment) breathability(atmosphere []*Gas, surfPressure float64) Oxygen {
+	/*--------------------------------------------------------------------------*/
+	/*	 This function uses figures on the maximum inspired partial pressures   */
+	/*   of Oxygen, other atmospheric and traces gases as laid out on pages 15, */
+	/*   16 and 18 of Dole's Habitable Planets for Man to derive breathability  */
+	/*   of the planet's atmosphere.                                       JLB  */
+	/*--------------------------------------------------------------------------*/
+
 	// no atmosphere
 	if atmosphere == nil || len(atmosphere) < 1 {
 		return None
@@ -687,9 +698,10 @@ func (planetEnvironment *PlanetEnvironment) breathability(atmosphere []*Gas, sur
 
 	oxygenOk := false
 
+	// get each gas on the planet
 	for _, gas := range atmosphere {
 
-		ipp := planetEnvironment.inspiredPartialPressure(gas.SurfPressure, surfPressure)
+		ipp := planetEnvironment.inspiredPartialPressure(surfPressure, gas.SurfPressure)
 
 		gasAtom, ok := GasesTable[gas.Num]
 		if !ok {
@@ -879,44 +891,32 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *Sun, planet *Pla
 				planet.Type = PlanetUnknown
 			}
 		}
-
-		// check if do moons and a moon is available
-		if doMoons && !isMoon && planet.Moons != nil && len(planet.Moons) > 0 {
-			// make a new array for valid moons
-			moons := make([]*Planet, 0)
-
-			for _, moon := range planet.Moons {
-				// check if the moon has enough mass
-				if !((moon.Mass * SunMassInEarthMasses) > 0.000001) {
-					continue
-				}
-
-				// add the moon to the valid moons
-				moons = append(moons, moon)
-
-				// move the moon to the planet
-				moon.SemiMajorAxis = planet.SemiMajorAxis
-				moon.Eccentricity = planet.Eccentricity
-
-				// generate the moon
-				planetEnvironment.GeneratePlanet(sun, moon, randomTilt, doMoons, doGases, true) // Adjusts ptr->density
-
-				rocheLimit := 2.44 * planet.Radius * math.Pow((planet.Density/moon.Density), (1.0/3.0))
-				hillSphere := planet.SemiMajorAxis * KMPerAU * math.Pow((planet.Mass/(3.0*sun.Mass)), (1.0/3.0))
-				if (rocheLimit * 3.0) < hillSphere {
-					moon.MoonA = utils.RandFloat64(rocheLimit*1.5, hillSphere/2.0) / KMPerAU
-					moon.MoonE = randEccentricity()
-				} else {
-					moon.MoonA = 0.0
-					moon.MoonE = 0.0
-				}
-			}
-
-			// send the valid moons
-			planet.Moons = moons
-		}
 	}
 
 	// verify if the planet Breathability
 	planet.Breathability = planetEnvironment.breathability(planet.Atmosphere, planet.SurfaceAcceleration)
+
+	// check if do moons and a moon is available
+	if doMoons && !isMoon && planet.Moons != nil && len(planet.Moons) > 0 {
+		// generate all moons for the planet
+		for _, moon := range planet.Moons {
+			// move the moon to the planet
+			moon.SemiMajorAxis = planet.SemiMajorAxis
+			moon.Eccentricity = planet.Eccentricity
+
+			// generate the moon
+			planetEnvironment.GeneratePlanet(sun, moon, randomTilt, doMoons, doGases, true) // Adjusts ptr->density
+
+			rocheLimit := 2.44 * planet.Radius * math.Pow((planet.Density/moon.Density), (1.0/3.0))
+			hillSphere := planet.SemiMajorAxis * KMPerAU * math.Pow((planet.Mass/(3.0*sun.Mass)), (1.0/3.0))
+			if (rocheLimit * 3.0) < hillSphere {
+				moon.MoonA = utils.RandFloat64(rocheLimit*1.5, hillSphere/2.0) / KMPerAU
+				moon.MoonE = randEccentricity()
+			} else {
+				moon.MoonA = 0.0
+				moon.MoonE = 0.0
+			}
+		}
+	}
+
 }
