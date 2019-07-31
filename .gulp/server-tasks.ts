@@ -74,7 +74,8 @@ export namespace Server {
             const process: ChildProcess = spawn(
                 GO_CONFIG.GO, [
                     "run",
-                    SERVER_CONFIG.STARGEN_MAIN_PKG
+                    SERVER_CONFIG.STARGEN_MAIN_PKG,
+                    "-ldflags='-s -w'"
                 ], {
                     stdio: 'inherit'
                 })

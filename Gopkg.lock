@@ -50,6 +50,14 @@
   version = "v1.4.0"
 
 [[projects]]
+  digest = "1:463031edbae100ab8e731ab6d9b565b435a6176f332788ce9a5db775ca2ca5aa"
+  name = "github.com/ojrac/opensimplex-go"
+  packages = ["."]
+  pruneopts = ""
+  revision = "7bffa9e65fbe3215abbe7c2215b7eff0f56b8a3f"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:1d7e1867c49a6dd9856598ef7c3123604ea3daabf5b83f303ff457bcbc410b1d"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -80,6 +88,7 @@
     "github.com/gorilla/mux",
     "github.com/gorilla/sessions",
     "github.com/gorilla/websocket",
+    "github.com/ojrac/opensimplex-go",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/assert",
   ]

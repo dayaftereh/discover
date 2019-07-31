@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/dayaftereh/discover/server/game/universe/generator/stargen"
-	"github.com/dayaftereh/discover/server/utils"
 )
 
 type Statistics struct {
@@ -86,77 +89,44 @@ func (statistics *Statistics) String() string {
 	return s
 }
 
-func InspectPlanet(statistics *Statistics, planet *stargen.Planet) {
-	count, ok := statistics.Types[planet.Type]
-	if ok {
-		statistics.Types[planet.Type] = count + 1
-	} else {
-		statistics.Types[planet.Type] = 1
+func CollectAndPrint(workers []*Worker, statistics *Statistics) {
+	for _, worker := range workers {
+		worker.AddToStatistics(statistics)
 	}
 
-	count, ok = statistics.Oxygen[planet.Breathability]
-	if ok {
-		statistics.Oxygen[planet.Breathability] = count + 1
-	} else {
-		statistics.Oxygen[planet.Breathability] = 1
-	}
-
-	for _, gas := range planet.Atmosphere {
-		count, ok = statistics.Gases[gas.Num]
-		if ok {
-			statistics.Gases[gas.Num] = count + 1
-		} else {
-			statistics.Gases[gas.Num] = 1
-		}
-	}
+	fmt.Println(statistics)
 }
 
-func AppendPlanet(statistics *Statistics, planet *stargen.Planet) {
-	InspectPlanet(statistics, planet)
+func Loop(workers []*Worker, statistics *Statistics) {
+	signalChannel := make(chan os.Signal, 1)
+	signal.Notify(signalChannel, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
-	if planet.Type == stargen.PlanetUnknown {
-		statistics.UnknownPlanets++
-	}
-
-	// count each moon
-	statistics.Moons += int64(len(planet.Moons))
-
-	// inspect each moon
-	for _, moon := range planet.Moons {
-		InspectPlanet(statistics, moon)
-
-		if moon.Type == stargen.PlanetUnknown {
-			statistics.UnknownMoons++
+	for {
+		select {
+		case <-time.After(10 * time.Second):
+			CollectAndPrint(workers, statistics)
+		case <-signalChannel:
+			return
 		}
 	}
 }
 
 func main() {
-	lastPrint := 0.0
-	statistics := NewStatistics()
 
-	for {
-		statistics.Executions++
+	concurrently := 3
 
-		// generate stellar system
-		_, planets := stargen.GenerateStellarSystem(true, true, true)
-		// add found planets
-		statistics.Planets += int64(len(planets))
-
-		// look at each planet
-		for _, planet := range planets {
-			AppendPlanet(statistics, planet)
-		}
-
-		// calculate last print delta of statistics
-		delta := utils.SystemSeconds() - lastPrint
-
-		// above 10 s
-		if delta > 10.0 {
-			lastPrint = utils.SystemSeconds()
-			// show statistics
-			fmt.Println(statistics)
-		}
+	workers := make([]*Worker, 0)
+	for i := 0; i < concurrently; i++ {
+		worker := NewWorker()
+		workers = append(workers, worker)
+		worker.Start()
 	}
 
+	statistics := NewStatistics()
+
+	Loop(workers, statistics)
+
+	for _, worker := range workers {
+		worker.Stop()
+	}
 }
