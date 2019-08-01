@@ -8,25 +8,27 @@ import (
 	"github.com/dayaftereh/discover/server/mathf"
 
 	"github.com/dayaftereh/discover/server/game/universe/generator/texture/noise"
+	textureset "github.com/dayaftereh/discover/server/game/universe/generator/texture/texture-set"
 )
 
 type TextureGenerator struct {
 	seed   int64
 	width  int
 	height int
-	//  heightMap
-	heightMapFrequency float64
-	heightMapOctaves   int64
-	//  heatMap
-	heatMapFrequency float64
-	heatMapOctaves   int64
-	// moistureMap
-	moistureMapFrequency float64
-	moistureMapOctaves   int64
 	// Tiles
-	tiles []*Tile
+	tiles []*textureset.Tile
 	// texture set
-	textureSet TextureSet
+	textureSet textureset.TextureSet
+}
+
+func NewTextureGenerator(width, height int, textureSet textureset.TextureSet, seed int64) *TextureGenerator {
+	return &TextureGenerator{
+		width:      width,
+		height:     height,
+		seed:       seed,
+		textureSet: textureSet,
+		tiles:      make([]*textureset.Tile, width*height),
+	}
 }
 
 func (textureGenerator *TextureGenerator) forEachPixel(fn func(x, y int)) {
@@ -39,20 +41,26 @@ func (textureGenerator *TextureGenerator) forEachPixel(fn func(x, y int)) {
 
 func (textureGenerator *TextureGenerator) Init() {
 	// heightMap
-	heightMap := noise.NewImplicitFractal(textureGenerator.heightMapFrequency, textureGenerator.heightMapOctaves, true, textureGenerator.seed)
+	heightMapFrequency := textureGenerator.textureSet.HeightMapFrequency()
+	heightMapOctaves := textureGenerator.textureSet.HeightMapOctaves()
+
+	heightMap := noise.NewImplicitFractal(heightMapFrequency, heightMapOctaves, true, textureGenerator.seed)
+
 	// heatMap
-	heatFractal := noise.NewImplicitFractal(textureGenerator.heatMapFrequency, textureGenerator.heatMapOctaves, true, textureGenerator.seed)
+	heatMapFrequency := textureGenerator.textureSet.HeatMapFrequency()
+	heatMapOctaves := textureGenerator.textureSet.HeatMapOctaves()
+
+	heatFractal := noise.NewImplicitFractal(heatMapFrequency, heatMapOctaves, true, textureGenerator.seed)
 	gradient := noise.NewImplicitGradient(1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
 	heatMap := noise.NewImplicitCombiner(noise.CombinerTypeMultiply)
 	heatMap.AddSource(gradient)
 	heatMap.AddSource(heatFractal)
-	// MoistureMap
-	moistureMap := noise.NewImplicitFractal(textureGenerator.moistureMapFrequency, textureGenerator.moistureMapOctaves, true, textureGenerator.seed)
 
-	// initialize the map data
-	heightMapData := NewMapData(textureGenerator.width, textureGenerator.height)
-	heatMapData := NewMapData(textureGenerator.width, textureGenerator.height)
-	moistureMapData := NewMapData(textureGenerator.width, textureGenerator.height)
+	// MoistureMap
+	moistureMapFrequency := textureGenerator.textureSet.MoistureMapFrequency()
+	moistureMapOctaves := textureGenerator.textureSet.MoistureMapOctaves()
+
+	moistureMap := noise.NewImplicitFractal(moistureMapFrequency, moistureMapOctaves, true, textureGenerator.seed)
 
 	// generate all map data
 	textureGenerator.forEachPixel(func(x, y int) {
@@ -74,51 +82,65 @@ func (textureGenerator *TextureGenerator) Init() {
 		nz := x1 + math.Sin(s*2.0*math.Pi)*dx/(2.0*math.Pi)
 		nw := y1 + math.Sin(t*2.0*math.Pi)*dy/(2.0*math.Pi)
 
-		heightValue := heightMap.Get4D(nx, ny, nz, nw)
-		heatValue := heatMap.Get4D(nx, ny, nz, nw)
-		moistureValue := moistureMap.Get4D(nx, ny, nz, nw)
+		// get the tile
+		tile := textureGenerator.getTile(x, y)
 
-		heightMapData.Set(x, y, heightValue)
-		heatMapData.Set(x, y, heatValue)
-		moistureMapData.Set(x, y, moistureValue)
+		tile.HeightValue = heightMap.Get4D(nx, ny, nz, nw)
+		tile.HeatValue = heatMap.Get4D(nx, ny, nz, nw)
+		tile.MoistureValue = moistureMap.Get4D(nx, ny, nz, nw)
+
 	})
 
 	textureGenerator.forEachPixel(func(x, y int) {
+		// get the tile
 		tile := textureGenerator.getTile(x, y)
-		tile.HeightValue = (heightMapData.Get(x, y) - heatMapData.MinValue) / (heatMapData.MaxValue - heatMapData.MinValue)
-		tile.HeatValue = (heatMapData.Get(x, y) - heatMapData.MinValue) / (heatMapData.MaxValue - heatMapData.MinValue)
-		tile.MoistureValue = (moistureMapData.Get(x, y) - moistureMapData.MinValue) / (moistureMapData.MaxValue - moistureMapData.MinValue)
+		// initialize the tile
+		tile.Init()
 	})
-
 }
 
 func (textureGenerator *TextureGenerator) tileIndex(x, y int) int {
-	x = int(math.Mod(float64(x), float64(textureGenerator.width)))
-	y = int(math.Mod(float64(y), float64(textureGenerator.height)))
+	x = x % textureGenerator.width
+	y = y % textureGenerator.height
+
+	if x < 0 {
+		x = textureGenerator.width + x
+	}
+
+	if y < 0 {
+		y = textureGenerator.height + y
+	}
+
 	index := y*textureGenerator.width + x
 	return index
 }
 
-func (textureGenerator *TextureGenerator) getTile(x, y int) *Tile {
+func (textureGenerator *TextureGenerator) getTile(x, y int) *textureset.Tile {
 	index := textureGenerator.tileIndex(x, y)
 	tile := textureGenerator.tiles[index]
 
 	if tile == nil {
-		tile = &Tile{
+		// create the tile
+		tile = &textureset.Tile{
+			Index:      index,
 			X:          x,
 			Y:          y,
 			TextureSet: textureGenerator.textureSet,
-			Top:        textureGenerator.getTile(x, y-1),
-			Bottom:     textureGenerator.getTile(x, y+1),
-			Left:       textureGenerator.getTile(x-1, y),
-			Right:      textureGenerator.getTile(x+1, y),
 		}
+		// store the tile
 		textureGenerator.tiles[index] = tile
+
+		// locate the tile
+		tile.Top = textureGenerator.getTile(x, y-1)
+		tile.Bottom = textureGenerator.getTile(x, y+1)
+		tile.Left = textureGenerator.getTile(x-1, y)
+		tile.Right = textureGenerator.getTile(x+1, y)
 	}
+
 	return tile
 }
 
-func (textureGenerator *TextureGenerator) imageFromEachTile(fn func(tile *Tile) *Color) *image.RGBA {
+func (textureGenerator *TextureGenerator) imageFromEachTile(fn func(tile *textureset.Tile) *textureset.Color) *image.RGBA {
 	rect := image.Rect(0, 0, textureGenerator.width, textureGenerator.height)
 	img := image.NewRGBA(rect)
 
@@ -133,34 +155,34 @@ func (textureGenerator *TextureGenerator) imageFromEachTile(fn func(tile *Tile) 
 }
 
 func (textureGenerator *TextureGenerator) GenerateHeightMapTexture() *image.RGBA {
-	img := textureGenerator.imageFromEachTile(func(tile *Tile) *Color {
+	img := textureGenerator.imageFromEachTile(func(tile *textureset.Tile) *textureset.Color {
 		return tile.HeightColor()
 	})
 	return img
 }
 
 func (textureGenerator *TextureGenerator) GenerateHeatMapTexture() *image.RGBA {
-	img := textureGenerator.imageFromEachTile(func(tile *Tile) *Color {
+	img := textureGenerator.imageFromEachTile(func(tile *textureset.Tile) *textureset.Color {
 		return tile.HeatColor()
 	})
 	return img
 }
 
 func (textureGenerator *TextureGenerator) GenerateMoistureMapTexture() *image.RGBA {
-	img := textureGenerator.imageFromEachTile(func(tile *Tile) *Color {
+	img := textureGenerator.imageFromEachTile(func(tile *textureset.Tile) *textureset.Color {
 		return tile.MoistureColor()
 	})
 	return img
 }
 
 func (textureGenerator *TextureGenerator) GenerateBiomeMapTexture() *image.RGBA {
-	img := textureGenerator.imageFromEachTile(func(tile *Tile) *Color {
-		return tile.MoistureColor()
+	img := textureGenerator.imageFromEachTile(func(tile *textureset.Tile) *textureset.Color {
+		return tile.BiomeColor()
 	})
 	return img
 }
 
-func (textureGenerator *TextureGenerator) color2RGBA(c *Color) color.RGBA {
+func (textureGenerator *TextureGenerator) color2RGBA(c *textureset.Color) color.RGBA {
 	r := uint8(255 * mathf.Clamp(c.R, 0.0, 1.0))
 	g := uint8(255 * mathf.Clamp(c.G, 0.0, 1.0))
 	b := uint8(255 * mathf.Clamp(c.B, 0.0, 1.0))

@@ -1,4 +1,4 @@
-package texture
+package textureset
 
 type Color struct {
 	R float64
@@ -32,4 +32,13 @@ func NewRGBAColor(r, g, b, a float64) *Color {
 		B: b,
 		A: a,
 	}
+}
+
+func (color *Color) Lerp(other *Color, x float64) *Color {
+	return NewRGBAColor(
+		x*(other.R-color.R)+color.R,
+		x*(other.G-color.G)+color.G,
+		x*(other.B-color.B)+color.B,
+		color.A,
+	)
 }

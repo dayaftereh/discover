@@ -1,6 +1,7 @@
-package texture
+package textureset
 
 type Tile struct {
+	Index         int
 	X             int
 	Y             int
 	HeightValue   float64
@@ -11,6 +12,10 @@ type Tile struct {
 	Left          *Tile
 	Right         *Tile
 	TextureSet    TextureSet
+}
+
+func (tile *Tile) Init() {
+	tile.TextureSet.Init(tile)
 }
 
 func (tile *Tile) HeightColor() *Color {
