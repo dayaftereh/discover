@@ -59,6 +59,18 @@ var (
 		Snow:         textureset.NewRGBColor(1.0, 1.0, 1.0),
 		River:        textureset.NewRGBColor255(241.0, 12.0, 0.0),
 	}
+
+	BumpMapColors = map[*HeightType]*textureset.Color{
+		DeepWater:    textureset.NewRGBColor(0.0, 0.0, 0.0),
+		ShallowWater: textureset.NewRGBColor(0.0, 0.0, 0.0),
+		Shore:        textureset.NewRGBColor(0.3, 0.3, 0.3),
+		Sand:         textureset.NewRGBColor(0.3, 0.3, 0.3),
+		Grass:        textureset.NewRGBColor(0.45, 0.45, 0.45),
+		Forest:       textureset.NewRGBColor(0.6, 0.6, 0.6),
+		Rock:         textureset.NewRGBColor(0.75, 0.75, 0.75),
+		Snow:         textureset.NewRGBColor(1.0, 1.0, 1.0),
+		River:        textureset.NewRGBColor255(0.0, 0.0, 0.0),
+	}
 )
 
 func FindHeightType(value float64) *HeightType {

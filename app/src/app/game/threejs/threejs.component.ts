@@ -91,7 +91,7 @@ export class ThreeJSComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private createCamera(): void {
         const aspectRatio: number = this.calculateAspectRatio()
-        this.camera = new THREE.PerspectiveCamera(60, aspectRatio, 1, 1100)
+        this.camera = new THREE.PerspectiveCamera(60, aspectRatio, 0.1, 1100)
         this.camera.position.set(0, 0, 0)
     }
 

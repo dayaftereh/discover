@@ -18,23 +18,23 @@ const (
 )
 
 var (
-	BiomeMatrix = map[MoistureType]map[HeatType]BiomeType{
-		Dryest: map[HeatType]BiomeType{
+	BiomeMatrix = map[*MoistureType]map[*HeatType]BiomeType{
+		Dryest: map[*HeatType]BiomeType{
 			Coldest: Ice, Colder: Tundra, Cold: Grassland, Warm: Desert, Warmer: Desert, Warmest: Desert,
 		},
-		Dryer: map[HeatType]BiomeType{
+		Dryer: map[*HeatType]BiomeType{
 			Coldest: Ice, Colder: Tundra, Cold: Grassland, Warm: Desert, Warmer: Desert, Warmest: Desert,
 		},
-		Dry: map[HeatType]BiomeType{
+		Dry: map[*HeatType]BiomeType{
 			Coldest: Ice, Colder: Tundra, Cold: Woodland, Warm: Woodland, Warmer: Savanna, Warmest: Savanna,
 		},
-		Wet: map[HeatType]BiomeType{
+		Wet: map[*HeatType]BiomeType{
 			Coldest: Ice, Colder: Tundra, Cold: BorealForest, Warm: Woodland, Warmer: Savanna, Warmest: Savanna,
 		},
-		Wetter: map[HeatType]BiomeType{
+		Wetter: map[*HeatType]BiomeType{
 			Coldest: Ice, Colder: Tundra, Cold: BorealForest, Warm: SeasonalForest, Warmer: TropicalRainforest, Warmest: TropicalRainforest,
 		},
-		Wettest: map[HeatType]BiomeType{
+		Wettest: map[*HeatType]BiomeType{
 			Coldest: Ice, Colder: Tundra, Cold: BorealForest, Warm: TropicalRainforest, Warmer: TropicalRainforest, Warmest: TropicalRainforest,
 		},
 	}
@@ -54,7 +54,7 @@ var (
 	}
 )
 
-func FindBiomeType(moistureType MoistureType, heatType HeatType) BiomeType {
+func FindBiomeType(moistureType *MoistureType, heatType *HeatType) BiomeType {
 	moistureRow, ok := BiomeMatrix[moistureType]
 
 	if !ok {

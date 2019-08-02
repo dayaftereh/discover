@@ -14,33 +14,33 @@ type HeatType struct {
 
 // HeatTypes
 var (
-	HeatTypes = []HeatType{
+	HeatTypes = []*HeatType{
 		Coldest, Colder, Cold, Warm, Warmer, Warmest,
 	}
 
-	Coldest = HeatType{
+	Coldest = &HeatType{
 		Value: 0.05,
 	}
-	Colder = HeatType{
+	Colder = &HeatType{
 		Value: 0.18,
 	}
-	Cold = HeatType{
+	Cold = &HeatType{
 		Value: 0.4,
 	}
-	Warm = HeatType{
+	Warm = &HeatType{
 		Value: 0.6,
 	}
-	Warmer = HeatType{
+	Warmer = &HeatType{
 		Value: 0.8,
 	}
-	Warmest = HeatType{
+	Warmest = &HeatType{
 		Value:    0.8,
 		Range:    true,
 		MaxValue: math.Inf(1),
 	}
 
 	// Heat Colors
-	HeatMapColors = map[HeatType]*textureset.Color{
+	HeatMapColors = map[*HeatType]*textureset.Color{
 		Coldest: textureset.NewRGBColor(0.0, 1.0, 1.0),
 		Colder:  textureset.NewRGBColor255(170, 255, 255),
 		Cold:    textureset.NewRGBColor255(0.0, 229.0, 133.0),
@@ -50,7 +50,7 @@ var (
 	}
 )
 
-func FindHeatType(value float64) HeatType {
+func FindHeatType(value float64) *HeatType {
 	for _, typ := range HeatTypes {
 		if typ.Range {
 			if typ.Value <= value && value <= typ.MaxValue {

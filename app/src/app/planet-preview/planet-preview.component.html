@@ -1,0 +1,15 @@
+<div class="p-grid">
+    <div class="p-col-2">
+        Textures:
+    </div>
+    <div class="p-col-2">
+        <p-fileUpload mode="basic" [multiple]="false" accept="image/*" [auto]="true" [customUpload]="true"
+            (uploadHandler)="onUploaded($event)"></p-fileUpload>
+    </div>
+</div>
+
+<div class="p-grid">
+    <div class="p-col">
+        <app-threejs (onInit)="onInitThreeJS($event)" (onUpdate)="onUpdateThreeJS($event)"></app-threejs>
+    </div>
+</div>

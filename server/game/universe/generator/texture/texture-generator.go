@@ -62,41 +62,81 @@ func (textureGenerator *TextureGenerator) Init() {
 
 	moistureMap := noise.NewImplicitFractal(moistureMapFrequency, moistureMapOctaves, true, textureGenerator.seed)
 
-	// generate all map data
-	textureGenerator.forEachPixel(func(x, y int) {
-		// WRAP ON BOTH AXIS
+	// CloudMap
+	cloudMapFrequency := textureGenerator.textureSet.CloudMapFrequency()
+	cloudMapOctaves := textureGenerator.textureSet.CloudMapOctaves()
+	cloudMap := noise.NewImplicitFractal(cloudMapFrequency, cloudMapOctaves, true, textureGenerator.seed)
 
-		// Noise range
-		x1, x2 := 0.0, 2.0
-		y1, y2 := 0.0, 2.0
-		dx := x2 - x1
-		dy := y2 - y1
+	// MapData
+	heightData := NewMapData(textureGenerator.width, textureGenerator.height)
+	heatData := NewMapData(textureGenerator.width, textureGenerator.height)
+	moistureData := NewMapData(textureGenerator.width, textureGenerator.height)
+	cloudData := NewMapData(textureGenerator.width, textureGenerator.height)
 
-		// Sample noise at smaller intervals
-		s := float64(x) / float64(textureGenerator.width)
-		t := float64(y) / float64(textureGenerator.height)
+	southLatBound := -180.0
+	northLatBound := 180.0
+	westLonBound := -90.0
+	eastLonBound := 90.0
 
-		// Calculate our 4D coordinates
-		nx := x1 + math.Cos(s*2.0*math.Pi)*dx/(2.0*math.Pi)
-		ny := y1 + math.Cos(t*2.0*math.Pi)*dy/(2.0*math.Pi)
-		nz := x1 + math.Sin(s*2.0*math.Pi)*dx/(2.0*math.Pi)
-		nw := y1 + math.Sin(t*2.0*math.Pi)*dy/(2.0*math.Pi)
+	lonExtent := eastLonBound - westLonBound
+	latExtent := northLatBound - southLatBound
 
-		// get the tile
-		tile := textureGenerator.getTile(x, y)
+	xDelta := lonExtent / float64(textureGenerator.width)
+	yDelta := latExtent / float64(textureGenerator.height)
 
-		tile.HeightValue = heightMap.Get4D(nx, ny, nz, nw)
-		tile.HeatValue = heatMap.Get4D(nx, ny, nz, nw)
-		tile.MoistureValue = moistureMap.Get4D(nx, ny, nz, nw)
+	curLon := westLonBound
+	curLat := southLatBound
 
-	})
+	for x := 0; x < textureGenerator.width; x++ {
+		curLon = westLonBound
+		for y := 0; y < textureGenerator.height; y++ {
+			x1, y1, z1 := textureGenerator.latLonToXYZ(curLat, curLon)
 
-	textureGenerator.forEachPixel(func(x, y int) {
-		// get the tile
-		tile := textureGenerator.getTile(x, y)
+			// set the heightValue
+			heightValue := heightMap.Get3D(x1, y1, z1)
+			heightData.Set(x, y, heightValue)
+
+			// set the heatValue
+			heatValue := heatMap.Get3D(x1, y1, z1)
+
+			coldness := math.Abs(curLon) / 90.0
+			heat := 1.0 - math.Abs(curLon)/90.0
+
+			heatValue += heat
+			heatValue -= coldness
+
+			heatData.Set(x, y, heatValue)
+
+			// set the moistureValue
+			moistureValue := moistureMap.Get3D(x1, y1, z1)
+			moistureData.Set(x, y, moistureValue)
+
+			cloudValue := cloudMap.Get3D(x1, y1, z1)
+			cloudData.Set(x, y, cloudValue)
+
+			curLon += xDelta
+		}
+		curLat += yDelta
+	}
+
+	textureGenerator.forEachTile(func(tile *textureset.Tile) {
+		tile.HeightValue = heightData.GetNormalized(tile.X, tile.Y)
+		tile.HeatValue = heatData.GetNormalized(tile.X, tile.Y)
+		tile.MoistureValue = moistureData.GetNormalized(tile.X, tile.Y)
+		tile.CloudValue = cloudData.GetNormalized(tile.X, tile.Y)
+
 		// initialize the tile
 		tile.Init()
 	})
+}
+
+func (textureGenerator *TextureGenerator) latLonToXYZ(lat, lon float64) (float64, float64, float64) {
+	r := math.Cos(mathf.ToRadians(lon))
+	x := r * math.Cos(mathf.ToRadians(lat))
+	y := math.Sin(mathf.ToRadians(lon))
+	z := r * math.Sin(mathf.ToRadians(lat))
+
+	return x, y, z
 }
 
 func (textureGenerator *TextureGenerator) tileIndex(x, y int) int {
@@ -131,24 +171,60 @@ func (textureGenerator *TextureGenerator) getTile(x, y int) *textureset.Tile {
 		textureGenerator.tiles[index] = tile
 
 		// locate the tile
-		tile.Top = textureGenerator.getTile(x, y-1)
-		tile.Bottom = textureGenerator.getTile(x, y+1)
-		tile.Left = textureGenerator.getTile(x-1, y)
-		tile.Right = textureGenerator.getTile(x+1, y)
+		tile.Top = func() *textureset.Tile {
+			return textureGenerator.getTopTile(tile)
+		}
+		tile.Bottom = func() *textureset.Tile {
+			return textureGenerator.getBottomTile(tile)
+		}
+		tile.Left = func() *textureset.Tile {
+			return textureGenerator.getLeftTile(tile)
+		}
+		tile.Right = func() *textureset.Tile {
+			return textureGenerator.getRightTile(tile)
+		}
 	}
 
 	return tile
+}
+
+func (textureGenerator *TextureGenerator) getTopTile(tile *textureset.Tile) *textureset.Tile {
+	if tile.Y-1 > 0 {
+		return textureGenerator.getTile(tile.X, tile.Y-1)
+	}
+	return nil
+}
+
+func (textureGenerator *TextureGenerator) getBottomTile(tile *textureset.Tile) *textureset.Tile {
+	if tile.Y+1 < textureGenerator.height {
+		return textureGenerator.getTile(tile.X, tile.Y+1)
+	}
+	return nil
+}
+
+func (textureGenerator *TextureGenerator) getLeftTile(tile *textureset.Tile) *textureset.Tile {
+	return textureGenerator.getTile(tile.X-1, tile.Y)
+}
+
+func (textureGenerator *TextureGenerator) getRightTile(tile *textureset.Tile) *textureset.Tile {
+	return textureGenerator.getTile(tile.X+1, tile.Y)
+}
+
+func (textureGenerator *TextureGenerator) forEachTile(fn func(tile *textureset.Tile)) {
+	textureGenerator.forEachPixel(func(x, y int) {
+		tile := textureGenerator.getTile(x, y)
+		fn(tile)
+	})
 }
 
 func (textureGenerator *TextureGenerator) imageFromEachTile(fn func(tile *textureset.Tile) *textureset.Color) *image.RGBA {
 	rect := image.Rect(0, 0, textureGenerator.width, textureGenerator.height)
 	img := image.NewRGBA(rect)
 
-	textureGenerator.forEachPixel(func(x, y int) {
-		tile := textureGenerator.getTile(x, y)
+	textureGenerator.forEachTile(func(tile *textureset.Tile) {
 		c := fn(tile)
 		rgba := textureGenerator.color2RGBA(c)
-		img.Set(x, y, rgba)
+		img.Set(tile.X, tile.Y, rgba)
 	})
 
 	return img
@@ -179,6 +255,100 @@ func (textureGenerator *TextureGenerator) GenerateBiomeMapTexture() *image.RGBA 
 	img := textureGenerator.imageFromEachTile(func(tile *textureset.Tile) *textureset.Color {
 		return tile.BiomeColor()
 	})
+	return img
+}
+
+func (textureGenerator *TextureGenerator) GenerateBumpMapTexture() *image.RGBA {
+	img := textureGenerator.imageFromEachTile(func(tile *textureset.Tile) *textureset.Color {
+		return tile.BumpColor()
+	})
+	return img
+}
+
+func (textureGenerator *TextureGenerator) GenerateSpecularMapTexture() *image.RGBA {
+	img := textureGenerator.imageFromEachTile(func(tile *textureset.Tile) *textureset.Color {
+		return tile.SpecularColor()
+	})
+	return img
+}
+
+func (textureGenerator *TextureGenerator) GenerateCloudMapTexture() *image.RGBA {
+	img := textureGenerator.imageFromEachTile(func(tile *textureset.Tile) *textureset.Color {
+		return tile.CloudColor()
+	})
+	return img
+}
+
+func (textureGenerator *TextureGenerator) calculateNormalMapColor(tile *textureset.Tile, strength float64) *textureset.Color {
+	left := textureGenerator.getTile(tile.X-1, tile.Y)
+	if tile.X-1 < 0 {
+		left = tile
+	}
+
+	right := tile
+	if tile.X+1 < textureGenerator.width {
+		right = textureGenerator.getTile(tile.X+1, tile.Y)
+	}
+
+	top := textureGenerator.getTile(tile.X, tile.Y-1)
+	if tile.Y-1 < 0 {
+		top = tile
+	}
+
+	bottom := tile
+	if tile.Y+1 < textureGenerator.height {
+		bottom = textureGenerator.getTile(tile.X, tile.Y+1)
+	}
+
+	leftColor := left.BumpColor()
+	rightColor := right.BumpColor()
+	topColor := top.BumpColor()
+	bottomColor := bottom.BumpColor()
+
+	xLeft := leftColor.Grayscale() * strength
+	xRight := rightColor.Grayscale() * strength
+	yTop := topColor.Grayscale() * strength
+	yBottom := bottomColor.Grayscale() * strength
+
+	xDelta := ((xLeft - xRight) + 1.0) * 0.5
+	yDelta := ((yTop - yBottom) + 1.0) * 0.5
+
+	return textureset.NewRGBAColor(xDelta, yDelta, 1.0, 1.0)
+}
+
+func (textureGenerator *TextureGenerator) GenerateNormalMapTexture(strength float64) *image.RGBA {
+	strength = mathf.Clamp(strength, 0.0, 10.0)
+	img := textureGenerator.imageFromEachTile(func(tile *textureset.Tile) *textureset.Color {
+		return textureGenerator.calculateNormalMapColor(tile, strength)
+	})
+	return img
+}
+
+func (textureGenerator *TextureGenerator) GenerateTextures(strength float64) *image.RGBA {
+	rect := image.Rect(0, 0, textureGenerator.width*2.0, textureGenerator.height*2.0)
+	img := image.NewRGBA(rect)
+
+	textureGenerator.forEachTile(func(tile *textureset.Tile) {
+		biomeColor := tile.BiomeColor()
+		normalColor := textureGenerator.calculateNormalMapColor(tile, strength)
+		specularColor := tile.SpecularColor()
+		cloudColor := tile.CloudColor()
+
+		normalX := tile.X + textureGenerator.width
+		normalY := tile.Y + textureGenerator.height
+
+		specularX := tile.X + textureGenerator.width
+		specularY := tile.Y
+
+		cloudX := tile.X
+		cloudY := tile.Y + textureGenerator.height
+
+		img.Set(tile.X, tile.Y, textureGenerator.color2RGBA(biomeColor))
+		img.Set(cloudX, cloudY, textureGenerator.color2RGBA(cloudColor))
+		img.Set(specularX, specularY, textureGenerator.color2RGBA(specularColor))
+		img.Set(normalX, normalY, textureGenerator.color2RGBA(normalColor))
+	})
+
 	return img
 }
 

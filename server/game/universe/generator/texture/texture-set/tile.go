@@ -7,10 +7,11 @@ type Tile struct {
 	HeightValue   float64
 	HeatValue     float64
 	MoistureValue float64
-	Top           *Tile
-	Bottom        *Tile
-	Left          *Tile
-	Right         *Tile
+	CloudValue    float64
+	Top           func() *Tile
+	Bottom        func() *Tile
+	Left          func() *Tile
+	Right         func() *Tile
 	TextureSet    TextureSet
 }
 
@@ -34,10 +35,14 @@ func (tile *Tile) BiomeColor() *Color {
 	return tile.TextureSet.BiomeColor(tile)
 }
 
-func (tile *Tile) Cloud1Color() *Color {
-	return tile.TextureSet.Cloud1Color(tile)
+func (tile *Tile) BumpColor() *Color {
+	return tile.TextureSet.BumpColor(tile)
 }
 
-func (tile *Tile) Cloud2Color() *Color {
-	return tile.TextureSet.Cloud2Color(tile)
+func (tile *Tile) CloudColor() *Color {
+	return tile.TextureSet.CloudColor(tile)
+}
+
+func (tile *Tile) SpecularColor() *Color {
+	return tile.TextureSet.SpecularColor(tile)
 }

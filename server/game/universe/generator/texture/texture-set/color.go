@@ -39,6 +39,10 @@ func (color *Color) Lerp(other *Color, x float64) *Color {
 		x*(other.R-color.R)+color.R,
 		x*(other.G-color.G)+color.G,
 		x*(other.B-color.B)+color.B,
-		color.A,
+		x*(other.A-color.A)+color.A,
 	)
+}
+
+func (color *Color) Grayscale() float64 {
+	return color.R*0.299 + color.G*0.587 + color.B*0.114
 }

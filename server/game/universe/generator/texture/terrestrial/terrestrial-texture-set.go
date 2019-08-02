@@ -1,9 +1,6 @@
 package terrestrial
 
 import (
-	"fmt"
-	"log"
-
 	textureset "github.com/dayaftereh/discover/server/game/universe/generator/texture/texture-set"
 )
 
@@ -46,7 +43,19 @@ func (textureSet *TerrestrialTextureSet) MoistureMapOctaves() int64 {
 	return 4
 }
 
+func (textureSet *TerrestrialTextureSet) CloudMapFrequency() float64 {
+	return 1.55
+}
+
+func (textureSet *TerrestrialTextureSet) CloudMapOctaves() int64 {
+	return 4
+}
+
 func (textureSet *TerrestrialTextureSet) findTile(tile *textureset.Tile) *TerrestrialTile {
+	if tile == nil {
+		return nil
+	}
+
 	terrestrialTile, ok := textureSet.Tiles[tile.Index]
 	if !ok {
 		terrestrialTile = &TerrestrialTile{}
@@ -61,20 +70,18 @@ func (terrestrialSet *TerrestrialTextureSet) Init(tile *textureset.Tile) {
 	// find the HeightType
 	terrestrialTile.HeightType = FindHeightType(tile.HeightValue)
 
-	fmt.Println(tile.HeightValue, terrestrialTile.HeightType)
-
 	// get the heat value
 	heatValue := tile.HeatValue
 
 	// Adjust Heat Map based on Height - Higher == colder
 	if terrestrialTile.HeightType == Forest { // Forest
-		heatValue -= 0.01 * tile.HeightValue
+		heatValue -= 0.1 * tile.HeightValue
 	} else if terrestrialTile.HeightType == Rock { // Rock
-		heatValue -= 0.025 * tile.HeightValue
+		heatValue -= 0.25 * tile.HeightValue
 	} else if terrestrialTile.HeightType == Snow { // Snow
-		heatValue -= 0.04 * tile.HeightValue
+		heatValue -= 0.4 * tile.HeightValue
 	} else {
-		heatValue += 0.001 * tile.HeightValue
+		heatValue += 0.01 * tile.HeightValue
 	}
 
 	// find the HeatType
@@ -85,13 +92,13 @@ func (terrestrialSet *TerrestrialTextureSet) Init(tile *textureset.Tile) {
 
 	//adjust moisture based on height
 	if terrestrialTile.HeightType == DeepWater { //DeepWater
-		moistureValue += 0.08 * tile.HeightValue
+		moistureValue += 0.8 * tile.HeightValue
 	} else if terrestrialTile.HeightType == ShallowWater { //ShallowWater
-		moistureValue += 0.03 * tile.HeightValue
+		moistureValue += 0.3 * tile.HeightValue
 	} else if terrestrialTile.HeightType == Shore { //Shore
-		moistureValue += 0.02 * tile.HeightValue
+		moistureValue += 0.1 * tile.HeightValue
 	} else if terrestrialTile.HeightType == Sand { //Sand
-		moistureValue += 0.02 * tile.HeightValue
+		moistureValue += 0.05 * tile.HeightValue
 	}
 
 	// find the moistureType
@@ -108,8 +115,6 @@ func (terrestrialSet *TerrestrialTextureSet) HeightColor(tile *textureset.Tile) 
 	// try to find the color for the type
 	color, ok := HeightMapColors[terrestrialTile.HeightType]
 
-	log.Println(color)
-
 	if !ok {
 		return Black
 	}
@@ -119,19 +124,19 @@ func (terrestrialSet *TerrestrialTextureSet) HeightColor(tile *textureset.Tile) 
 func (terrestrialSet *TerrestrialTextureSet) bitmask(tile *textureset.Tile) int {
 	terrestrialTile := terrestrialSet.findTile(tile)
 
-	terrestrialTileTop := terrestrialSet.findTile(tile.Top)
-	terrestrialTileBottom := terrestrialSet.findTile(tile.Bottom)
-	terrestrialTileLeft := terrestrialSet.findTile(tile.Left)
-	terrestrialTileRight := terrestrialSet.findTile(tile.Right)
+	terrestrialTileTop := terrestrialSet.findTile(tile.Top())
+	terrestrialTileBottom := terrestrialSet.findTile(tile.Bottom())
+	terrestrialTileLeft := terrestrialSet.findTile(tile.Left())
+	terrestrialTileRight := terrestrialSet.findTile(tile.Right())
 
 	count := 0
-	if terrestrialTile.HeightType == terrestrialTileTop.HeightType {
+	if terrestrialTileTop != nil && terrestrialTile.HeightType == terrestrialTileTop.HeightType {
 		count++
-	} else if terrestrialTile.HeightType == terrestrialTileRight.HeightType {
+	} else if terrestrialTileRight != nil && terrestrialTile.HeightType == terrestrialTileRight.HeightType {
 		count += 2
-	} else if terrestrialTile.HeightType == terrestrialTileBottom.HeightType {
+	} else if terrestrialTileBottom != nil && terrestrialTile.HeightType == terrestrialTileBottom.HeightType {
 		count += 4
-	} else if terrestrialTile.HeightType == terrestrialTileLeft.HeightType {
+	} else if terrestrialTileLeft != nil && terrestrialTile.HeightType == terrestrialTileLeft.HeightType {
 		count += 8
 	}
 
@@ -182,28 +187,28 @@ func (terrestrialSet *TerrestrialTextureSet) MoistureColor(tile *textureset.Tile
 func (terrestrialSet *TerrestrialTextureSet) biomeBitmask(tile *textureset.Tile) int {
 	terrestrialTile := terrestrialSet.findTile(tile)
 
-	terrestrialTileTop := terrestrialSet.findTile(tile.Top)
-	terrestrialTileBottom := terrestrialSet.findTile(tile.Bottom)
-	terrestrialTileLeft := terrestrialSet.findTile(tile.Left)
-	terrestrialTileRight := terrestrialSet.findTile(tile.Right)
+	terrestrialTileTop := terrestrialSet.findTile(tile.Top())
+	terrestrialTileBottom := terrestrialSet.findTile(tile.Bottom())
+	terrestrialTileLeft := terrestrialSet.findTile(tile.Left())
+	terrestrialTileRight := terrestrialSet.findTile(tile.Right())
 
 	count := 0
-	if terrestrialTile.BiomeType == terrestrialTileTop.BiomeType {
+	if terrestrialTileTop != nil && terrestrialTile.BiomeType == terrestrialTileTop.BiomeType {
 		count++
-	} else if terrestrialTile.BiomeType == terrestrialTileRight.BiomeType {
+	} else if terrestrialTileRight != nil && terrestrialTile.BiomeType == terrestrialTileRight.BiomeType {
 		count += 2
-	} else if terrestrialTile.BiomeType == terrestrialTileBottom.BiomeType {
+	} else if terrestrialTileBottom != nil && terrestrialTile.BiomeType == terrestrialTileBottom.BiomeType {
 		count += 4
-	} else if terrestrialTile.BiomeType == terrestrialTileLeft.BiomeType {
+	} else if terrestrialTileLeft != nil && terrestrialTile.BiomeType == terrestrialTileLeft.BiomeType {
 		count += 8
 	}
 
 	return count
 }
 
-func (terrestrialSet *TerrestrialTextureSet) BiomeColor(tile *textureset.Tile) *textureset.Color {
+func (textureSet *TerrestrialTextureSet) BiomeColor(tile *textureset.Tile) *textureset.Color {
 	// find the terrestrialTile
-	terrestrialTile := terrestrialSet.findTile(tile)
+	terrestrialTile := textureSet.findTile(tile)
 
 	// Water tiles
 	if terrestrialTile.HeightType == DeepWater {
@@ -220,7 +225,7 @@ func (terrestrialSet *TerrestrialTextureSet) BiomeColor(tile *textureset.Tile) *
 	}
 
 	// calculate the biomeBitmask
-	biomeBitmask := terrestrialSet.biomeBitmask(tile)
+	biomeBitmask := textureSet.biomeBitmask(tile)
 
 	if biomeBitmask != 15 {
 		color = color.Lerp(Black, 0.4)
@@ -229,10 +234,33 @@ func (terrestrialSet *TerrestrialTextureSet) BiomeColor(tile *textureset.Tile) *
 	return color
 }
 
-func (textureSet *TerrestrialTextureSet) Cloud1Color(tile *textureset.Tile) *textureset.Color {
-	return nil
+func (textureSet *TerrestrialTextureSet) BumpColor(tile *textureset.Tile) *textureset.Color {
+	// find the terrestrialTile
+	terrestrialTile := textureSet.findTile(tile)
+	// try to find the color for the type
+	color, ok := BumpMapColors[terrestrialTile.HeightType]
+
+	if !ok {
+		return Black
+	}
+	return color
 }
 
-func (textureSet *TerrestrialTextureSet) Cloud2Color(tile *textureset.Tile) *textureset.Color {
-	return nil
+func (textureSet *TerrestrialTextureSet) CloudColor(tile *textureset.Tile) *textureset.Color {
+	if tile.CloudValue > 0.55 {
+		//white := textureset.NewRGBColor(1.0, 1.0, 1.0)
+		//color := textureset.NewRGBAColor(1.0, 1.0, 1.0, 0.0)
+		return textureset.NewRGBAColor(1.0, 1.0, 1.0, tile.CloudValue)
+	}
+	return textureset.NewRGBAColor(0.0, 0.0, 0.0, 0.0)
+}
+
+func (textureSet *TerrestrialTextureSet) SpecularColor(tile *textureset.Tile) *textureset.Color {
+	// find the terrestrialTile
+	terrestrialTile := textureSet.findTile(tile)
+	// Only Water is Specular
+	if terrestrialTile.HeightType == DeepWater || terrestrialTile.HeightType == ShallowWater {
+		return textureset.NewRGBColor(1.0, 1.0, 1.0)
+	}
+	return Black
 }

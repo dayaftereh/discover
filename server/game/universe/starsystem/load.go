@@ -17,10 +17,10 @@ func (starSystem *StarSystem) loadData(starSystemData *data.StarSystem) {
 	starSystem.world.AddObject(starSystem.sun)
 
 	// load all planets
-	for _, planetData := range starSystemData.Planets {
-		// load the planet
-		starSystem.loadAndAddPlanet(planetData)
-	}
+	//for _, planetData := range starSystemData.Planets {
+	// load the planet
+	//starSystem.loadAndAddPlanet(planetData)
+	//}
 }
 
 func (starSystem *StarSystem) loadAndAddPlanet(planetData *data.Planet) {

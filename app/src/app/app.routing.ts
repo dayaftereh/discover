@@ -5,6 +5,7 @@ import { GameComponent } from './game/game.component';
 import { GuardServicesModule } from './services/guard/guard-services.module';
 import { InGameGuardService } from './services/guard/in-game-guard.service';
 import { AuthenticationGuardService } from './services/guard/authentication-guard.service';
+import { PlanetPreviewComponent } from './planet-preview/planet-preview.component';
 
 const routes: Routes = [
     {
@@ -21,6 +22,7 @@ const routes: Routes = [
             { path: '', component: GameComponent },
         ]
     },
+    { path: 'planet-preview', component: PlanetPreviewComponent },
     { path: '', redirectTo: '/login', pathMatch: 'full' }
 ]
 

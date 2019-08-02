@@ -13,34 +13,34 @@ type MoistureType struct {
 }
 
 var (
-	MoistureTypes = []MoistureType{
+	MoistureTypes = []*MoistureType{
 		Dryest, Dryer, Dry, Wet, Wetter, Wettest,
 	}
 
-	Wettest = MoistureType{
+	Wettest = &MoistureType{
 		Value:    0.95,
 		Range:    true,
 		MaxValue: math.Inf(1),
 	}
-	Wetter = MoistureType{
+	Wetter = &MoistureType{
 		Value: 0.95,
 	}
-	Wet = MoistureType{
+	Wet = &MoistureType{
 		Value: 0.8,
 	}
-	Dry = MoistureType{
+	Dry = &MoistureType{
 		Value: 0.6,
 	}
-	Dryer = MoistureType{
+	Dryer = &MoistureType{
 		Value: 0.4,
 	}
-	Dryest = MoistureType{
+	Dryest = &MoistureType{
 		Value: 0.27,
 	}
 
 	// Moisture Colors
 
-	MoistureMapColors = map[MoistureType]*textureset.Color{
+	MoistureMapColors = map[*MoistureType]*textureset.Color{
 		Wettest: textureset.NewRGBColor255(0.0, 0.0, 100.0),
 		Wetter:  textureset.NewRGBColor255(20.0, 70.0, 255.0),
 		Wet:     textureset.NewRGBColor255(85.0, 255.0, 255.0),
@@ -50,7 +50,7 @@ var (
 	}
 )
 
-func FindMoistureType(value float64) MoistureType {
+func FindMoistureType(value float64) *MoistureType {
 	for _, typ := range MoistureTypes {
 		if typ.Range {
 			if typ.Value <= value && value <= typ.MaxValue {

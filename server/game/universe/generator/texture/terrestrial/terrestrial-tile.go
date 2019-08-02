@@ -1,8 +1,8 @@
 package terrestrial
 
 type TerrestrialTile struct {
-	HeatType     HeatType
+	HeatType     *HeatType
 	BiomeType    BiomeType
 	HeightType   *HeightType
-	MoistureType MoistureType
+	MoistureType *MoistureType
 }
