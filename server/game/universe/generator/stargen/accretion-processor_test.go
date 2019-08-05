@@ -5,6 +5,7 @@ import (
 
 	"github.com/dayaftereh/discover/server/utils/container"
 
+	"github.com/dayaftereh/discover/server/game/persistence/types"
 	"github.com/dayaftereh/discover/server/game/universe/generator/stargen"
 )
 
@@ -29,7 +30,7 @@ func TestAccretionProcessor(t *testing.T) {
 	})
 
 	container.ForEach(accretionProcessor.Planets, func(value interface{}, index int64) {
-		planet := value.(*stargen.Planet)
+		planet := value.(*types.Planet)
 		t.Log(planet)
 	})
 }

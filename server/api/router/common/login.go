@@ -30,7 +30,10 @@ func (common *commonRouter) login(ctx context.Context, response http.ResponseWri
 	}
 
 	// get the player
-	player := common.backend.SessionByName(sessionID, *login.Name)
+	player, err := common.backend.SessionByName(sessionID, *login.Name)
+	if err != nil {
+		return err
+	}
 
 	// create the status
 	status := types.Status{
@@ -38,6 +41,7 @@ func (common *commonRouter) login(ctx context.Context, response http.ResponseWri
 		ID:            player.ID,
 		Name:          &player.Name,
 		StarSystem:    player.StarSystem,
+		Admin:         player.Admin,
 	}
 
 	// log the login

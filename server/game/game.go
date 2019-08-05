@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/dayaftereh/discover/server/game/persistence"
 	"github.com/dayaftereh/discover/server/game/player"
 	"github.com/dayaftereh/discover/server/game/universe"
 )
@@ -10,13 +11,15 @@ type Game struct {
 	playerManager *player.Manager
 	// Universe
 	universe *universe.Universe
+	// persistence
+	persistence *persistence.PersistenceManager
 }
 
-func NewGame() *Game {
+func NewGame(directory string) *Game {
+	persistenceManager := persistence.NewPersistenceManager(directory)
 	return &Game{
-		universe:      universe.NewUniverse(),
-		playerManager: player.NewPlayerManager(),
+		universe:      universe.NewUniverse(persistenceManager),
+		playerManager: player.NewPlayerManager(persistenceManager),
+		persistence:   persistenceManager,
 	}
 }
-
-

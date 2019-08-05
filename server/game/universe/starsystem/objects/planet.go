@@ -1,8 +1,8 @@
 package objects
 
 import (
-	"github.com/dayaftereh/discover/server/game/data"
 	"github.com/dayaftereh/discover/server/game/engine/physics"
+	"github.com/dayaftereh/discover/server/game/persistence/types"
 	"github.com/dayaftereh/discover/server/mathf"
 	"github.com/dayaftereh/discover/server/mathf/orbit"
 )
@@ -11,63 +11,48 @@ var GameObjectPlanet GameObjectType = "planet"
 
 type Planet struct {
 	id        int64
-	color     int64
-	radius    float64
+	sun       *Sun
 	orbit     *orbit.Orbit
 	rigidbody *physics.RigidBody
 	// custom
 	epoch float64
-	data  *data.Planet
+	// public
+	Data *types.Planet
 }
 
-func NewPlanet(id int64) *Planet {
-	rigidbody := physics.NewRigidBody()
-
+func NewPlanet(id int64, data *types.Planet, sun *Sun) *Planet {
 	return &Planet{
 		id:        id,
-		rigidbody: rigidbody,
+		sun:       sun,
+		Data:      data,
+		rigidbody: physics.NewRigidBody(),
 	}
 }
 
-func (planet *Planet) Load(sun *Sun, data *data.Planet) {
-	// store the data for the planet
-	planet.data = data
+func (planet *Planet) Init() error {
 	// setup the orbit
-	planet.orbit = planet.createOrbit(sun, data.Orbit)
+	//planet.orbit = planet.createOrbit()
 	planet.epoch = 0.0
 
-	// setup planet
-	planet.color = data.Color
-	planet.radius = data.Radius
-
 	// setup rigidbody
-	planet.rigidbody.Mass = data.Mass
-	planet.rigidbody.Position = planet.orbit.Position()
+	planet.rigidbody.Mass = planet.Data.Mass
+	//planet.rigidbody.Position = planet.orbit.Position()
 	planet.rigidbody.LinearFactor = mathf.NewZeroVec3()
 
 	// load the Inertia
-	planet.rigidbody.Inertia = physics.CalculateSphereInertia(planet.radius, planet.rigidbody.Mass)
+	planet.rigidbody.Inertia = physics.CalculateSphereInertia(planet.Data.Radius, planet.rigidbody.Mass)
 	planet.rigidbody.UpdateInertiaWorld(true)
+
+	return nil
 }
 
-func (planet *Planet) createOrbit(sun *Sun, orbitData *data.Orbit) *orbit.Orbit {
-	// get the RigidBody of the sun
-	sunRigidBody := sun.RigidBody()
-	// get th radius of the sun
-	centralBodyRadius := sun.Radius()
+func (planet *Planet) createOrbit() *orbit.Orbit {
 	// calucate mu
-	mu := mathf.GravitationalConstant * sunRigidBody.Mass
+	mu := mathf.GravitationalConstant * planet.sun.Data.Mass
 
 	// create the orbit
 	orbit := orbit.OrbitFromParams(&orbit.OrbitParameter{
-		MU:                  &mu,
-		CentralBodyRadius:   &centralBodyRadius,
-		Apogee:              &orbitData.Apogee,
-		Perigee:             &orbitData.Perigee,
-		Eccentricity:        &orbitData.Eccentricity,
-		Inclination:         &orbitData.Inclination,
-		RightAscension:      &orbitData.RightAscension,
-		ArgumentOfPeriapsis: &orbitData.ArgumentOfPeriapsis,
+		MU: &mu,
 	})
 
 	return orbit
@@ -77,35 +62,27 @@ func (planet *Planet) ID() int64 {
 	return planet.id
 }
 
-func (planet *Planet) Radius() float64 {
-	return planet.radius
-}
-
 func (planet *Planet) RigidBody() *physics.RigidBody {
 	return planet.rigidbody
 }
 
 func (planet *Planet) Update(delta float64) {
-	// update the rigidbody
+	/*// update the rigidbody
 	planet.rigidbody.Update(delta)
 	// move the planet
 	planet.epoch += delta
 	// get the current orbit
 	currentOrbit := planet.orbit.Update(planet.epoch)
 	// update planet to current orbit
-	planet.rigidbody.Position = currentOrbit.Position()
-}
-
-func (planet *Planet) Color() int64 {
-	return planet.color
+	planet.rigidbody.Position = currentOrbit.Position()*/
 }
 
 func (planet *Planet) Type() GameObjectType {
 	return GameObjectPlanet
 }
 
-func (planet *Planet) Write() *data.Planet {
-	return planet.data
+func (planet *Planet) Radius() float64 {
+	return planet.Data.Radius
 }
 
 func (planet *Planet) Destroy() {

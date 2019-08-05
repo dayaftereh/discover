@@ -11,10 +11,7 @@ func TestStargen(t *testing.T) {
 		_, planets := stargen.GenerateStellarSystem(true, true, true)
 		//t.Log(sun)
 		for _, planet := range planets {
-			if len(planet.Atmosphere) > 0 {
-				t.Log(planet)
-
-			}
+			t.Log(planet)
 		}
 	}
 }

@@ -16,11 +16,11 @@ func (starSystem *StarSystem) JoinPlayer(player *player.Player) {
 	// check if player already in the star system
 	_, ok := starSystem.players[player.ID]
 	if ok {
-		log.Printf("player [ %s ] already joined star-system [ %d ]", player.Name, starSystem.ID)
+		log.Printf("player [ %s ] already joined star-system [ %s ]", player.Name, starSystem.Name)
 		return
 	}
 
-	log.Printf("player [ %s ] joined star-system [ %d ]\n", player.Name, starSystem.ID)
+	log.Printf("player [ %s ] joined star-system [ %s ]\n", player.Name, starSystem.Name)
 
 	// store the player
 	starSystem.players[player.ID] = player
@@ -69,7 +69,7 @@ func (starSystem *StarSystem) UpdatePlayer(player *player.Player, move *mathf.Ve
 
 	// check if game object a player
 	if gameObject.Type() != objects.GameObjectPlayer {
-		return errors.Errorf("ugame-object with id [ %d ] is not a player object", gameObjectID, player.Name)
+		return errors.Errorf("game-object with id [ %d ] is not a player object for player [ %s ]", gameObjectID, player.Name)
 	}
 
 	// convert game object to player
@@ -86,7 +86,7 @@ func (starSystem *StarSystem) DropPlayer(player *player.Player) error {
 	starSystem.lock.Lock()
 	defer starSystem.lock.Unlock()
 
-	log.Printf("dropping player [ %s ] from star-system [ %d ]\n", player.Name, starSystem.ID)
+	log.Printf("dropping player [ %s ] from star-system [ %s ]\n", player.Name, starSystem.Name)
 
 	_, ok := starSystem.players[player.ID]
 	// check if the player is joined to this star system
@@ -100,7 +100,7 @@ func (starSystem *StarSystem) DropPlayer(player *player.Player) error {
 	gameObjectID, ok := starSystem.playersObject[player.ID]
 	// check if game object found
 	if !ok {
-		return errors.Errorf("unable to find game-object [ %d ] for player [ %s ]", gameObjectID, player.Name)
+		return errors.Errorf("unable to find game-object [ %d ] for player [ %s ] in star-system [ %s ]", gameObjectID, player.Name, starSystem.Name)
 	}
 	// remove the mapping
 	delete(starSystem.playersObject, player.ID)

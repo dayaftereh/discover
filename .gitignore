@@ -7,7 +7,8 @@ dist/
 tmp/
 out-tsc/
 
-/data/players.json
+# ignore data
+/data
 
 # dependencies
 vendor/

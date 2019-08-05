@@ -3,7 +3,9 @@ package main
 import (
 	"sync"
 
+	persistence "github.com/dayaftereh/discover/server/game/persistence/types"
 	"github.com/dayaftereh/discover/server/game/universe/generator/stargen"
+	"github.com/dayaftereh/discover/server/game/universe/generator/stargen/types"
 	"github.com/dayaftereh/discover/server/utils/atomic"
 )
 
@@ -28,35 +30,35 @@ func (worker *Worker) Start() {
 	go worker.Run()
 }
 
-func (worker *Worker) inspectPlanet(planet *stargen.Planet) {
-	count, ok := worker.statistics.Types[planet.Type]
+func (worker *Worker) inspectPlanet(planet *persistence.Planet) {
+	count, ok := worker.statistics.PlanetTypes[planet.Type]
 	if ok {
-		worker.statistics.Types[planet.Type] = count + 1
+		worker.statistics.PlanetTypes[planet.Type] = count + 1
 	} else {
-		worker.statistics.Types[planet.Type] = 1
+		worker.statistics.PlanetTypes[planet.Type] = 1
 	}
 
-	count, ok = worker.statistics.Oxygen[planet.Breathability]
+	count, ok = worker.statistics.AtmosphereTypes[planet.AtmosphereType]
 	if ok {
-		worker.statistics.Oxygen[planet.Breathability] = count + 1
+		worker.statistics.AtmosphereTypes[planet.AtmosphereType] = count + 1
 	} else {
-		worker.statistics.Oxygen[planet.Breathability] = 1
+		worker.statistics.AtmosphereTypes[planet.AtmosphereType] = 1
 	}
 
 	for _, gas := range planet.Atmosphere {
-		count, ok = worker.statistics.Gases[gas.Num]
+		count, ok = worker.statistics.AtmosphereGases[gas.Num]
 		if ok {
-			worker.statistics.Gases[gas.Num] = count + 1
+			worker.statistics.AtmosphereGases[gas.Num] = count + 1
 		} else {
-			worker.statistics.Gases[gas.Num] = 1
+			worker.statistics.AtmosphereGases[gas.Num] = 1
 		}
 	}
 }
 
-func (worker *Worker) appendPlanet(planet *stargen.Planet) {
+func (worker *Worker) appendPlanet(planet *persistence.Planet) {
 	worker.inspectPlanet(planet)
 
-	if planet.Type == stargen.PlanetUnknown {
+	if planet.Type == types.PlanetUnknown {
 		worker.statistics.UnknownPlanets++
 	}
 
@@ -67,13 +69,13 @@ func (worker *Worker) appendPlanet(planet *stargen.Planet) {
 	for _, moon := range planet.Moons {
 		worker.inspectPlanet(moon)
 
-		if moon.Type == stargen.PlanetUnknown {
+		if moon.Type == types.PlanetUnknown {
 			worker.statistics.UnknownMoons++
 		}
 	}
 }
 
-func (worker *Worker) updateStatistics(planets []*stargen.Planet) {
+func (worker *Worker) updateStatistics(planets []*persistence.Planet) {
 	worker.lock.Lock()
 	defer worker.lock.Unlock()
 
@@ -109,30 +111,30 @@ func (worker *Worker) AddToStatistics(statistics *Statistics) {
 	statistics.Moons += worker.statistics.Moons
 	statistics.UnknownMoons += worker.statistics.UnknownMoons
 
-	for typ, count := range worker.statistics.Types {
-		c, ok := statistics.Types[typ]
+	for typ, count := range worker.statistics.PlanetTypes {
+		c, ok := statistics.PlanetTypes[typ]
 		if !ok {
-			statistics.Types[typ] = count
+			statistics.PlanetTypes[typ] = count
 		} else {
-			statistics.Types[typ] = c + count
+			statistics.PlanetTypes[typ] = c + count
 		}
 	}
 
-	for oxygen, count := range worker.statistics.Oxygen {
-		c, ok := statistics.Oxygen[oxygen]
+	for oxygen, count := range worker.statistics.AtmosphereTypes {
+		c, ok := statistics.AtmosphereTypes[oxygen]
 		if !ok {
-			statistics.Oxygen[oxygen] = count
+			statistics.AtmosphereTypes[oxygen] = count
 		} else {
-			statistics.Oxygen[oxygen] = c + count
+			statistics.AtmosphereTypes[oxygen] = c + count
 		}
 	}
 
-	for gas, count := range worker.statistics.Gases {
-		c, ok := statistics.Gases[gas]
+	for gas, count := range worker.statistics.AtmosphereGases {
+		c, ok := statistics.AtmosphereGases[gas]
 		if !ok {
-			statistics.Gases[gas] = count
+			statistics.AtmosphereGases[gas] = count
 		} else {
-			statistics.Gases[gas] = c + count
+			statistics.AtmosphereGases[gas] = c + count
 		}
 	}
 }

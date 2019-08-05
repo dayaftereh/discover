@@ -19,24 +19,14 @@ func gameObjectToOutbound(gameObject objects.GameObject) *types.GameObject {
 	// get the body of the game object
 	rigidbody := gameObject.RigidBody()
 
-	// get the radius of the game object
-	radius := gameObject.Radius()
-
 	// get location and roation
 	position := rigidbody.Position.Clone()
 	rotation := rigidbody.Rotation.ToEuler()
-
-	color := gameObject.Color()
-
-	objectType := string(gameObject.Type())
 
 	removeable := false
 
 	// create the outgoing gameobject
 	return &types.GameObject{
-		Type:       &objectType,
-		Radius:     &radius,
-		Color:      &color,
 		Position:   position,
 		Rotation:   rotation,
 		Removeable: &removeable,

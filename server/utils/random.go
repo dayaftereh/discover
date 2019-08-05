@@ -11,6 +11,13 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	NumbersCharset   = "0123456789"
+	UpperCaseCharset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	LowerCaseCharset = "abcdefghijklmnopqrstuvwxyz"
+	AlphaCharset     = NumbersCharset + UpperCaseCharset + LowerCaseCharset
+)
+
 var (
 	random     = createRand()
 	randomLock sync.Mutex
@@ -43,6 +50,16 @@ func RandString(size int64) (string, error) {
 	str := base64.StdEncoding.EncodeToString(buffer)
 	value := str[:size]
 	return value, nil
+}
+
+func RandStringWithCharset(length int, charset string) string {
+	b := make([]byte, length)
+	charsetLength := len(charset)
+	for i := range b {
+		index := RandIntn(charsetLength)
+		b[i] = charset[index]
+	}
+	return string(b)
 }
 
 func RandIntn(n int) int {

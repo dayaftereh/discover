@@ -1,5 +1,7 @@
 package stargen
 
+import "github.com/dayaftereh/discover/server/game/universe/generator/stargen/types"
+
 const (
 	K                       float64 = 50.0     //K = gas/dust ratio
 	B                       float64 = 1.2E-5   //Used in Crit_mass calc
@@ -16,22 +18,20 @@ const (
 	SunMassInEarthMasses float64 = 332775.64
 	SolarMassInGrams     float64 = 1.989e33 /* Units of grams			*/
 
-	EarthRadius              float64 = 6.378e8  /* Units of cm				*/
-	EarthRadiusInKM          float64 = 6378.0   /* Units of km				*/
-	EarthDensity             float64 = 5.52     /* Units of g/cc			*/
-	EarthMassInGrams         float64 = 5.977e27 /* Units of grams			*/
-	EarthExosphereTemp       float64 = 1273.0   /* Units of degrees Kelvin	*/
-	EarthAcceleration        float64 = 980.7    /* Units of cm/sec2			*/
-	EarthAxialTilt           float64 = 23.4     /* Units of degrees*/
-	EarthAverageCelsius      float64 = 14.0     /* Average Earth Temperature */
-	EarthAverageKelvin       float64 = EarthAverageCelsius + FreezingPointOfWater
-	EarthEffectiveTemp       float64 = 250.0 /* Units of degrees Kelvin (was 255)	*/
-	EarthSurfPersInMilliBars float64 = 1013.25
-	EarthConvectionFactor    float64 = 0.43     /* from Hart, eq.20			*/
-	EarthWaterMassPerArea    float64 = 3.83e15  /* grams per square km		*/
-	EarthSurfPersInMMHG      float64 = 760.0    /* Dole p. 15				*/
-	DaysInAYear              float64 = 365.256  /* Earth days per Earth year*/
-	CloudCoverageFactor      float64 = 1.839e-8 /* Km^2/kg					*/
+	EarthRadius           float64 = 6.378e8  /* Units of cm				*/
+	EarthRadiusInKM       float64 = 6378.0   /* Units of km				*/
+	EarthDensity          float64 = 5.52     /* Units of g/cc			*/
+	EarthMassInGrams      float64 = 5.977e27 /* Units of grams			*/
+	EarthExosphereTemp    float64 = 1273.0   /* Units of degrees Kelvin	*/
+	EarthAcceleration     float64 = 980.7    /* Units of cm/sec2			*/
+	EarthAxialTilt        float64 = 23.4     /* Units of degrees*/
+	EarthAverageCelsius   float64 = 14.0     /* Average Earth Temperature */
+	EarthAverageKelvin    float64 = EarthAverageCelsius + FreezingPointOfWater
+	EarthEffectiveTemp    float64 = 250.0    /* Units of degrees Kelvin (was 255)	*/
+	EarthConvectionFactor float64 = 0.43     /* from Hart, eq.20			*/
+	EarthWaterMassPerArea float64 = 3.83e15  /* grams per square km		*/
+	DaysInAYear           float64 = 365.256  /* Earth days per Earth year*/
+	CloudCoverageFactor   float64 = 1.839e-8 /* Km^2/kg					*/
 
 	MaxSunAge float64 = 6e9
 	MinSunAge float64 = 1e9
@@ -97,22 +97,6 @@ const (
 	Q2_36 float64 = 0.0698   /* 1/Kelvin */
 
 	H2OAssumedPressure float64 = 47.0 * MMHG2MilliBars /* Dole p. 15      */
-	PPMPressure        float64 = EarthSurfPersInMilliBars / 1000000.0
-	MMHG2MilliBars     float64 = EarthSurfPersInMilliBars / EarthSurfPersInMMHG
-	// Gas IPP
-	MinO2IPP  float64 = (72.0 * MMHG2MilliBars)  /* Dole p. 15      */
-	MaxO2IPP  float64 = 400.0 * MMHG2MilliBars   /* Dole p. 15      */
-	MaxHeIPP  float64 = 61000.0 * MMHG2MilliBars /* Dole p. 16      */
-	MaxNeIPP  float64 = 3900.0 * MMHG2MilliBars  /* Dole p. 16      */
-	MaxN2IPP  float64 = 2330.0 * MMHG2MilliBars  /* Dole p. 16      */
-	MaxArIPP  float64 = 1220.0 * MMHG2MilliBars  /* Dole p. 16      */
-	MaxKrIPP  float64 = 350.0 * MMHG2MilliBars   /* Dole p. 16      */
-	MaxXeIPP  float64 = 160.0 * MMHG2MilliBars   /* Dole p. 16      */
-	MaxCo2IPP float64 = 7.0 * MMHG2MilliBars     /* Dole p. 16      */
-	// The next gases are listed as poisonous in parts per million by volume at 1 atm:
-	MaxFIPP   float64 = 0.1 * PPMPressure    /* Dole p. 18      */
-	MaxClIPP  float64 = 1.0 * PPMPressure    /* Dole p. 18      */
-	MaxNh3IPP float64 = 100. * PPMPressure   /* Dole p. 18      */
-	MaxO3IPP  float64 = 0.1 * PPMPressure    /* Dole p. 18      */
-	MaxCh4IPP float64 = 50000. * PPMPressure /* Dole p. 18      */
+	PPMPressure        float64 = types.EarthSurfPersInMilliBars / 1000000.0
+	MMHG2MilliBars     float64 = types.EarthSurfPersInMilliBars / types.EarthSurfPersInMMHG
 )

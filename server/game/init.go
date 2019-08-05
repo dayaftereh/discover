@@ -1,21 +1,14 @@
 package game
 
-import (
-	"github.com/dayaftereh/discover/server/game/data"
-)
-
-func (game *Game) Init(directory string) error {
-	// load the game data
-	gameData, err := data.Load(directory)
+func (game *Game) Init() error {
+	// initialize the player manager
+	err := game.playerManager.Init()
 	if err != nil {
 		return err
 	}
 
-	// load the players
-	game.playerManager.LoadPlayersFromData(gameData)
-
-	// load the universe
-	game.universe.LoadUniverseFromData(gameData)
+	// initialize the universe
+	err = game.universe.Init()
 
 	return err
 }

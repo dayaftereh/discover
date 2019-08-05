@@ -6,6 +6,12 @@
         <p-fileUpload mode="basic" [multiple]="false" accept="image/*" [auto]="true" [customUpload]="true"
             (uploadHandler)="onUploaded($event)"></p-fileUpload>
     </div>
+    <div class="p-col-2">
+        Clouds:
+    </div>
+    <div class="p-col-2">
+        <p-checkbox [binary]="true" (onChange)="onCloudStateChanged()"></p-checkbox>
+    </div>
 </div>
 
 <div class="p-grid">

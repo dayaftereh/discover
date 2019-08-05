@@ -46,10 +46,6 @@ func (player *Player) ID() int64 {
 	return player.id
 }
 
-func (player *Player) Radius() float64 {
-	return player.radius
-}
-
 func (player *Player) RigidBody() *physics.RigidBody {
 	return player.rigidbody
 }
@@ -80,12 +76,12 @@ func (player *Player) UpdateMovement(move *mathf.Vec3, rotation *mathf.Vec3) {
 	player.rotation = rotation
 }
 
-func (player *Player) Color() int64 {
-	return int64(0x34ff81)
-}
-
 func (player *Player) Type() GameObjectType {
 	return GameObjectPlayer
+}
+
+func (player *Player) Radius() float64 {
+	return 1.0
 }
 
 func (player *Player) Destroy() {

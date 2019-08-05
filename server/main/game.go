@@ -22,19 +22,19 @@ func gameDirectory() (string, error) {
 }
 
 func initGame() (*game.Game, error) {
-	// create a new game
-	game := game.NewGame()
-
 	// get the game directory
 	gameDirectory, err := gameDirectory()
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("loading game data from [ %s ]\n", gameDirectory)
+	log.Printf("game directory found at [ %s ]\n", gameDirectory)
+
+	// create a new game
+	game := game.NewGame(gameDirectory)
 
 	// load the game data
-	err = game.Init(gameDirectory)
+	err = game.Init()
 	if err != nil {
 		return nil, err
 	}

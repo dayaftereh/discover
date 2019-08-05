@@ -3,46 +3,44 @@ package player
 import (
 	"sync"
 
-	"github.com/dayaftereh/discover/server/game/data"
+	"github.com/dayaftereh/discover/server/game/persistence"
+	"github.com/dayaftereh/discover/server/game/persistence/types"
+	"github.com/pkg/errors"
 )
 
 type Manager struct {
-	lock     sync.RWMutex
-	sessions map[string]*Player
-	storage  map[string]*data.Player
+	lock        sync.RWMutex
+	sessions    map[string]*Player
+	storage     map[string]*types.Player
+	persistence *persistence.PersistenceManager
 }
 
-func NewPlayerManager() *Manager {
+func NewPlayerManager(persistenceManager *persistence.PersistenceManager) *Manager {
 	return &Manager{
-		sessions: make(map[string]*Player),
-		storage:  make(map[string]*data.Player),
+		persistence: persistenceManager,
+		sessions:    make(map[string]*Player),
+		storage:     make(map[string]*types.Player),
 	}
 }
 
-func (manager *Manager) LoadPlayersFromData(gameData *data.Game) {
+func (manager *Manager) Init() error {
 	// lock for write
 	manager.lock.Lock()
 	defer manager.lock.Unlock()
 
-	// store all players
-	for name, player := range gameData.Players {
-		manager.storage[name] = player
+	// load the player from the persistance manager
+	players, err := manager.persistence.LoadPlayers()
+	if err != nil {
+		return err
 	}
+
+	// store the players
+	manager.storage = players
+
+	return nil
 }
 
-func (manager *Manager) WritePlayersToData(gameData *data.Game) {
-	// lock for read
-	manager.lock.RLock()
-	defer manager.lock.RUnlock()
-
-	//copy players to game data
-	gameData.Players = make(map[string]*data.Player)
-	for name, player := range manager.storage {
-		gameData.Players[name] = player
-	}
-}
-
-func (manager *Manager) SessionByName(id string, name string) *Player {
+func (manager *Manager) SessionByName(id string, name string) (*Player, error) {
 	// lock for read
 	manager.lock.RLock()
 
@@ -54,7 +52,7 @@ func (manager *Manager) SessionByName(id string, name string) *Player {
 
 	// if session exists
 	if ok {
-		return player
+		return player, nil
 	}
 
 	// if not lock for write
@@ -67,10 +65,17 @@ func (manager *Manager) SessionByName(id string, name string) *Player {
 	// create a new player in storage
 	if !ok {
 		// create a new player
-		playerData = &data.Player{}
-		playerData.Name = name
+		playerData = &types.Player{
+			Name:  name,
+			Admin: false,
+		}
 		// storage the player
 		manager.storage[name] = playerData
+		// storage the new created player
+		err := manager.persistence.WritePlayers(manager.storage)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// create a new player
@@ -78,7 +83,7 @@ func (manager *Manager) SessionByName(id string, name string) *Player {
 	// store a new session for the player
 	manager.sessions[id] = player
 
-	return player
+	return player, nil
 
 }
 
@@ -110,7 +115,7 @@ func (manager *Manager) DropSession(id string) *Player {
 	return player
 }
 
-func (manager *Manager) UpdatePlayerStarSystem(id string, starSystem int64) {
+func (manager *Manager) UpdatePlayerStarSystem(id string, starSystem string) error {
 	// lock for write
 	manager.lock.Lock()
 	defer manager.lock.Unlock()
@@ -118,7 +123,7 @@ func (manager *Manager) UpdatePlayerStarSystem(id string, starSystem int64) {
 	// get the player
 	player, ok := manager.sessions[id]
 	if !ok {
-		return
+		return errors.Errorf("fail to update star-system for player session [ %s ], because session not found", id)
 	}
 
 	// set the star system for the player
@@ -129,9 +134,13 @@ func (manager *Manager) UpdatePlayerStarSystem(id string, starSystem int64) {
 
 	// if data not exists
 	if !ok {
-		return
+		return errors.Errorf("fail to update star-system for player [ %s ], because not player found in storage", id)
 	}
 
 	// set the star system for the player
 	playerData.StarSystem = &starSystem
+
+	// write the changed player storage
+	err := manager.persistence.WritePlayers(manager.storage)
+	return err
 }

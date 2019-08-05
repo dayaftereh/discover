@@ -4,6 +4,8 @@ import (
 	"container/list"
 	"math"
 
+	persistence "github.com/dayaftereh/discover/server/game/persistence/types"
+	"github.com/dayaftereh/discover/server/game/universe/generator/stargen/types"
 	"github.com/dayaftereh/discover/server/utils"
 	"github.com/dayaftereh/discover/server/utils/container"
 )
@@ -339,7 +341,7 @@ func (accretionProcessor *AccretionProcessor) coalescePlanetesimals(a, e, mass, 
 	// First we try to find an existing planet with an over-lapping orbit.
 	found := container.FindByElement(accretionProcessor.Planets, func(element *list.Element, index int64) bool {
 		// get the current planet
-		planet := element.Value.(*Planet)
+		planet := element.Value.(*persistence.Planet)
 
 		diff := planet.SemiMajorAxis - a
 
@@ -384,13 +386,13 @@ func (accretionProcessor *AccretionProcessor) coalescePlanetesimals(a, e, mass, 
 				if mass < critMass {
 					// check if the mass fits into the values
 					if (mass*SunMassInEarthMasses) < 2.5 && (mass*SunMassInEarthMasses) > 0.000001 && existingMass < (planet.Mass*0.05) {
-						moon := &Planet{
-							Type:     PlanetUnknown,
+						moon := &persistence.Planet{
+							Type:     types.PlanetUnknown,
 							Mass:     mass,
 							DustMass: dustMass,
 							GasMass:  gasMass,
 							GasGiant: false,
-							Moons:    make([]*Planet, 0),
+							Moons:    make([]*persistence.Planet, 0),
 						}
 
 						// check if the moon more mass then the planet
@@ -437,7 +439,7 @@ func (accretionProcessor *AccretionProcessor) coalescePlanetesimals(a, e, mass, 
 
 			// find a planet further than new a from the sun to insert before
 			nextElement := container.FindAfter(element, func(value interface{}) bool {
-				nextPlanet := value.(*Planet)
+				nextPlanet := value.(*persistence.Planet)
 				return nextPlanet.SemiMajorAxis > newA
 			})
 
@@ -458,20 +460,20 @@ func (accretionProcessor *AccretionProcessor) coalescePlanetesimals(a, e, mass, 
 	// Planetesimals didn't collide. Make it a planet.
 	if found == nil {
 		// create a new planet
-		planet := &Planet{
+		planet := &persistence.Planet{
 			SemiMajorAxis: a,
 			Eccentricity:  e,
 			Mass:          mass,
 			DustMass:      dustMass,
 			GasMass:       gasMass,
 			GasGiant:      mass >= critMass,
-			Moons:         make([]*Planet, 0),
-			Type:          PlanetUnknown,
+			Moons:         make([]*persistence.Planet, 0),
+			Type:          types.PlanetUnknown,
 		}
 
 		// find a planet further than new planet from the sun to insert before
 		nextElement := container.Find(accretionProcessor.Planets, func(value interface{}, index int64) bool {
-			nextPlanet := value.(*Planet)
+			nextPlanet := value.(*persistence.Planet)
 			return nextPlanet.SemiMajorAxis > a
 		})
 

@@ -325,7 +325,7 @@ func (textureGenerator *TextureGenerator) GenerateNormalMapTexture(strength floa
 }
 
 func (textureGenerator *TextureGenerator) GenerateTextures(strength float64) *image.RGBA {
-	rect := image.Rect(0, 0, textureGenerator.width*2.0, textureGenerator.height*2.0)
+	rect := image.Rect(0, 0, textureGenerator.width*5.0, textureGenerator.height)
 	img := image.NewRGBA(rect)
 
 	textureGenerator.forEachTile(func(tile *textureset.Tile) {
@@ -333,20 +333,25 @@ func (textureGenerator *TextureGenerator) GenerateTextures(strength float64) *im
 		normalColor := textureGenerator.calculateNormalMapColor(tile, strength)
 		specularColor := tile.SpecularColor()
 		cloudColor := tile.CloudColor()
+		bumpColor := tile.BumpColor()
 
 		normalX := tile.X + textureGenerator.width
-		normalY := tile.Y + textureGenerator.height
+		normalY := tile.Y
 
-		specularX := tile.X + textureGenerator.width
+		specularX := tile.X + textureGenerator.width*2.0
 		specularY := tile.Y
 
-		cloudX := tile.X
-		cloudY := tile.Y + textureGenerator.height
+		bumpX := tile.X + textureGenerator.width*3.0
+		bumpY := tile.Y
+
+		cloudX := tile.X + textureGenerator.width*4.0
+		cloudY := tile.Y
 
 		img.Set(tile.X, tile.Y, textureGenerator.color2RGBA(biomeColor))
-		img.Set(cloudX, cloudY, textureGenerator.color2RGBA(cloudColor))
-		img.Set(specularX, specularY, textureGenerator.color2RGBA(specularColor))
 		img.Set(normalX, normalY, textureGenerator.color2RGBA(normalColor))
+		img.Set(specularX, specularY, textureGenerator.color2RGBA(specularColor))
+		img.Set(bumpX, bumpY, textureGenerator.color2RGBA(bumpColor))
+		img.Set(cloudX, cloudY, textureGenerator.color2RGBA(cloudColor))
 	})
 
 	return img

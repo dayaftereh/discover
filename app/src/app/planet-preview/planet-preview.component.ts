@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { ThreeJSInitEvent } from "../game/threejs/threejs-init-event";
 import { ThreeJSUpdateEvent } from "../game/threejs/threejs-update-event";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { WebGLRenderer } from "three";
+import { WebGLRenderer, Euler } from "three";
 
 
 @Component({
@@ -11,6 +11,7 @@ import { WebGLRenderer } from "three";
 })
 export class PlanetPreviewComponent {
 
+    private light: THREE.PointLight | undefined
     private cloud: THREE.Mesh | undefined
     private cloudMaterial: THREE.MeshPhongMaterial | undefined
     private planetMaterial: THREE.MeshPhongMaterial | undefined
@@ -24,25 +25,27 @@ export class PlanetPreviewComponent {
         event.camera.position.set(3.0, 2.0, 0)
 
         const directionalLight: THREE.DirectionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(1,5,10).normalize();
+        directionalLight.position.set(1, 5, 10).normalize();
         event.scene.add(directionalLight);
 
         const planet: THREE.Mesh = this.createPlanet()
         event.scene.add(planet)
 
+        this.light = new THREE.PointLight(0xffffff, 1.0, 0.0, 1.0)
+        this.light.position.set(-10.0, 0.0, 0.0)
+        event.scene.add(this.light)
+
         this.controls = new OrbitControls(event.camera, event.canvas);
         this.controls.rotateSpeed = 0.1
-        // this.controls.screenSpacePanning = 0.1
         this.controls.zoomSpeed = 0.1
         this.controls.panSpeed = 0.1
-        this.controls.autoRotate=true
-        this.controls.autoRotateSpeed=0.1
+        this.controls.autoRotate = true
+        this.controls.autoRotateSpeed = 0.1
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.screenSpacePanning = false;
         this.controls.minDistance = 0.5;
         this.controls.maxDistance = 15;
-        this.controls.maxPolarAngle = Math.PI / 2;
     }
 
     private createPlanet(): THREE.Mesh {
@@ -79,24 +82,22 @@ export class PlanetPreviewComponent {
         const file: File = event.files[0]
         const allInOneTexture: THREE.Texture = await this.loadTexture(file)
 
-        const textures: THREE.Texture[] = this.splitTexture(allInOneTexture, 2, 2)
+        const textures: THREE.Texture[] = this.splitTexture(allInOneTexture, 5, 1)
 
         const biomeTexture: THREE.Texture = textures[0]
+        const normalTexture: THREE.Texture = textures[1]
         const specularTexture: THREE.Texture = textures[2]
-        const normalTexture: THREE.Texture = textures[3]
+        const bumpTexture: THREE.Texture = textures[3]
 
         this.planetMaterial.map = biomeTexture
-        this.planetMaterial.specularMap = specularTexture
         this.planetMaterial.normalMap = normalTexture
+        this.planetMaterial.specularMap = specularTexture
+        this.planetMaterial.bumpMap = bumpTexture
         this.planetMaterial.needsUpdate = true
 
-        const cloudTexture: THREE.Texture = textures[1]
+        const cloudTexture: THREE.Texture = textures[4]
         this.cloudMaterial.map = cloudTexture
         this.cloudMaterial.needsUpdate = true
-
-        if (this.cloud) {
-            this.cloud.visible = true
-        }
     }
 
     private loadTexture(file: File): Promise<THREE.Texture> {
@@ -151,9 +152,33 @@ export class PlanetPreviewComponent {
         })
     }
 
+    private rotateLight(): void {
+        if (!this.light) {
+            return
+        }
+        const speed: number = Date.now() / 2000.0
+        const radius: number = 10.0
+        const lx: number = radius * Math.cos(speed)
+        const lz: number = radius * Math.sin(speed)
+
+        const ly: number = 5.0 + 5.0 * Math.sin(speed / 3.0)
+
+        this.light.position.set(lx, ly, lz)
+        this.light.lookAt(new THREE.Vector3(0.0, 0.0, 0.0))
+    }
+
     onUpdateThreeJS(event: ThreeJSUpdateEvent): void {
         if (this.controls) {
             this.controls.update()
+        }
+        if (this.light) {
+            this.rotateLight()
+        }
+    }
+
+    onCloudStateChanged(): void {
+        if (this.cloud) {
+            this.cloud.visible = !this.cloud.visible
         }
     }
 }

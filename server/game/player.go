@@ -6,10 +6,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (game *Game) SessionByName(id string, name string) *player.Player {
+func (game *Game) SessionByName(id string, name string) (*player.Player, error) {
 	// get or create the player session for the given name
-	player := game.playerManager.SessionByName(id, name)
-	return player
+	player, err := game.playerManager.SessionByName(id, name)
+	return player, err
 }
 
 // GetPlayerSession returns the session for the player
@@ -50,7 +50,7 @@ func (game *Game) Ready(player *player.Player) error {
 		}
 
 		// update the player star system
-		game.playerManager.UpdatePlayerStarSystem(player.ID, initialStarSystem.ID)
+		game.playerManager.UpdatePlayerStarSystem(player.ID, initialStarSystem.Name)
 
 		// let the player join the star system
 		initialStarSystem.JoinPlayer(player)
@@ -61,7 +61,7 @@ func (game *Game) Ready(player *player.Player) error {
 	starSystem := game.universe.GetStarSystem(*player.StarSystem)
 	// check if a star system exists
 	if starSystem == nil {
-		return errors.Errorf("unable to join player [ %s ] into star-system [ %d ], because star-system not found", player.Name, starSystem.ID)
+		return errors.Errorf("unable to join player [ %s ] into star-system [ %d ], because star-system not found", player.Name, starSystem.Name)
 	}
 	// let the player join the star system
 	starSystem.JoinPlayer(player)

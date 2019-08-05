@@ -31,3 +31,8 @@ func Forbidden(response http.ResponseWriter) error {
 	response.WriteHeader(http.StatusForbidden)
 	return nil
 }
+
+func BadRequest(response http.ResponseWriter) error {
+	response.WriteHeader(http.StatusBadRequest)
+	return nil
+}

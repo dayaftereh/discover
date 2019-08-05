@@ -5,6 +5,7 @@ import (
 
 	"github.com/dayaftereh/discover/server/utils/container"
 
+	"github.com/dayaftereh/discover/server/game/data"
 	"github.com/dayaftereh/discover/server/game/universe/generator/stargen"
 )
 
@@ -24,7 +25,7 @@ func TestPlanetEnvironmentGeneratePlanet(t *testing.T) {
 	)
 
 	container.ForEach(accretionProcessor.Planets, func(value interface{}, index int64) {
-		planet := value.(*stargen.Planet)
+		planet := value.(*data.Planet)
 
 		planetEnvironment := stargen.NewPlanetEnvironment()
 		planetEnvironment.GeneratePlanet(sun, planet, true, true, true, false)

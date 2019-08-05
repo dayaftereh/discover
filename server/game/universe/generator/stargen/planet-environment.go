@@ -4,6 +4,8 @@ import (
 	"math"
 	"sort"
 
+	persistence "github.com/dayaftereh/discover/server/game/persistence/types"
+	"github.com/dayaftereh/discover/server/game/universe/generator/stargen/types"
 	"github.com/dayaftereh/discover/server/mathf"
 
 	"github.com/dayaftereh/discover/server/utils"
@@ -43,9 +45,9 @@ func (planetEnvironment *PlanetEnvironment) rootMeanSquareVelocity(molecularWeig
 // This formula is listed as eq.9 in Fogg's article, although some typos crop up in that eq.
 // See "The Internal Constitution of Planets", by Dr. D. S. Kothari, Mon. Not. of the Royal Astronomical Society, vol 96
 // pp.833-843, 1936 for the derivation.  Specifically, this is Kothari's eq.23, which appears on page 840.
-func (planetEnvironment *PlanetEnvironment) kothariRadius(mass float64, gaint bool, zone OrbitZone) float64 {
+func (planetEnvironment *PlanetEnvironment) kothariRadius(mass float64, gaint bool, zone types.OrbitZone) float64 {
 	var atomicWeight, atomicNum float64
-	if zone == Orbit1 {
+	if zone == types.Orbit1 {
 		if gaint {
 			atomicWeight = 9.5
 			atomicNum = 4.5
@@ -54,7 +56,7 @@ func (planetEnvironment *PlanetEnvironment) kothariRadius(mass float64, gaint bo
 			atomicNum = 8.0
 		}
 	} else {
-		if zone == Orbit2 {
+		if zone == types.Orbit2 {
 			if gaint {
 				atomicWeight = 2.47
 				atomicNum = 2.0
@@ -118,7 +120,7 @@ func (planetEnvironment *PlanetEnvironment) volumeDensity(mass float64, radius f
 
 // dayLength calculates the length of the day in units of hours.
 // Input parameters are mass (in solar masses), radius (in Km), orbital period (in days), orbital radius (in AU), density (in g/cc), ccentricity, and whether it is a gas giant or not.
-func (planetEnvironment *PlanetEnvironment) dayLength(planet *Planet, sun *Sun) (float64, bool) {
+func (planetEnvironment *PlanetEnvironment) dayLength(planet *persistence.Planet, sun *persistence.Sun) (float64, bool) {
 	/*--------------------------------------------------------------------------*/
 	/*	 Fogg's information for this routine came from Dole "Habitable Planets	*/
 	/* for Man", Blaisdell Publishing Company, NY, 1964.  From this, he came	*/
@@ -134,7 +136,7 @@ func (planetEnvironment *PlanetEnvironment) dayLength(planet *Planet, sun *Sun) 
 	planetaryMassInGrams := planet.Mass * SolarMassInGrams
 	equatorialRadiusInCM := planet.Radius * CMPerKM
 	yearInHours := planet.OrbitPeriod * 24.0
-	giant := (planet.Type == PlanetGasGiant || planet.Type == PlanetSubGasGiant || planet.Type == PlanetSubSubGasGiant)
+	giant := (planet.Type == types.PlanetGasGiant || planet.Type == types.PlanetSubGasGiant || planet.Type == types.PlanetSubSubGasGiant)
 
 	stopped := false
 
@@ -183,13 +185,13 @@ func (planetEnvironment *PlanetEnvironment) acceleration(mass float64, radius fl
 }
 
 // orbitZone returns the orbital 'zone' of the particle from the given the orbital radius of a planet in AU
-func (planetEnvironment *PlanetEnvironment) orbitZone(luminosity, orbitRadius float64) OrbitZone {
+func (planetEnvironment *PlanetEnvironment) orbitZone(luminosity, orbitRadius float64) types.OrbitZone {
 	if orbitRadius < (4.0 * math.Sqrt(luminosity)) {
-		return Orbit1
+		return types.Orbit1
 	} else if orbitRadius < (15.0 * math.Sqrt(luminosity)) {
-		return Orbit2
+		return types.Orbit2
 	} else {
-		return Orbit3
+		return types.Orbit3
 	}
 }
 
@@ -237,7 +239,7 @@ func (planetEnvironment *PlanetEnvironment) estimatedTemp(ecosphereRadius float6
 	return math.Sqrt(ecosphereRadius/orbitRadius) * math.Sqrt(math.Sqrt((1.0-albedo)/(1.0-EarthAlbedo))) * EarthAverageKelvin
 }
 
-func (planetEnvironment *PlanetEnvironment) minMolecularWeight(planet *Planet, sun *Sun) float64 {
+func (planetEnvironment *PlanetEnvironment) minMolecularWeight(planet *persistence.Planet, sun *persistence.Sun) float64 {
 
 	guess1 := planetEnvironment.moleculeLimit(planet.Mass, planet.Radius, planet.ExosphericTemperature)
 	guess2 := guess1
@@ -294,7 +296,7 @@ func (planetEnvironment *PlanetEnvironment) greenHouse(ecosphereRadius, orbitRad
 }
 
 // This implements Fogg's eq.17.  The 'inventory' returned is unitless.
-func (planetEnvironment *PlanetEnvironment) volInventory(mass, escapeVel, rmsVel, stellarMass float64, zone OrbitZone, greenhouseEffect, accretedGas bool) float64 {
+func (planetEnvironment *PlanetEnvironment) volInventory(mass, escapeVel, rmsVel, stellarMass float64, zone types.OrbitZone, greenhouseEffect, accretedGas bool) float64 {
 	velocityRatio := escapeVel / rmsVel
 	if velocityRatio < GasRetentionThreshold {
 		return 0.0
@@ -302,11 +304,11 @@ func (planetEnvironment *PlanetEnvironment) volInventory(mass, escapeVel, rmsVel
 
 	var proportionConst float64
 	switch zone {
-	case Orbit1:
+	case types.Orbit1:
 		proportionConst = 140000.0 /* 100 -> 140 JLB */
-	case Orbit2:
+	case types.Orbit2:
 		proportionConst = 75000.0
-	case Orbit3:
+	case types.Orbit3:
 		proportionConst = 250.0
 	default:
 		proportionConst = 0.0
@@ -327,7 +329,7 @@ func (planetEnvironment *PlanetEnvironment) pressure(volatileGasInventory, equat
 	// This implements Fogg's eq.18.
 	// JLB: Apparently this assumed that earth pressure = 1000mb. I've added a fudge factor (EARTH_SURF_PRES_IN_MILLIBARS / 1000.) to correct for that
 	equatRadius = EarthRadiusInKM / equatRadius
-	return volatileGasInventory * gravity * (EarthSurfPersInMilliBars / MilliBarsPerBar) / math.Pow(equatRadius, 2.0)
+	return volatileGasInventory * gravity * (types.EarthSurfPersInMilliBars / MilliBarsPerBar) / math.Pow(equatRadius, 2.0)
 }
 
 // boilingPoint returns the boiling point of water in an atmosphere of surface pressure in millibars.
@@ -354,7 +356,7 @@ func (planetEnvironment *PlanetEnvironment) soft(v, max, min float64) float64 {
 // I tuned this by changing a pow(x,.25) to pow(x,.4) to match Venus - JLB
 func (planetEnvironment *PlanetEnvironment) greenRise(opticalDepth, effectiveTemp, surfPressure float64) float64 {
 	// This is Fogg's eq.20, and is also Hart's eq.20 in his "Evolution of Earth's Atmosphere" article.
-	convectionFactor := EarthConvectionFactor * math.Pow(surfPressure/EarthSurfPersInMilliBars, 0.4)
+	convectionFactor := EarthConvectionFactor * math.Pow(surfPressure/types.EarthSurfPersInMilliBars, 0.4)
 	rise := (math.Sqrt(math.Sqrt(1.0+0.75*opticalDepth)) - 1.0) * effectiveTemp * convectionFactor
 	return math.Max(rise, 0.0)
 }
@@ -377,30 +379,30 @@ func (planetEnvironment *PlanetEnvironment) opacity(molecularWeight, surfPressur
 	if molecularWeight >= 45 && molecularWeight < 100.0 {
 		opticalDepth = opticalDepth + 0.05
 	}
-	if surfPressure >= (70.0 * EarthSurfPersInMilliBars) {
+	if surfPressure >= (70.0 * types.EarthSurfPersInMilliBars) {
 		return opticalDepth * 8.333
 	}
 
-	if surfPressure >= (50.0 * EarthSurfPersInMilliBars) {
+	if surfPressure >= (50.0 * types.EarthSurfPersInMilliBars) {
 		return opticalDepth * 6.666
 	}
 
-	if surfPressure >= (30.0 * EarthSurfPersInMilliBars) {
+	if surfPressure >= (30.0 * types.EarthSurfPersInMilliBars) {
 		return opticalDepth * 3.33
 	}
 
-	if surfPressure >= (10.0 * EarthSurfPersInMilliBars) {
+	if surfPressure >= (10.0 * types.EarthSurfPersInMilliBars) {
 		return opticalDepth * 2.0
 	}
 
-	if surfPressure >= (5.0 * EarthSurfPersInMilliBars) {
+	if surfPressure >= (5.0 * types.EarthSurfPersInMilliBars) {
 		return opticalDepth * 1.5
 	}
 
 	return opticalDepth
 }
 
-func (planetEnvironment *PlanetEnvironment) setPlanetTempRange(planet *Planet) {
+func (planetEnvironment *PlanetEnvironment) setPlanetTempRange(planet *persistence.Planet) {
 	pressmod := 1.0 / math.Sqrt(1.0+20.0*planet.SurfacePressure/1000.0)
 	ppmod := 1.0 / math.Sqrt(10.0+5.0*planet.SurfacePressure/1000.0)
 	tiltmod := math.Abs(math.Cos(planet.AxialTilt*math.Pi/180.0) * math.Pow(1.0+planet.Eccentricity, 2.0))
@@ -512,7 +514,7 @@ func (planetEnvironment *PlanetEnvironment) planetAlbedo(waterFraction, cloudFra
 	return cloudPart + rockPart + waterPart + icePart
 }
 
-func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *Planet, sun *Sun, first bool, lastWater, lastClouds, lastIce, lastTemp, lastAlbedo float64) {
+func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *persistence.Planet, sun *persistence.Sun, first bool, lastWater, lastClouds, lastIce, lastTemp, lastAlbedo float64) {
 	if first {
 		planet.Albedo = EarthAlbedo
 
@@ -580,7 +582,7 @@ func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *P
 	planetEnvironment.setPlanetTempRange(planet)
 }
 
-func (planetEnvironment *PlanetEnvironment) iterateAndSetSurfaceTemp(planet *Planet, sun *Sun) {
+func (planetEnvironment *PlanetEnvironment) iterateAndSetSurfaceTemp(planet *persistence.Planet, sun *persistence.Sun) {
 	initialTemp := planetEnvironment.estimatedTemp(sun.EcosphereRadius, planet.SemiMajorAxis, planet.Albedo)
 
 	planetEnvironment.calculateAndSetSurfaceTemp(planet, sun, true, 0.0, 0.0, 0.0, 0.0, 0.0)
@@ -602,8 +604,8 @@ func (planetEnvironment *PlanetEnvironment) iterateAndSetSurfaceTemp(planet *Pla
 	planet.GreenhouseRise = planet.SurfaceTemperature - initialTemp
 }
 
-func (planetEnvironment *PlanetEnvironment) calculateGases(planet *Planet, sun *Sun) []*Gas {
-	atmosphere := make([]*Gas, 0)
+func (planetEnvironment *PlanetEnvironment) calculateGases(planet *persistence.Planet, sun *persistence.Sun) []*types.Gas {
+	atmosphere := make([]*types.Gas, 0)
 
 	// no gases
 	if !(planet.SurfacePressure > 0.0) {
@@ -613,7 +615,7 @@ func (planetEnvironment *PlanetEnvironment) calculateGases(planet *Planet, sun *
 	totalAmount := 0.0
 	amount := make(map[int64]float64)
 	pressure := planet.SurfacePressure / MilliBarsPerBar
-	for _, gas := range GasesTable {
+	for _, gas := range types.AtmosphereGases {
 
 		yp := gas.Boil / (373.0*(math.Log(pressure+0.001)/-5050.5) + (1.0 / 373.0))
 		// check if the gas stay on the planet
@@ -654,21 +656,21 @@ func (planetEnvironment *PlanetEnvironment) calculateGases(planet *Planet, sun *
 	}
 
 	for num, gasAmount := range amount {
-		gas, ok := GasesTable[num]
+		gas, ok := types.ChemicalElements[num]
 
 		if !ok {
 			continue
 		}
 
-		atmosphere = append(atmosphere, &Gas{
-			Num:          gas.Num,
-			SurfPressure: planet.SurfacePressure * gasAmount / totalAmount,
+		atmosphere = append(atmosphere, &types.Gas{
+			Num:             gas.Num,
+			SurfacePressure: planet.SurfacePressure * gasAmount / totalAmount,
 		})
 	}
 
 	// sort after SurfPressure
 	sort.SliceStable(atmosphere, func(i, j int) bool {
-		return atmosphere[i].SurfPressure < atmosphere[j].SurfPressure
+		return atmosphere[i].SurfacePressure < atmosphere[j].SurfacePressure
 	})
 
 	return atmosphere
@@ -683,7 +685,7 @@ func (planetEnvironment *PlanetEnvironment) inspiredPartialPressure(surfPressure
 }
 
 // breathability verifies if the planet has breathability gases
-func (planetEnvironment *PlanetEnvironment) breathability(atmosphere []*Gas, surfPressure float64) Oxygen {
+func (planetEnvironment *PlanetEnvironment) breathability(atmosphere []*types.Gas, surfPressure float64) types.AtmosphereType {
 	/*--------------------------------------------------------------------------*/
 	/*	 This function uses figures on the maximum inspired partial pressures   */
 	/*   of Oxygen, other atmospheric and traces gases as laid out on pages 15, */
@@ -693,7 +695,7 @@ func (planetEnvironment *PlanetEnvironment) breathability(atmosphere []*Gas, sur
 
 	// no atmosphere
 	if atmosphere == nil || len(atmosphere) < 1 {
-		return None
+		return types.None
 	}
 
 	oxygenOk := false
@@ -701,32 +703,32 @@ func (planetEnvironment *PlanetEnvironment) breathability(atmosphere []*Gas, sur
 	// get each gas on the planet
 	for _, gas := range atmosphere {
 
-		ipp := planetEnvironment.inspiredPartialPressure(surfPressure, gas.SurfPressure)
+		ipp := planetEnvironment.inspiredPartialPressure(surfPressure, gas.SurfacePressure)
 
-		gasAtom, ok := GasesTable[gas.Num]
+		gasAtom, ok := types.ChemicalElements[gas.Num]
 		if !ok {
 			continue
 		}
 
 		if ipp > gasAtom.MaxIpp {
-			return Toxic // POISONOUS
+			return types.Toxic // POISONOUS
 		}
 
-		if gasAtom.Symbol == "O" {
-			oxygenOk = (ipp >= MinO2IPP) && (ipp <= MaxO2IPP)
+		if gasAtom == types.Oxygen {
+			oxygenOk = (ipp >= types.MinO2IPP) && (ipp <= types.MaxO2IPP)
 		}
 	}
 
 	if oxygenOk {
-		return Breathable
+		return types.Breathable
 	}
-	return Unbreathable
+	return types.Unbreathable
 }
 
-func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *Sun, planet *Planet, randomTilt bool, doMoons, doGases, isMoon bool) {
+func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *persistence.Sun, planet *persistence.Planet, randomTilt bool, doMoons, doGases, isMoon bool) {
 	// initialize the planet
-	planet.Atmosphere = make([]*Gas, 0)
-	planet.Breathability = None
+	planet.Atmosphere = make([]*types.Gas, 0)
+	planet.AtmosphereType = types.None
 
 	// start caluclating
 	planet.OrbitZone = planetEnvironment.orbitZone(sun.Luminosity, planet.SemiMajorAxis)
@@ -754,11 +756,11 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *Sun, planet *Pla
 	// check if the planet is a gas gaint
 	if (planet.Mass*SunMassInEarthMasses) > 1.0 && (planet.GasMass/planet.Mass) > 0.05 && planet.MolecularWeight <= 4.0 {
 		if (planet.GasMass / planet.Mass) < 0.20 {
-			planet.Type = PlanetSubSubGasGiant
+			planet.Type = types.PlanetSubSubGasGiant
 		} else if (planet.Mass * SunMassInEarthMasses) < 20.0 {
-			planet.Type = PlanetSubGasGiant
+			planet.Type = types.PlanetSubGasGiant
 		} else {
-			planet.Type = PlanetGasGiant
+			planet.Type = types.PlanetGasGiant
 		}
 	} else { // If not, it's rocky.
 		planet.Radius = planetEnvironment.kothariRadius(planet.Mass, false, planet.OrbitZone)
@@ -797,7 +799,7 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *Sun, planet *Pla
 	planet.EscapeVelocity = planetEnvironment.escapeVelocity(planet.Mass, planet.Radius)
 
 	// check if the planet is a gas gaint
-	if planet.Type == PlanetGasGiant || planet.Type == PlanetSubGasGiant || planet.Type == PlanetSubSubGasGiant {
+	if planet.Type == types.PlanetGasGiant || planet.Type == types.PlanetSubGasGiant || planet.Type == types.PlanetSubSubGasGiant {
 		planet.GreenhouseEffect = false
 		planet.VolatileGasInventory = math.MaxFloat64
 		planet.SurfacePressure = math.MaxFloat64
@@ -861,40 +863,40 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *Sun, planet *Pla
 
 		if planet.SurfacePressure < 1.0 {
 			if !isMoon && (planet.Mass*SunMassInEarthMasses) < AsteroidMassLimit {
-				planet.Type = PlanetAsteroids
+				planet.Type = types.PlanetAsteroids
 			} else {
-				planet.Type = PlanetRock
+				planet.Type = types.PlanetRock
 			}
 		} else if planet.SurfacePressure > 6000.0 && planet.MolecularWeight <= 2.0 { // Retains Hydrogen
-			planet.Type = PlanetSubSubGasGiant
-			planet.Atmosphere = make([]*Gas, 0)
+			planet.Type = types.PlanetSubSubGasGiant
+			planet.Atmosphere = make([]*types.Gas, 0)
 		} else {
 			// Atmospheres:
 			if mathf.CloseEquals(planet.Day, planet.OrbitPeriod*24.0) || planet.ResonantPeriod {
-				planet.Type = Planet1Face
+				planet.Type = types.Planet1Face
 			} else if planet.Hydrosphere >= 0.95 {
-				planet.Type = PlanetWater // >95% water
+				planet.Type = types.PlanetWater // >95% water
 			} else if planet.IceCover >= 0.95 {
-				planet.Type = PlanetIce // >95% ice
+				planet.Type = types.PlanetIce // >95% ice
 			} else if planet.Hydrosphere > 0.05 {
-				planet.Type = PlanetTerrestrial // Terrestrial else <5% water
+				planet.Type = types.PlanetTerrestrial // Terrestrial else <5% water
 			} else if planet.MaxTemperature > planet.BoilPoint {
-				planet.Type = PlanetVenusian // Hot = Venusian
+				planet.Type = types.PlanetVenusian // Hot = Venusian
 			} else if (planet.GasMass / planet.Mass) > 0.0001 {
-				planet.Type = PlanetIce // Accreted gas, But no Greenhouse or liquid water => make it an Ice World
+				planet.Type = types.PlanetIce // Accreted gas, But no Greenhouse or liquid water => make it an Ice World
 				planet.IceCover = 1.0
 			} else if planet.SurfacePressure <= 250.0 {
-				planet.Type = PlanetMartian // Thin air = Martian
+				planet.Type = types.PlanetMartian // Thin air = Martian
 			} else if planet.SurfaceTemperature < FreezingPointOfWater {
-				planet.Type = PlanetIce
+				planet.Type = types.PlanetIce
 			} else {
-				planet.Type = PlanetUnknown
+				planet.Type = types.PlanetUnknown
 			}
 		}
 	}
 
 	// verify if the planet Breathability
-	planet.Breathability = planetEnvironment.breathability(planet.Atmosphere, planet.SurfaceAcceleration)
+	planet.AtmosphereType = planetEnvironment.breathability(planet.Atmosphere, planet.SurfaceAcceleration)
 
 	// check if do moons and a moon is available
 	if doMoons && !isMoon && planet.Moons != nil && len(planet.Moons) > 0 {
@@ -910,11 +912,11 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *Sun, planet *Pla
 			rocheLimit := 2.44 * planet.Radius * math.Pow((planet.Density/moon.Density), (1.0/3.0))
 			hillSphere := planet.SemiMajorAxis * KMPerAU * math.Pow((planet.Mass/(3.0*sun.Mass)), (1.0/3.0))
 			if (rocheLimit * 3.0) < hillSphere {
-				moon.MoonA = utils.RandFloat64(rocheLimit*1.5, hillSphere/2.0) / KMPerAU
-				moon.MoonE = randEccentricity()
+				moon.SemiMajorAxis = utils.RandFloat64(rocheLimit*1.5, hillSphere/2.0) / KMPerAU
+				moon.Eccentricity = randEccentricity()
 			} else {
-				moon.MoonA = 0.0
-				moon.MoonE = 0.0
+				moon.SemiMajorAxis = 0.0
+				moon.Eccentricity = 0.0
 			}
 		}
 	}
