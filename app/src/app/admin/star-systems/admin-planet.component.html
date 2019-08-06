@@ -1,0 +1,333 @@
+<p-panel [header]="planet?.name" [toggleable]="true" [collapsed]="collapsed">
+    <div class="p-grid">
+        <div class="p-col-1">
+            Type:
+        </div>
+        <div class="p-col-1">
+            {{planet?.type}}
+        </div>
+        <div class="p-col-1">
+            SemiMajorAxis:
+        </div>
+        <div class="p-col-1">
+            <div class="p-grid">
+                <div class="p-col">
+                    {{planet?.semiMajorAxis|number}} AU
+                </div>
+            </div>
+            <div class="p-grid">
+                <div class="p-col">
+                    {{au2KM(planet?.semiMajorAxis)|number}} km
+                </div>
+            </div>
+        </div>
+        <div class="p-col-1">
+            Eccentricity:
+        </div>
+        <div class="p-col-1">
+            {{planet?.eccentricity|number}}
+        </div>
+        <div class="p-col-1">
+            AxialTilt:
+        </div>
+        <div class="p-col-1">
+            {{planet?.axialTilt|number}} &deg;
+        </div>
+        <div class="p-col-1">
+            Mass:
+        </div>
+        <div class="p-col-1">
+            <div class="p-grid">
+                <div class="p-col">
+                    {{planet?.mass|number:'1.3-8'}} M<sub>&#9737;</sub>
+                </div>
+            </div>
+            <div class="p-grid">
+                <div class="p-col">
+                    {{solarMass2KG(planet?.mass)|number}} kg
+                </div>
+            </div>
+        </div>
+        <div class="p-col-1">
+            GasGiant:
+        </div>
+        <div class="p-col-1">
+            <p-checkbox [binary]="true" [ngModel]="planet?.gasGiant" [disabled]="true"></p-checkbox>
+        </div>
+        <div class="p-col-1">
+            DustMass:
+        </div>
+        <div class="p-col-1">
+            <div class="p-grid">
+                <div class="p-col">
+                    {{planet?.dustMass|number:'1.3-8'}} M<sub>&#9737;</sub>
+                </div>
+            </div>
+            <div class="p-grid">
+                <div class="p-col">
+                    {{solarMass2KG(planet?.dustMass)|number}} kg
+                </div>
+            </div>
+        </div>
+        <div class="p-col-1">
+            GasMass:
+        </div>
+        <div class="p-col-1">
+            <div class="p-grid">
+                <div class="p-col">
+                    {{planet?.gasMass|number:'1.3-8'}} M<sub>&#9737;</sub>
+                </div>
+            </div>
+            <div class="p-grid">
+                <div class="p-col">
+                    {{solarMass2KG(planet?.gasMass)|number}} kg
+                </div>
+            </div>
+        </div>
+        <div class="p-col-1">
+            Radius-Core:
+        </div>
+        <div class="p-col-1">
+            {{planet?.coreRadius|number}} km
+        </div>
+        <div class="p-col-1">
+            Equatorial Radius:
+        </div>
+        <div class="p-col-1">
+            {{planet?.radius|number}} km
+        </div>
+        <div class="p-col-1">
+            OrbitZone:
+        </div>
+        <div class="p-col-1">
+            {{planet?.orbitZone}}
+        </div>
+        <div class="p-col-1">
+            Density:
+        </div>
+        <div class="p-col-1">
+            {{planet?.density|number}} g/cc
+        </div>
+        <div class="p-col-1">
+            OrbitPeriod:
+        </div>
+        <div class="p-col-1">
+            {{planet?.orbitPeriod|number}} Days
+        </div>
+        <div class="p-col-1">
+            Day:
+        </div>
+        <div class="p-col-1">
+            {{planet?.day|number}} Hours
+        </div>
+        <div class="p-col-1">
+            ResonantPeriod:
+        </div>
+        <div class="p-col-1">
+            <p-checkbox [binary]="true" [ngModel]="planet?.resonantPeriod" [disabled]="true"></p-checkbox>
+        </div>
+        <div class="p-col-1">
+            EscapeVelocity:
+        </div>
+        <div class="p-col-1">
+            {{cmPerS2mPerS(planet?.escapeVelocity)|number}} m/s
+        </div>
+        <div class="p-col-1">
+            SurfaceAcceleration:
+        </div>
+        <div class="p-col-1">
+            {{cmPerSSqr2mPerSSqr(planet?.surfaceAcceleration)|number}} m/s<sup>2</sup>
+        </div>
+        <div class="p-col-1">
+            SurfaceGravity:
+        </div>
+        <div class="p-col-1">
+            <div class="p-grid">
+                <div class="p-col">
+                    {{planet?.surfaceGravity|number}} g<sub>0</sub>
+                </div>
+            </div>
+            <div class="p-grid">
+                <div class="p-col">
+                    {{earthGravities2mPerSSqr(planet?.surfaceGravity)|number}} m/s<sup>2</sup>
+                </div>
+            </div>
+        </div>
+        <div class="p-col-1">
+            RMS-Velocity:
+        </div>
+        <div class="p-col-1">
+            {{cmPerS2mPerS(planet?.rootMeanSquareVelocity)|number}} m/s
+        </div>
+        <div class="p-col-1">
+            MolecularWeight:
+        </div>
+        <div class="p-col-1">
+            {{planet?.molecularWeight|number}}
+        </div>
+        <div class="p-col-1">
+            VolatileGasInventory:
+        </div>
+        <div class="p-col-1">
+            {{planet?.volatileGasInventory|number}}
+        </div>
+        <div class="p-col-1">
+            SurfacePressure:
+        </div>
+        <div class="p-col-1">
+            {{planet?.surfacePressure|number}} mbar
+        </div>
+        <div class="p-col-1">
+            GreenhouseEffect:
+        </div>
+        <div class="p-col-1">
+            <p-checkbox [binary]="true" [ngModel]="planet?.greenhouseEffect" [disabled]="true"></p-checkbox>
+        </div>
+        <div class="p-col-1">
+            BoilPoint:
+        </div>
+        <div class="p-col-1">
+            {{kelvin2Degrees(planet?.boilPoint)|number}} &deg;
+        </div>
+        <div class="p-col-1">
+            Albedo:
+        </div>
+        <div class="p-col-1">
+            {{planet?.albedo|number}}
+        </div>
+        <div class="p-col-1">
+            Exospheric Temp.:
+        </div>
+        <div class="p-col-1">
+            {{kelvin2Degrees(planet?.exosphericTemperature)|number}} &deg;
+        </div>
+        <div class="p-col-1">
+            Estimated Temp.:
+        </div>
+        <div class="p-col-1">
+            {{kelvin2Degrees(planet?.estimatedTemperature)|number}} &deg;
+        </div>
+        <div class="p-col-1">
+            Estimated Terr. Temp.:
+        </div>
+        <div class="p-col-1">
+            {{kelvin2Degrees(planet?.estimatedTerrestrialTemperature)|number}} &deg;
+        </div>
+        <div class="p-col-1">
+            Surface Temp.:
+        </div>
+        <div class="p-col-1">
+            {{kelvin2Degrees(planet?.surfaceTemperature)|number}} &deg;
+        </div>
+        <div class="p-col-1">
+            GreenhouseRise:
+        </div>
+        <div class="p-col-1">
+            {{kelvin2Degrees(planet?.greenhouseRise)|number}} &deg;
+        </div>
+        <div class="p-col-1">
+            Day / Night Temperature:
+        </div>
+        <div class="p-col-1">
+            <div class="p-grid">
+                <div class="p-col">
+                    {{kelvin2Degrees(planet?.highTemperature)|number}} &deg;
+                </div>
+            </div>
+            <div class="p-grid">
+                <div class="p-col">
+                    {{kelvin2Degrees(planet?.lowTemperature)|number}} &deg;
+                </div>
+            </div>
+        </div>
+        <div class="p-col-1">
+            Summer / Winter Temperature:
+        </div>
+        <div class="p-col-1">
+            <div class="p-grid">
+                <div class="p-col">
+                    {{kelvin2Degrees(planet?.maxTemperature)|number}} &deg;
+                </div>
+            </div>
+            <div class="p-grid">
+                <div class="p-col">
+                    {{kelvin2Degrees(planet?.minTemperature)|number}} &deg;
+                </div>
+            </div>
+        </div>
+        <div class="p-col-1">
+            Hydrosphere:
+        </div>
+        <div class="p-col-1">
+            {{planet?.hydrosphere*100|number}} %
+        </div>
+        <div class="p-col-1">
+            CloudCover:
+        </div>
+        <div class="p-col-1">
+            {{planet?.cloudCover*100|number}} %
+        </div>
+        <div class="p-col-1">
+            IceCover:
+        </div>
+        <div class="p-col-1">
+            {{planet?.iceCover*100|number}} %
+        </div>
+        <div class="p-col-1">
+            AtmosphereType:
+        </div>
+        <div class="p-col-1">
+            {{planet?.atmosphereType}}
+        </div>
+    </div>
+    <div class="p-grid" *ngIf="planet?.atmosphere && planet?.atmosphere.length > 0">
+        <div class="p-col">
+            <div class="p-grid">
+                <div class="p-col">
+                    <h4>Gases:</h4>
+                </div>
+            </div>
+            <div class="p-grid" *ngFor="let gas of planet?.atmosphere">
+                <div class="p-col-1">
+                    Num:
+                </div>
+                <div class="p-col-1">
+                    {{gas?.num}}
+                </div>
+                <div class="p-col-1">
+                    Symbol:
+                </div>
+                <div class="p-col-1">
+                    {{atomSymbols[gas.num]?.symbol}}
+                </div>
+                <div class="p-col-1">
+                    Name:
+                </div>
+                <div class="p-col-1">
+                    {{atomSymbols[gas.num]?.name}}
+                </div>
+                <div class="p-col-1">
+                    SurfacePressure:
+                </div>
+                <div class="p-col-1">
+                    {{gas.surfacePressure|number}} mbar
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-grid" *ngIf="planet?.moons && planet?.moons.length > 0">
+        <div class="p-col">
+            <div class="p-grid">
+                <div class="p-col">
+                    <h4>Moon's:</h4>
+                </div>
+            </div>
+            <div class="p-grid" *ngFor="let moon of planet?.moons">
+                <div class="p-col">
+                    <app-admin-planet [planet]="moon" [collapsed]="true"></app-admin-planet>
+                </div>
+            </div>
+        </div>
+    </div>
+</p-panel>

@@ -1,21 +1,12 @@
-import { Component, OnInit } from "@angular/core";
-import { MenuItem } from "primeng/components/common/menuitem";
+import { Component } from "@angular/core";
 
 @Component({
     templateUrl: './admin.component.html'
 })
-export class AdminComponent implements OnInit {
-
-    items: MenuItem[]
+export class AdminComponent {
 
     constructor() {
-        this.items = []
-    }
 
-    ngOnInit(): void {
-        this.items.push({
-            label: 'Star-Systems'
-        })
     }
 
 }

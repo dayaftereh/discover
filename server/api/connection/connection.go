@@ -64,6 +64,14 @@ func (connection *Connection) inBoundLoop() {
 
 		_, bytes, err := connection.conn.ReadMessage()
 		if err != nil {
+			// check if the websocket closed
+			if websocket.IsCloseError(err,
+				websocket.CloseGoingAway,
+				websocket.CloseNormalClosure,
+				websocket.CloseNoStatusReceived,
+				websocket.CloseAbnormalClosure) {
+				return
+			}
 			connection.OnError <- err
 		}
 

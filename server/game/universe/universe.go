@@ -66,6 +66,17 @@ func (universe *Universe) Init() error {
 		// generate a initialStarSystem
 		universe.generateNewStarSystem(universe.initialStarSystem)
 	}
+
+	for len(universe.starSystems) < 15 {
+		// find a new random name
+		starSystemName, err := universe.findRandomStarSystemName()
+		if err != nil {
+			return err
+		}
+		// generate the new star system
+		universe.generateNewStarSystem(starSystemName)
+	}
+
 	return nil
 }
 
@@ -77,17 +88,8 @@ func (universe *Universe) generateInitialStarSystem() error {
 
 	log.Printf("generating initial star-system [ %s ]", name)
 
-	// generate a new InitialStarSystem
+	// generate and create a new InitialStarSystem
 	_, err = universe.generateNewStarSystem(name)
-
-	if err != nil {
-		return err
-	}
-
-	// create the star system
-	universe.starSystems[name] = starsystem.NewStarSystem(name, universe.persistence)
-	// load the star system
-	err = universe.starSystems[name].Init()
 	if err != nil {
 		return err
 	}
@@ -102,7 +104,29 @@ func (universe *Universe) generateInitialStarSystem() error {
 
 func (universe *Universe) generateNewStarSystem(name string) (*types.StarSystem, error) {
 	log.Printf("generating star-system [ %s ]", name)
+
+	// generate a new star system
 	starSystem, err := universe.generator.Generate(name)
+	// create the star system
+	universe.starSystems[name] = starsystem.NewStarSystem(name, universe.persistence)
+	// load the star system
+	err = universe.starSystems[name].Init()
+	if err != nil {
+		return nil, err
+	}
+
+	// storage the new universe
+	err = universe.writeUniverse()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range starSystem.Planets {
+		if p.Atmosphere != nil && len(p.Atmosphere) > 0 {
+			log.Println(p.Name)
+		}
+	}
+
 	return starSystem, err
 }
 

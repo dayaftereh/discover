@@ -7,6 +7,7 @@ import (
 	"github.com/dayaftereh/discover/server/api/connection/dispatch/handler"
 	"github.com/dayaftereh/discover/server/api/connection/handler/movement"
 	"github.com/dayaftereh/discover/server/api/connection/handler/ping"
+	"github.com/dayaftereh/discover/server/api/router/admin"
 	"github.com/dayaftereh/discover/server/api/router/common"
 	"github.com/dayaftereh/discover/server/api/router/connection"
 	gameRouter "github.com/dayaftereh/discover/server/api/router/game"
@@ -90,6 +91,8 @@ func initRouters(game *game.Game, server *server.Server) error {
 		connection.NewRouter(game, dispatcher),
 		// game
 		gameRouter.NewRouter(game),
+		// admin
+		admin.NewRouter(game),
 	}
 
 	// register the routers

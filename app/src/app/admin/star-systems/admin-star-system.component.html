@@ -1,4 +1,79 @@
 <div class="p-grid">
     <div class="p-col">
+        <p-panel [header]="'Sun'">
+            <div class="p-grid">
+                <div class="p-col-1">
+                    Class:
+                </div>
+                <div class="p-col-1">
+                    {{starSystem?.sun?.class}}
+                </div>
+                <div class="p-col-1">
+                    Color:
+                </div>
+                <div class="p-col-1">
+                    <div style="background: black;" [ngStyle]="{'color':color(starSystem?.sun?.color)}">
+                        {{color(starSystem?.sun?.color)}}
+                    </div>
+                </div>
+                <div class="p-col-1">
+                    Mass:
+                </div>
+                <div class="p-col-1">
+                    <div class="p-grid">
+                        <div class="p-col">
+                            {{starSystem?.sun?.mass|number}} M<sub>&#9737;</sub>
+                        </div>
+                    </div>
+                    <div class="p-grid">
+                        <div class="p-col">
+                            {{solarMass2KG(starSystem?.sun?.mass)|number}} kg
+                        </div>
+                    </div>
+                </div>
+                <div class="p-col-1">
+                    Luminosity:
+                </div>
+                <div class="p-col-1">
+                    {{starSystem?.sun?.luminosity|number}}
+                </div>
+                <div class="p-col-1">
+                    EcosphereRadius:
+                </div>
+                <div class="p-col-2">
+                    <div class="p-grid">
+                        <div class="p-col">
+                            {{starSystem?.sun?.ecosphereRadius|number}} AU
+                        </div>
+                    </div>
+                    <div class="p-grid">
+                        <div class="p-col">
+                            {{au2KM(starSystem?.sun?.ecosphereRadius)|number}} km
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="p-grid">
+                <div class="p-col-1">
+                    Life:
+                </div>
+                <div class="p-col-2">
+                    {{starSystem?.sun?.life|number}} Years
+                </div>
+                <div class="p-col-1">
+                    Age:
+                </div>
+                <div class="p-col-2">
+                    {{starSystem?.sun?.age|number}} Years
+                </div>
+            </div>
+        </p-panel>
+    </div>
+</div>
+
+<div class="p-grid" *ngFor="let planet of starSystem?.planets">
+    <div class="p-col">
+        <app-admin-planet [planet]="planet"></app-admin-planet>
     </div>
 </div>

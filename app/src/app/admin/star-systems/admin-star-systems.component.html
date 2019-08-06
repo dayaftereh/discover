@@ -9,9 +9,12 @@
             </ng-template>
             <ng-template pTemplate="body" let-starSystem>
                 <tr>
-                    <td>{{starSystem}}</td>
                     <td>
-
+                        {{starSystem}}
+                    </td>
+                    <td>
+                        <a pButton type="button" icon="pi pi-angle-right"
+                            [routerLink]="['/admin','star-system',starSystem]"></a>
                     </td>
                 </tr>
             </ng-template>

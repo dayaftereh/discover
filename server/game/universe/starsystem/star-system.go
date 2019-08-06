@@ -61,6 +61,7 @@ func NewStarSystem(name string, persistence *persistence.PersistenceManager) *St
 
 func (starSystem *StarSystem) loop() {
 	defer func() {
+		starSystem.running.Set(false)
 		log.Printf("closing star-system [ %s ] thread\n", starSystem.Name)
 	}()
 
@@ -111,6 +112,6 @@ func (starSystem *StarSystem) Shutdown() {
 		return
 	}
 
-	log.Printf("shutdown star-system with id [ %d ]\n", starSystem.Name)
+	log.Printf("shutdown star-system with id [ %s ]\n", starSystem.Name)
 	starSystem.close <- true
 }

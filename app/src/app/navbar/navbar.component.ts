@@ -36,7 +36,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
             { separator: true },
             { label: 'Settings' },
             { separator: true },
-            { label: 'Admin' }
+            {
+                label: 'Admin',
+                routerLink: ['admin'],
+                items: [
+                    {
+                        label: 'Star-Systems',
+                        routerLink: ['admin', 'star-systems'],
+                    }
+                ]
+            }
         ]
     }
 

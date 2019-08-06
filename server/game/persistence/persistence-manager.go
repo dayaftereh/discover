@@ -71,9 +71,9 @@ func (persistenceManager *PersistenceManager) LoadPlayers() (map[string]*types.P
 	lock.Lock()
 	defer lock.Unlock()
 
-	players := make(map[string]*types.Player)
+	var players map[string]*types.Player
 	// read the players
-	err := readJSON(playersFile, players)
+	err := readJSON(playersFile, &players)
 	if err != nil {
 		return nil, err
 	}

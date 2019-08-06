@@ -61,7 +61,7 @@ func (game *Game) Ready(player *player.Player) error {
 	starSystem := game.universe.GetStarSystem(*player.StarSystem)
 	// check if a star system exists
 	if starSystem == nil {
-		return errors.Errorf("unable to join player [ %s ] into star-system [ %d ], because star-system not found", player.Name, starSystem.Name)
+		return errors.Errorf("unable to join player [ %s ] into star-system [ %s ], because star-system not found", player.Name, *player.StarSystem)
 	}
 	// let the player join the star system
 	starSystem.JoinPlayer(player)
