@@ -3,7 +3,6 @@ package gasgiant
 import (
 	"image"
 	"image/color"
-	"log"
 	"math"
 
 	"github.com/dayaftereh/discover/server/game/universe/generator/texture"
@@ -30,12 +29,27 @@ func NewGasGiantGenerator(linearGradient *LinearGradient1D, width, height int, s
 }
 
 func (gasGiantGenerator *GasGiantGenerator) Init() {
-	fractalFrequency := 10.0
-	fractalOctaves := int64(6)
-	fractalPersistence := 0.8
-	fractalMap := noise.NewImplicitFractal2(fractalOctaves, fractalFrequency, fractalPersistence, gasGiantGenerator.seed)
+	// noise between [-1.0, 1.0]
+	noiseSimplex := noise.NewImplicitSimplex(gasGiantGenerator.seed)
+	noiseRanged := noise.NewImplicitRanged(noiseSimplex, -1.0, 1.0)
 
-	ridgedMap := noise.NewImplicitFractalRidged(5, 5.8, 0.75, gasGiantGenerator.seed)
+	// fractal noise
+	gasNoiseFractal := noise.NewImplicitFractalNormalized(noiseRanged, gasNoiseOctaves, gasNoiseFrequency, gasNoisePersistence)
+	gasNoiseRidgedFractal := noise.NewImplicitFractalRidged(noiseRanged, ridgedOctaves, ridgedFrequency, ridgedPersistence)
+
+	// storm noise
+	stormNoise := noise.NewImplicitInputTransform(noiseRanged, func(value float64) float64 {
+		return value * 0.1
+	})
+	stormNoise1 := noise.NewImplicitInputTransform(noiseRanged, func(value float64) float64 {
+		return value * 2.0
+	})
+	stormNoise2 := noise.NewImplicitInputTransform(noiseRanged, func(value float64) float64 {
+		return (value + 800.0) * 2.0
+	})
+	stormNoise3 := noise.NewImplicitInputTransform(noiseRanged, func(value float64) float64 {
+		return (value + 1600.0) * 2.0
+	})
 
 	gasGiantGenerator.fractalData = texture.NewMapData(gasGiantGenerator.width, gasGiantGenerator.height)
 
@@ -58,9 +72,25 @@ func (gasGiantGenerator *GasGiantGenerator) Init() {
 		for y := 0; y < gasGiantGenerator.height; y++ {
 			x1, y1, z1 := gasGiantGenerator.latLonToXYZ(curLat, curLon)
 
-			fractalValue := fractalMap.Get3D(x1, y1, z1) * 0.01
-			ridgedValue := ridgedMap.Get3D(x1, y1, z1)*0.015 - 0.01
-			gasGiantGenerator.fractalData.Set(x, y, fractalValue+ridgedValue)
+			// Base noise
+			n1 := gasNoiseFractal.Get3D(x1, y1, z1) * 0.01
+			n2 := gasNoiseRidgedFractal.Get3D(x1, y1, z1)*0.015 - 0.01
+
+			// Get the three threshold samples
+			s := 0.6
+			t1 := stormNoise1.Get3D(x1, y1, z1) - s
+			t2 := stormNoise2.Get3D(x1, y1, z1) - s
+			t3 := stormNoise3.Get3D(x1, y1, z1) - s
+			// Intersect them and get rid of negatives
+			threshold := math.Max(t1*t2*t3, 0.0)
+
+			// Storms
+			n3 := stormNoise.Get3D(x1, y1, z1) * threshold * 10.0
+
+			// cumulate
+			n := n1 + n2 + n3
+
+			gasGiantGenerator.fractalData.Set(x, y, n)
 
 			curLon += xDelta
 		}
@@ -68,7 +98,6 @@ func (gasGiantGenerator *GasGiantGenerator) Init() {
 		curLat += yDelta
 	}
 
-	log.Println(gasGiantGenerator.fractalData.MinValue, gasGiantGenerator.fractalData.MaxValue)
 }
 
 func (gasGiantGenerator *GasGiantGenerator) latLonToXYZ(lat, lon float64) (float64, float64, float64) {
@@ -81,7 +110,7 @@ func (gasGiantGenerator *GasGiantGenerator) latLonToXYZ(lat, lon float64) (float
 }
 
 func (gasGiantGenerator *GasGiantGenerator) GetFractalImage() *image.RGBA {
-	rect := image.Rect(0, 0, gasGiantGenerator.width, gasGiantGenerator.height)
+	rect := image.Rect(0, 0, gasGiantGenerator.width*5, gasGiantGenerator.height)
 	img := image.NewRGBA(rect)
 
 	for x := 0; x < gasGiantGenerator.width; x++ {

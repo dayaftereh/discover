@@ -43,6 +43,9 @@ type Planet struct {
 	Hydrosphere                     float64              `json:"hydrosphere"`                     /* fraction of surface covered water (%) */
 	CloudCover                      float64              `json:"cloudCover"`                      /* fraction of surface covered (%) */
 	IceCover                        float64              `json:"iceCover"`                        /* fraction of surface covered (%) */
+	IceMassFraction                 float64              `json:"iceMassFraction"`                 /* ice mass fraction (%) imf*/
+	RockMassFraction                float64              `json:"rockMassFraction"`                /* rock mass fraction (%) rmf*/
+	CarbonMassFraction              float64              `json:"carbonMassFraction"`              /* fraction of rock that's carbon instead of silicate (%) cmf*/
 	Atmosphere                      []*types.Gas         `json:"atmosphere"`                      /* The gases of the atmosphere */
 	AtmosphereType                  types.AtmosphereType `json:"atmosphereType"`                  /* the type of the atmosphere */
 	Moons                           []*Planet            `json:"moons"`                           /* list of moons for this planet */

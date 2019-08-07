@@ -63,6 +63,7 @@ func RandomLinearGradient1D() *gasgiant.LinearGradient1D {
 	linearGradient := gasgiant.NewLinearGradient1D()
 
 	linearGradient.AddColor(0, textureset.NewRGBColor255(100.0, 100.0, 100.0))
+	linearGradient.AddColor(0.15, textureset.NewRGBColor255(100.0, 100.0, 100.0))
 	x := 0.25
 	for x < 0.75 {
 		r := utils.RandFloat64(0, 1)
@@ -71,6 +72,7 @@ func RandomLinearGradient1D() *gasgiant.LinearGradient1D {
 		linearGradient.AddColor(x, textureset.NewRGBColor(r, g, b))
 		x += utils.RandFloat64(0.001, 0.01)
 	}
+	linearGradient.AddColor(0.85, textureset.NewRGBColor255(150.0, 150.0, 150.0))
 	linearGradient.AddColor(1.0, textureset.NewRGBColor255(150.0, 150.0, 150.0))
 
 	return linearGradient

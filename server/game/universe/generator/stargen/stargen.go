@@ -2,19 +2,12 @@ package stargen
 
 import (
 	"github.com/dayaftereh/discover/server/game/persistence/types"
-	"github.com/dayaftereh/discover/server/utils"
 	"github.com/dayaftereh/discover/server/utils/container"
 )
 
 func GenerateStellarSystem(randomTilt bool, doMoons bool, doGases bool) (*types.Sun, []*types.Planet) {
-	// get a random stellar class
-	stellarClass := RandStellarClass()
-	// generate a random star mass based on the stellar class
-	mass := utils.RandFromRange(stellarClass.Mass)
 	// create a new sun for the stellar system
-	sun := NewSun(mass)
-	sun.Class = stellarClass.Class
-	sun.Color = stellarClass.Color
+	sun := NewRandomSun()
 
 	// create the accretion processor for the planetesimal
 	accretionProcessor := NewAccretionProcessor()

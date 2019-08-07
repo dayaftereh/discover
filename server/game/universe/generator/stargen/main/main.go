@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/dayaftereh/discover/server/game/universe/generator/stargen/chemical"
 	"github.com/dayaftereh/discover/server/game/universe/generator/stargen/types"
 )
 
@@ -40,6 +41,10 @@ func NewStatistics() *Statistics {
 	statistics.PlanetTypes[types.PlanetSubSubGasGiant] = 0
 	statistics.PlanetTypes[types.PlanetAsteroids] = 0
 	statistics.PlanetTypes[types.Planet1Face] = 0
+	statistics.PlanetTypes[types.PlanetBrownDwarf] = 0
+	statistics.PlanetTypes[types.PlanetIron] = 0
+	statistics.PlanetTypes[types.PlanetCarbon] = 0
+	statistics.PlanetTypes[types.PlanetOil] = 0
 	statistics.PlanetTypes[types.PlanetUnknown] = 0
 
 	// set all Oxygen types to zero
@@ -78,7 +83,7 @@ func (statistics *Statistics) String() string {
 
 	// print the found gases
 	for gasNum, count := range statistics.AtmosphereGases {
-		gas, ok := types.ChemicalElements[gasNum]
+		gas, ok := chemical.PeriodicTable[gasNum]
 		if ok {
 			s = fmt.Sprintf("%s\t%v: %d, %1.3f\n", s, gas.Symbol, count, float64(count)/float64(statistics.Executions))
 		}

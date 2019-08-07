@@ -1,9 +1,7 @@
 package noise
 
-import "github.com/ojrac/opensimplex-go"
-
-type ImplicitFractal2 struct {
-	noise opensimplex.Noise
+type ImplicitFractalNormalized struct {
+	source ImplicitBase
 
 	/*
 		Octaves is the number of iterations, or the depth of the fractal. The more octaves, the better quality, but performance suffers. Keep this number as small as you can.
@@ -16,16 +14,16 @@ type ImplicitFractal2 struct {
 	persistence float64
 }
 
-func NewImplicitFractal2(octaves int64, frequency, persistence float64, seed int64) *ImplicitFractal2 {
-	return &ImplicitFractal2{
-		noise:       opensimplex.NewNormalized(seed),
+func NewImplicitFractalNormalized(source ImplicitBase, octaves int64, frequency, persistence float64) *ImplicitFractalNormalized {
+	return &ImplicitFractalNormalized{
+		source:      source,
 		octaves:     octaves,
 		frequency:   frequency,
 		persistence: persistence,
 	}
 }
 
-func (implicitFractal *ImplicitFractal2) execute(fn func(frequency float64) float64) float64 {
+func (implicitFractal *ImplicitFractalNormalized) execute(fn func(frequency float64) float64) float64 {
 	// Total value so far
 	total := 0.0
 	// Accumulates highest theoretical amplitude
@@ -50,20 +48,20 @@ func (implicitFractal *ImplicitFractal2) execute(fn func(frequency float64) floa
 	return total / maxAmplitude
 }
 
-func (implicitFractal *ImplicitFractal2) Get2D(x, y float64) float64 {
+func (implicitFractal *ImplicitFractalNormalized) Get2D(x, y float64) float64 {
 	return implicitFractal.execute(func(frequency float64) float64 {
-		return implicitFractal.noise.Eval2(x*frequency, y*frequency)
+		return implicitFractal.source.Get2D(x*frequency, y*frequency)
 	})
 }
 
-func (implicitFractal *ImplicitFractal2) Get3D(x, y, z float64) float64 {
+func (implicitFractal *ImplicitFractalNormalized) Get3D(x, y, z float64) float64 {
 	return implicitFractal.execute(func(frequency float64) float64 {
-		return implicitFractal.noise.Eval3(x*frequency, y*frequency, z*frequency)
+		return implicitFractal.source.Get3D(x*frequency, y*frequency, z*frequency)
 	})
 }
 
-func (implicitFractal *ImplicitFractal2) Get4D(x, y, z, w float64) float64 {
+func (implicitFractal *ImplicitFractalNormalized) Get4D(x, y, z, w float64) float64 {
 	return implicitFractal.execute(func(frequency float64) float64 {
-		return implicitFractal.noise.Eval4(x*frequency, y*frequency, z*frequency, w*frequency)
+		return implicitFractal.source.Get4D(x*frequency, y*frequency, z*frequency, w*frequency)
 	})
 }

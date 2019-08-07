@@ -90,9 +90,9 @@ export class PlanetPreviewComponent {
         const bumpTexture: THREE.Texture = textures[3]
 
         this.planetMaterial.map = biomeTexture
-        this.planetMaterial.normalMap = normalTexture
+        //this.planetMaterial.normalMap = normalTexture
         this.planetMaterial.specularMap = specularTexture
-        this.planetMaterial.bumpMap = bumpTexture
+        //this.planetMaterial.bumpMap = bumpTexture
         this.planetMaterial.needsUpdate = true
 
         const cloudTexture: THREE.Texture = textures[4]

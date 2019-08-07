@@ -2,12 +2,10 @@ package noise
 
 import (
 	"math"
-
-	"github.com/ojrac/opensimplex-go"
 )
 
 type ImplicitFractalRidged struct {
-	noise opensimplex.Noise
+	source ImplicitBase
 
 	/*
 		Octaves is the number of iterations, or the depth of the fractal. The more octaves, the better quality, but performance suffers. Keep this number as small as you can.
@@ -20,9 +18,9 @@ type ImplicitFractalRidged struct {
 	persistence float64
 }
 
-func NewImplicitFractalRidged(octaves int64, frequency, persistence float64, seed int64) *ImplicitFractalRidged {
+func NewImplicitFractalRidged(source ImplicitBase, octaves int64, frequency, persistence float64) *ImplicitFractalRidged {
 	return &ImplicitFractalRidged{
-		noise:       opensimplex.NewNormalized(seed),
+		source:      source,
 		octaves:     octaves,
 		frequency:   frequency,
 		persistence: persistence,
@@ -56,18 +54,18 @@ func (implicitFractal *ImplicitFractalRidged) execute(fn func(frequency float64)
 
 func (implicitFractal *ImplicitFractalRidged) Get2D(x, y float64) float64 {
 	return implicitFractal.execute(func(frequency float64) float64 {
-		return implicitFractal.noise.Eval2(x*frequency, y*frequency)
+		return implicitFractal.source.Get2D(x*frequency, y*frequency)
 	})
 }
 
 func (implicitFractal *ImplicitFractalRidged) Get3D(x, y, z float64) float64 {
 	return implicitFractal.execute(func(frequency float64) float64 {
-		return implicitFractal.noise.Eval3(x*frequency, y*frequency, z*frequency)
+		return implicitFractal.source.Get3D(x*frequency, y*frequency, z*frequency)
 	})
 }
 
 func (implicitFractal *ImplicitFractalRidged) Get4D(x, y, z, w float64) float64 {
 	return implicitFractal.execute(func(frequency float64) float64 {
-		return implicitFractal.noise.Eval4(x*frequency, y*frequency, z*frequency, w*frequency)
+		return implicitFractal.source.Get4D(x*frequency, y*frequency, z*frequency, w*frequency)
 	})
 }

@@ -20,6 +20,10 @@ const (
 	PlanetSubSubGasGiant PlanetType = "sub-sub-gas-gaint" // GasDwarf
 	PlanetAsteroids      PlanetType = "asteroids"
 	Planet1Face          PlanetType = "face"
+	PlanetBrownDwarf     PlanetType = "brown-dwarf"
+	PlanetIron           PlanetType = "iron"
+	PlanetCarbon         PlanetType = "carbon"
+	PlanetOil            PlanetType = "oil"
 
 	// OrbitType
 

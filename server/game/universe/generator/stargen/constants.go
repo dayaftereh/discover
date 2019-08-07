@@ -1,7 +1,5 @@
 package stargen
 
-import "github.com/dayaftereh/discover/server/game/universe/generator/stargen/types"
-
 const (
 	K                       float64 = 50.0     //K = gas/dust ratio
 	B                       float64 = 1.2E-5   //Used in Crit_mass calc
@@ -18,20 +16,22 @@ const (
 	SunMassInEarthMasses float64 = 332775.64
 	SolarMassInGrams     float64 = 1.989e33 /* Units of grams			*/
 
-	EarthRadius           float64 = 6.378e8  /* Units of cm				*/
-	EarthRadiusInKM       float64 = 6378.0   /* Units of km				*/
-	EarthDensity          float64 = 5.52     /* Units of g/cc			*/
-	EarthMassInGrams      float64 = 5.977e27 /* Units of grams			*/
-	EarthExosphereTemp    float64 = 1273.0   /* Units of degrees Kelvin	*/
-	EarthAcceleration     float64 = 980.7    /* Units of cm/sec2			*/
-	EarthAxialTilt        float64 = 23.4     /* Units of degrees*/
-	EarthAverageCelsius   float64 = 14.0     /* Average Earth Temperature */
-	EarthAverageKelvin    float64 = EarthAverageCelsius + FreezingPointOfWater
-	EarthEffectiveTemp    float64 = 250.0    /* Units of degrees Kelvin (was 255)	*/
-	EarthConvectionFactor float64 = 0.43     /* from Hart, eq.20			*/
-	EarthWaterMassPerArea float64 = 3.83e15  /* grams per square km		*/
-	DaysInAYear           float64 = 365.256  /* Earth days per Earth year*/
-	CloudCoverageFactor   float64 = 1.839e-8 /* Km^2/kg					*/
+	EarthRadius              float64 = 6.378e8  /* Units of cm				*/
+	EarthRadiusInKM          float64 = 6378.0   /* Units of km				*/
+	EarthDensity             float64 = 5.52     /* Units of g/cc			*/
+	EarthMassInGrams         float64 = 5.977e27 /* Units of grams			*/
+	EarthExosphereTemp       float64 = 1273.0   /* Units of degrees Kelvin	*/
+	EarthAcceleration        float64 = 980.7    /* Units of cm/sec2			*/
+	EarthAxialTilt           float64 = 23.4     /* Units of degrees*/
+	EarthAverageCelsius      float64 = 14.0     /* Average Earth Temperature */
+	EarthAverageKelvin       float64 = EarthAverageCelsius + FreezingPointOfWater
+	EarthEffectiveTemp       float64 = 250.0   /* Units of degrees Kelvin (was 255)	*/
+	EarthConvectionFactor    float64 = 0.43    /* from Hart, eq.20			*/
+	EarthWaterMassPerArea    float64 = 3.83e15 /* grams per square km		*/
+	EarthSurfPersInMMHG      float64 = 760.0   /* Dole p. 15 */
+	EarthSurfPersInMilliBars float64 = 1013.25
+	DaysInAYear              float64 = 365.256  /* Earth days per Earth year*/
+	CloudCoverageFactor      float64 = 1.839e-8 /* Km^2/kg					*/
 
 	MaxSunAge float64 = 6e9
 	MinSunAge float64 = 1e9
@@ -44,7 +44,20 @@ const (
 	RockyAlbedo             float64 = 0.15
 	RockyAirlessAlbedo      float64 = 0.07
 	WaterAlbedo             float64 = 0.04
-	GasGaintAlbedo          float64 = 0.5 /* albedo of a gas giant	*/
+	GasGiantAlbedo          float64 = 0.5 /* albedo of a gas giant	*/
+	CarbonGiantAlbedo       float64 = 0.01
+	SulfarGiantAlbedo       float64 = 0.63
+	MethaneGiantAlbedo      float64 = 0.3
+
+	// GasGiant Temperature
+
+	TemperatureCarbonGiant   float64 = 2240.0
+	TemperatureClassVGiant   float64 = 1400.0
+	TemperatureClassIVGiant  float64 = 900.0
+	TemperatureClassIIIGiant float64 = 360.0
+	TemperatureSulfarGiant   float64 = 320.0
+	TemperatureClassIIGiant  float64 = 150.0
+	TemperatureClassIGiant   float64 = 81.0
 
 	FreezingPointOfWater float64 = 273.15 /* Units of degrees Kelvin	*/
 	MilliBarsPerBar      float64 = 1000.0
@@ -85,6 +98,10 @@ const (
 	Krypton          float64 = 83.8  /* Kr  */
 	Xenon            float64 = 131.3 /* Xe  */
 
+	// Jupiter
+	JupiterMass   float64 = 317.8   /* mass of Jupiter in Earth Masses */
+	JupiterRadius float64 = 69911.0 /* average radius of Jupiter in km */
+
 	/*	The following defines are used in the kothari_radius function in	*/
 	A1_20     float64 = 6.485e12  /* All units are in cgs system.	 */
 	A2_20     float64 = 4.0032e-8 /*	 ie: cm, g, dynes, etc.		 */
@@ -97,6 +114,6 @@ const (
 	Q2_36 float64 = 0.0698   /* 1/Kelvin */
 
 	H2OAssumedPressure float64 = 47.0 * MMHG2MilliBars /* Dole p. 15      */
-	PPMPressure        float64 = types.EarthSurfPersInMilliBars / 1000000.0
-	MMHG2MilliBars     float64 = types.EarthSurfPersInMilliBars / types.EarthSurfPersInMMHG
+	PPMPressure        float64 = EarthSurfPersInMilliBars / 1000000.0
+	MMHG2MilliBars     float64 = EarthSurfPersInMilliBars / EarthSurfPersInMMHG
 )
