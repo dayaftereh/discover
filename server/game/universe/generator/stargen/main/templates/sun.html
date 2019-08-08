@@ -1,0 +1,116 @@
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Sun</h2>
+        <div class="row">
+
+            <div class="col-1">
+                <div class="row">
+                    <div class="col-6">
+                        <b>Class:</b>
+                    </div>
+                    <div class="col-6">
+                        {{.Class}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-2">
+                <div class="row">
+                    <div class="col-6">
+                        <b>Color:</b>
+                    </div>
+                    <div class="col-6">
+                        <p style="background: black; color: {{ decimal2hex .Color }}">
+                            {{ decimal2hex .Color }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-2">
+                <div class="row">
+                    <div class="col-4">
+                        <b>Mass:</b>
+                    </div>
+                    <div class="col-8">
+                        <div class="row">
+                            <div class="col-12">
+                                {{printf "%.4f" .Mass}} M<sub>&#9737;</sub>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                {{solarMass2KG .Mass | printf "%.3e" }} kg
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-2">
+                <div class="row">
+                    <div class="col-6">
+                        <b>Luminosity:</b>
+                    </div>
+                    <div class="col-6">
+                        {{printf "%f" .Luminosity}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-3">
+                <div class="row">
+                    <div class="col-7">
+                        <b>EcosphereRadius:</b>
+                    </div>
+                    <div class="col-5">
+                        <div class="row">
+                            <div class="col-12">
+                                {{printf "%.4f" .EcosphereRadius}} AU
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                {{au2KM .EcosphereRadius | printf "%.3e" }} km
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-2">
+                <div class="row">
+                    <div class="col-4">
+                        <b>Life:</b>
+                    </div>
+                    <div class="col-8">
+                        {{printf "%.3e" .Life}} Years
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-2">
+                <div class="row">
+                    <div class="col-4">
+                        <b>Age:</b>
+                    </div>
+                    <div class="col-8">
+                        {{printf "%.3e" .Age}} Years
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-3">
+                <div class="row">
+                    <div class="col-6">
+                        <b>Effective Temperature:</b>
+                    </div>
+                    <div class="col-6">
+                        {{ kelvin2Degrees .EffectiveTemperature | printf "%.2f"}} &deg;
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

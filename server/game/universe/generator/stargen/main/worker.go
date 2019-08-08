@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"sync"
 
 	persistence "github.com/dayaftereh/discover/server/game/persistence/types"
@@ -10,15 +12,21 @@ import (
 )
 
 type Worker struct {
+	worker     int
+	executions int64
 	running    *atomic.AtomicBool
 	lock       sync.Mutex
 	statistics *Statistics
+	display    *Display
 }
 
-func NewWorker() *Worker {
+func NewWorker(worker int, executions int64, display *Display) *Worker {
 	return &Worker{
+		worker:     worker,
+		executions: executions,
 		running:    atomic.NewAtomicBool(false),
 		statistics: NewStatistics(),
+		display:    display,
 	}
 }
 
@@ -91,13 +99,26 @@ func (worker *Worker) updateStatistics(planets []*persistence.Planet) {
 }
 
 func (worker *Worker) Run() {
+	executions := int64(0)
 	for worker.running.Get() {
+		// check if worker done
+		if worker.executions > 0 && executions >= worker.executions {
+			return
+		}
 
 		// generate stellar system
-		_, planets := stargen.GenerateStellarSystem(true, true, true)
+		sun, planets := stargen.GenerateStellarSystem(true, true, true)
+
+		name := fmt.Sprintf("worker-%d-execution-%d", worker.worker, executions)
+		err := worker.display.export(sun, planets, name)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
 		worker.updateStatistics(planets)
 
+		executions++
 	}
 }
 

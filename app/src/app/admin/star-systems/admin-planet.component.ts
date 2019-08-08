@@ -5,7 +5,7 @@ import { Planet } from "src/app/services/api/admin/planet";
     selector: 'app-admin-planet',
     templateUrl: './admin-planet.component.html'
 })
-export class AdminPlanetComponent implements OnInit {
+export class AdminPlanetComponent {
 
     @Input('planet')
     planet: Planet | undefined
@@ -13,28 +13,8 @@ export class AdminPlanetComponent implements OnInit {
     @Input('collapsed')
     collapsed: boolean
 
-    atomSymbols: { [key: number]: { symbol: string, name: string } } = {}
-
     constructor() {
         this.collapsed = false
-    }
-
-    ngOnInit(): void {
-        this.atomSymbols = {
-            1: { symbol: "H", name: "Hydrogen" },
-            2: { symbol: "He", name: "Helium" },
-            7: { symbol: "N", name: "Nitrogen" },
-            8: { symbol: "O", name: "Oxygen" },
-            10: { symbol: "Ne", name: "Neon" },
-            18: { symbol: "Ar", name: "Argon" },
-            36: { symbol: "Kr", name: "Krypton" },
-            54: { symbol: "Xe", name: "Xenon" },
-            900: { symbol: "NH3", name: "Ammonia" },
-            901: { symbol: "H2O", name: "Carbon Dioxide" },
-            902: { symbol: "CO2", name: "Xenon" },
-            903: { symbol: "O3", name: "Ozone" },
-            904: { symbol: "CH4", name: "Methane" },
-        }
     }
 
     infinity(x: number): number {

@@ -50,7 +50,7 @@ func (game *Game) Ready(player *player.Player) error {
 		}
 
 		// update the player star system
-		game.playerManager.UpdatePlayerStarSystem(player.ID, initialStarSystem.Name)
+		//game.playerManager.UpdatePlayerStarSystem(player.ID, initialStarSystem.Name)
 
 		// let the player join the star system
 		initialStarSystem.JoinPlayer(player)

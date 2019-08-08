@@ -1,0 +1,614 @@
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{ .Name }}</h5>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-muted">Planet:</h4>
+                        <div class="row">
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <b>Type:</b>
+                                    </div>
+                                    <div class="col-8">
+                                        {{.Type}}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b>SemiMajorAxis:</b>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {{printf "%.4f" .SemiMajorAxis}} AU
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {{au2KM .SemiMajorAxis | printf "%.3e" }} km
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-7">
+                                        <b>Eccentricity:</b>
+                                    </div>
+                                    <div class="col-5">
+                                        {{ printf "%.5f" .Eccentricity }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>AxialTilt:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ printf "%.1f" .AxialTilt }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>OrbitZone:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ .OrbitZone }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-5">
+                                        <b>OrbitPeriod:</b>
+                                    </div>
+                                    <div class="col-7">
+                                        {{  printf "%.2f" .OrbitPeriod }} days
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <b>Day:</b>
+                                    </div>
+                                    <div class="col-8">
+                                        {{  printf "%.2f" .Day }} hours
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>ResonantPeriod:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="checkbox" class="form-check-input" disabled {{ if .ResonantPeriod}}
+                                            checked {{ end }}>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-muted">Mass & Radius:</h4>
+                        <div class="row">
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>GasGiant:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="checkbox" class="form-check-input" disabled {{ if .GasGiant}}
+                                            checked {{ end }}>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <b>Mass:</b>
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {{printf "%.8f" .Mass}} M<sub>&#9737;</sub>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {{solarMass2KG .Mass | printf "%.3e" }} kg
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-5">
+                                        <b>DustMass:</b>
+                                    </div>
+                                    <div class="col-7">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {{printf "%.8f" .DustMass}} M<sub>&#9737;</sub>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {{solarMass2KG .DustMass | printf "%.3e" }} kg
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <b>GasMass:</b>
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {{printf "%.8f" .GasMass}} M<sub>&#9737;</sub>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {{solarMass2KG .GasMass | printf "%.3e" }} kg
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b>CoreRadius:</b>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ printf "%.2f" .CoreRadius }} km
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b>Radius:</b>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ printf "%.2f" .Radius }} km
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b>Density:</b>
+                                    </div>
+                                    <div class="col-6">
+                                        {{  printf "%.2f" .Density }} g/cc
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-muted">Other:</h4>
+                        <div class="row">
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b>EscapeVelocity:</b>
+                                    </div>
+                                    <div class="col-6">
+                                        {{cmPerS2mPerS .EscapeVelocity | printf "%.3f" }} m/s
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b>Acceleration:</b>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ cmPerSSqr2mPerSSqr .SurfaceAcceleration | printf "%.3f" }} m/s<sup>2</sup>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <b>Gravity:</b>
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {{printf "%.3f" .SurfaceGravity}} g<sub>0</sub>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                {{earthGravities2mPerSSqr .SurfaceGravity | printf "%.3f" }}
+                                                m/s<sup>2</sup>
+                                            </div>
+                                        </div>
+                                        {{ if lt .SurfaceGravity 0.8 }}
+                                        <div class="row">
+                                            <div class="col-12">
+                                                Low-G
+                                            </div>
+                                        </div>
+                                        {{ end }}
+                                        {{ if gt .SurfaceGravity 1.2 }}
+                                        <div class="row">
+                                            <div class="col-12">
+                                                High-G
+                                            </div>
+                                        </div>
+                                        {{ end }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <b>RMS-Velocity:</b>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ cmPerS2mPerS .RootMeanSquareVelocity |  printf "%.3f" }} m/s
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-7">
+                                        <b>MolecularWeight:</b>
+                                    </div>
+                                    <div class="col-5">
+                                        {{ printf "%.4f" .MolecularWeight }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>VolatileGasInventory:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ infinity .VolatileGasInventory | printf "%.5f"  }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>SurfacePressure:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ printf "%.2f" .SurfacePressure }} mbar
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-muted">Cover:</h4>
+                        <div class="row">
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>Albedo:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ printf "%f" .Albedo }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>Hydrosphere:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ percent .Hydrosphere | printf "%.1f" }} %
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>CloudCover:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ percent .CloudCover | printf "%.1f" }} %
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>IceCover:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ percent .IceCover | printf "%.1f" }} %
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-muted">Temperature:</h4>
+                        <div class="row">
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>GreenhouseEffect:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="checkbox" class="form-check-input" disabled
+                                            {{ if .GreenhouseEffect}} checked {{ end }}>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>BoilPoint:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ kelvin2Degrees .BoilPoint | infinity | printf "%.2f" }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>Exospheric:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ kelvin2Degrees .ExosphericTemperature | printf "%.2f" }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>Estimated:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ kelvin2Degrees .EstimatedTemperature | printf "%.2f" }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>EstimatedTerrestrial:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ kelvin2Degrees .EstimatedTerrestrialTemperature | printf "%.2f" }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>Surface:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ kelvin2Degrees .SurfaceTemperature | printf "%.2f" }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>GreenhouseRise:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ kelvin2Degrees .GreenhouseRise | printf "%.2f" }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>Day:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ kelvin2Degrees .HighTemperature | printf "%.2f" }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>Night:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ kelvin2Degrees .LowTemperature | printf "%.2f" }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>Summer:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ kelvin2Degrees .MaxTemperature | printf "%.2f" }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <b>Winter:</b>
+                                    </div>
+                                    <div class="col-4">
+                                        {{ kelvin2Degrees .MinTemperature | printf "%.2f" }} &deg;
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-muted">Mass Composition:</h4>
+
+
+                        <div class="row">
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <b>Ice:</b>
+                                    </div>
+                                    <div class="col-8">
+                                        {{ percent .IceMassFraction | printf "%.1f" }} %
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <b>Rock:</b>
+                                    </div>
+                                    <div class="col-8">
+                                        {{ percent .RockMassFraction | printf "%.1f" }} %
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <b>Carbon:</b>
+                                    </div>
+                                    <div class="col-8">
+                                        {{ percent .CarbonMassFraction | printf "%.1f" }} %
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <b>Silicates:</b>
+                                    </div>
+                                    <div class="col-8">
+                                        {{ silicatesMassFraction . | percent | printf "%.1f" }} %
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <b>Iron:</b>
+                                    </div>
+                                    <div class="col-8">
+                                        {{ ironMassFraction . | percent | printf "%.1f" }} %
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

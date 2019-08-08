@@ -108,7 +108,7 @@ export namespace Server {
             return Server.run()
         }))
 
-        gulp.task("server:stargen", gulp.series(["server:dependencies"], () => {
+        gulp.task("server:stargen", gulp.series(() => {
             return Server.runStargen()
         }))
     }

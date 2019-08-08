@@ -8,6 +8,7 @@ import (
 	"github.com/dayaftereh/discover/server/game/persistence/types"
 
 	"github.com/dayaftereh/discover/server/game/universe/generator"
+	stargenTypes "github.com/dayaftereh/discover/server/game/universe/generator/stargen/types"
 	"github.com/dayaftereh/discover/server/game/universe/starsystem"
 	"github.com/pkg/errors"
 )
@@ -67,7 +68,7 @@ func (universe *Universe) Init() error {
 		universe.generateNewStarSystem(universe.initialStarSystem)
 	}
 
-	for len(universe.starSystems) < 15 {
+	for len(universe.starSystems) < 1000 {
 		// find a new random name
 		starSystemName, err := universe.findRandomStarSystemName()
 		if err != nil {
@@ -122,7 +123,7 @@ func (universe *Universe) generateNewStarSystem(name string) (*types.StarSystem,
 	}
 
 	for _, p := range starSystem.Planets {
-		if p.Atmosphere != nil && len(p.Atmosphere) > 0 {
+		if p.Type == stargenTypes.PlanetUnknown {
 			log.Println(p.Name)
 		}
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -28,30 +29,6 @@ func NewStatistics() *Statistics {
 		AtmosphereGases: make(map[int64]int64),
 		AtmosphereTypes: make(map[types.AtmosphereType]int64),
 	}
-
-	// set all planet types to zero
-	statistics.PlanetTypes[types.PlanetRock] = 0
-	statistics.PlanetTypes[types.PlanetVenusian] = 0
-	statistics.PlanetTypes[types.PlanetTerrestrial] = 0
-	statistics.PlanetTypes[types.PlanetGasGiant] = 0
-	statistics.PlanetTypes[types.PlanetMartian] = 0
-	statistics.PlanetTypes[types.PlanetWater] = 0
-	statistics.PlanetTypes[types.PlanetIce] = 0
-	statistics.PlanetTypes[types.PlanetSubGasGiant] = 0
-	statistics.PlanetTypes[types.PlanetSubSubGasGiant] = 0
-	statistics.PlanetTypes[types.PlanetAsteroids] = 0
-	statistics.PlanetTypes[types.Planet1Face] = 0
-	statistics.PlanetTypes[types.PlanetBrownDwarf] = 0
-	statistics.PlanetTypes[types.PlanetIron] = 0
-	statistics.PlanetTypes[types.PlanetCarbon] = 0
-	statistics.PlanetTypes[types.PlanetOil] = 0
-	statistics.PlanetTypes[types.PlanetUnknown] = 0
-
-	// set all Oxygen types to zero
-	statistics.AtmosphereTypes[types.None] = 0
-	statistics.AtmosphereTypes[types.Toxic] = 0
-	statistics.AtmosphereTypes[types.Unbreathable] = 0
-	statistics.AtmosphereTypes[types.Breathable] = 0
 
 	return statistics
 }
@@ -85,7 +62,7 @@ func (statistics *Statistics) String() string {
 	for gasNum, count := range statistics.AtmosphereGases {
 		gas, ok := chemical.PeriodicTable[gasNum]
 		if ok {
-			s = fmt.Sprintf("%s\t%v: %d, %1.3f\n", s, gas.Symbol, count, float64(count)/float64(statistics.Executions))
+			s = fmt.Sprintf("%s\t%v: %d, %1.3f\n", s, gas.Name, count, float64(count)/float64(statistics.Executions))
 		}
 	}
 
@@ -94,22 +71,27 @@ func (statistics *Statistics) String() string {
 	return s
 }
 
-func CollectAndPrint(workers []*Worker, statistics *Statistics) {
+func CollectAndPrint(workers []*Worker, statistics *Statistics, executions int64) bool {
 	for _, worker := range workers {
 		worker.AddToStatistics(statistics)
 	}
 
 	fmt.Println(statistics)
+
+	return !(statistics.Executions < executions)
 }
 
-func Loop(workers []*Worker, statistics *Statistics) {
+func Loop(workers []*Worker, statistics *Statistics, executions int64) {
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	for {
 		select {
-		case <-time.After(10 * time.Second):
-			CollectAndPrint(workers, statistics)
+		case <-time.After(5 * time.Second):
+			done := CollectAndPrint(workers, statistics, executions)
+			if done {
+				return
+			}
 		case <-signalChannel:
 			return
 		}
@@ -117,19 +99,24 @@ func Loop(workers []*Worker, statistics *Statistics) {
 }
 
 func main() {
+	display, err := NewDisplay("./dist/star-systems", "./server/game/universe/generator/stargen/main/templates/*.html")
+	if err != nil {
+		log.Panicln(err)
+	}
 
-	concurrently := 3
+	executions := int64(1)
+	concurrently := 1
 
 	workers := make([]*Worker, 0)
 	for i := 0; i < concurrently; i++ {
-		worker := NewWorker()
+		worker := NewWorker(i+1, executions, display)
 		workers = append(workers, worker)
 		worker.Start()
 	}
 
 	statistics := NewStatistics()
 
-	Loop(workers, statistics)
+	Loop(workers, statistics, executions)
 
 	for _, worker := range workers {
 		worker.Stop()

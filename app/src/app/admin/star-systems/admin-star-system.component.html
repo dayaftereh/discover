@@ -51,8 +51,7 @@
                             {{au2KM(starSystem?.sun?.ecosphereRadius)|number}} km
                         </div>
                     </div>
-
-                </div>
+                </div>               
             </div>
             <div class="p-grid">
                 <div class="p-col-1">
@@ -66,6 +65,12 @@
                 </div>
                 <div class="p-col-2">
                     {{starSystem?.sun?.age|number}} Years
+                </div>
+                <div class="p-col-1">
+                    Effective Temperature:
+                </div>
+                <div class="p-col-1">
+                    {{kelvin2Degrees(starSystem?.sun?.effectiveTemperature)|number}} &deg;
                 </div>
             </div>
         </p-panel>

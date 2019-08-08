@@ -39,7 +39,7 @@ export interface Planet {
     hydrosphere: number
     cloudCover: number
     iceCover: number
-    Atmosphere: Gas[]
+    atmosphere: Gas[]
     atmosphereType: string
     moons: Planet[]
 }

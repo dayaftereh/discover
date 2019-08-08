@@ -152,6 +152,19 @@
                     {{earthGravities2mPerSSqr(planet?.surfaceGravity)|number}} m/s<sup>2</sup>
                 </div>
             </div>
+            <div class="p-grid">
+                <div class="p-col">
+                    <div class="p-col-1">
+                        <span *ngIf="planet?.surfaceGravity < 0.8">
+                            Low-G
+                        </span>
+                        <span *ngIf="planet?.surfaceGravity > 1.2">
+                            High-G
+                        </span>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <div class="p-col-1">
             RMS-Velocity:
@@ -280,6 +293,34 @@
             {{planet?.atmosphereType}}
         </div>
     </div>
+
+    <div class="p-grid">
+        <div class="p-col">
+            <div class="p-grid">
+                <div class="p-col">
+                    <h4>Mass Composition:</h4>
+                </div>
+            </div>
+            <div class="p-grid">
+                <div class="p-col-2">
+                    Ice: {{planet?.iceMassFraction*100|number}} %
+                </div>
+                <div class="p-col-2">
+                    Rock: {{planet?.rockMassFraction*100|number}} %
+                </div>
+                <div class="p-col-2">
+                    Carbon: {{planet?.carbonMassFraction*100|number}} %
+                </div>
+                <div class="p-col-2">
+                    Silicates: {{(1.0-planet?.carbonMassFraction)*100|number}} %
+                </div>
+                <div class="p-col-2">
+                    Iron: {{(1.0-(planet?.rockMassFraction+planet?.iceMassFraction))*100|number}} %
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="p-grid" *ngIf="planet?.atmosphere && planet?.atmosphere.length > 0">
         <div class="p-col">
             <div class="p-grid">
@@ -295,16 +336,10 @@
                     {{gas?.num}}
                 </div>
                 <div class="p-col-1">
-                    Symbol:
-                </div>
-                <div class="p-col-1">
-                    {{atomSymbols[gas.num]?.symbol}}
-                </div>
-                <div class="p-col-1">
                     Name:
                 </div>
                 <div class="p-col-1">
-                    {{atomSymbols[gas.num]?.name}}
+                    {{gas?.name}}
                 </div>
                 <div class="p-col-1">
                     SurfacePressure:

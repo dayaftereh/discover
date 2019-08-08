@@ -42,6 +42,14 @@ func (planetEnvironment *PlanetEnvironment) rootMeanSquareVelocity(molecularWeig
 	return math.Sqrt((3.0*MolarGasConst*exosphericTemp)/molecularWeight) * CMPerMeter
 }
 
+// rootMeanSquareVelocityV2 calculates Root Mean Square (RMS) velocity of a molecule or atom.
+// Calibrated to Earth exospheric temperature, which implies that the orbital radius has been preadjusted so that temperature comparisons are meaningful.
+func (planetEnvironment *PlanetEnvironment) rootMeanSquareVelocityV2(molecularWeight, orbitRadius float64) float64 {
+	// This is Fogg's eq.16.
+	exosphericTemp := EarthExosphereTemp / math.Pow(orbitRadius, 2.0)
+	return math.Sqrt((3.0*MolarGasConst*exosphericTemp)/molecularWeight) * CMPerMeter
+}
+
 // kothariRadius returns the radius of the planet in kilometers.  The mass passed in is in units of solar masses.
 // This formula is listed as eq.9 in Fogg's article, although some typos crop up in that eq.
 // See "The Internal Constitution of Planets", by Dr. D. S. Kothari, Mon. Not. of the Royal Astronomical Society, vol 96
@@ -298,8 +306,12 @@ func (planetEnvironment *PlanetEnvironment) greenHouse(ecosphereRadius, orbitRad
 
 // This implements Fogg's eq.17.  The 'inventory' returned is unitless.
 func (planetEnvironment *PlanetEnvironment) volInventory(mass, escapeVel, rmsVel, stellarMass float64, zone types.OrbitZone, greenhouseEffect, accretedGas bool) float64 {
+	if mathf.CloseZero(rmsVel) {
+		return 0.0
+	}
+
 	velocityRatio := escapeVel / rmsVel
-	if velocityRatio < GasRetentionThreshold {
+	if velocityRatio < GasRetentionThreshold || !accretedGas {
 		return 0.0
 	}
 
@@ -632,7 +644,7 @@ func (planetEnvironment *PlanetEnvironment) calculateGases(planet *persistence.P
 	pressure := planet.SurfacePressure / MilliBarsPerBar
 	for _, gas := range chemical.PeriodicTable {
 
-		yp := gas.Boil / (373.0*(math.Log(pressure+0.001)/-5050.5) + (1.0 / 373.0))
+		yp := gas.BoilingPoint / (373.0*(math.Log(pressure+0.001)/-5050.5) + (1.0 / 373.0))
 		// check if the gas stay on the planet
 		if !(((yp >= 0.0 && yp < planet.LowTemperature) || gasPlanet) && gas.Weight >= planet.MolecularWeight) {
 			continue
@@ -664,8 +676,9 @@ func (planetEnvironment *PlanetEnvironment) calculateGases(planet *persistence.P
 		fract := (1.0 - (planet.MolecularWeight / gas.Weight))
 		gasAmount := abund * pvrms * react * fract
 
+		totalAmount += gasAmount
+
 		if gasAmount > 0.0 {
-			totalAmount += gasAmount
 			amount[gas.Num] = gasAmount
 		}
 	}
@@ -679,6 +692,7 @@ func (planetEnvironment *PlanetEnvironment) calculateGases(planet *persistence.P
 
 		atmosphere = append(atmosphere, &types.Gas{
 			Num:             gas.Num,
+			Name:            gas.Name,
 			SurfacePressure: planet.SurfacePressure * gasAmount / totalAmount,
 		})
 	}
@@ -974,7 +988,7 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *persistence.Sun,
 	planetEnvironment.assignComposition(planet, sun, isMoon)
 
 	planet.ExosphericTemperature = EarthExosphereTemp / math.Pow(planet.SemiMajorAxis/sun.EcosphereRadius, 2.0)
-	planet.RootMeanSquareVelocity = planetEnvironment.rootMeanSquareVelocity(MolNitrogen, planet.ExosphericTemperature)
+	planet.RootMeanSquareVelocity = planetEnvironment.rootMeanSquareVelocityV2(MolNitrogen, planet.SemiMajorAxis)
 	planet.CoreRadius = planetEnvironment.kothariRadius(planet.DustMass, false, planet.OrbitZone)
 
 	// Calculate the radius as a gas giant, to verify it will retain gas.
@@ -1075,7 +1089,7 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *persistence.Sun,
 
 		planet.GreenhouseEffect = planetEnvironment.greenHouse(sun.EcosphereRadius, planet.SemiMajorAxis)
 
-		accretedGas := (planet.GasMass / planet.Mass) > 0.000001
+		accretedGas := planet.GasMass > 0.0
 		planet.VolatileGasInventory = planetEnvironment.volInventory(planet.Mass, planet.EscapeVelocity, planet.RootMeanSquareVelocity,
 			sun.Mass, planet.OrbitZone, planet.GreenhouseEffect, accretedGas)
 
