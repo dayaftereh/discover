@@ -1,0 +1,136 @@
+<div class="row">
+    <div class="col-12">
+        <table data-toggle="table" data-virtual-scroll="false" data-sortable="true"
+            data-detail-formatter="planetDetailFormatter" class="table" data-detail-view="true">
+            <thead>
+                <tr>
+                    <th data-sortable="true">Index</th>
+                    <th data-sortable="true" data-width="350">Type</th>
+                    <th data-sortable="true">AtmosphereType</th>
+                    <th data-sortable="true">SemiMajorAxis (AU)</th>
+                    <th data-sortable="true">Eccentricity</th>
+                    <th data-sortable="true">AxialTilt (&deg;)</th>
+                    <th data-sortable="true">OrbitZone</th>
+                    <th data-sortable="true">OrbitPeriod (days)</th>
+                    <th data-sortable="true">Day (hours)</th>
+                    <th data-sortable="true">ResonantPeriod</th>
+                    <th data-sortable="true">GasGiant</th>
+                    <th data-sortable="true">Mass (M<sub>&#9737;</sub>)</th>
+                    <th data-sortable="true">DustMass (M<sub>&#9737;</sub>)</th>
+                    <th data-sortable="true">GasMass (M<sub>&#9737;</sub>)</th>
+                    <th data-sortable="true">CoreRadius (km)</th>
+                    <th data-sortable="true">Radius (km)</th>
+                    <th data-sortable="true">Density (g/cc)</th>
+                    <th data-sortable="true">EscapeVelocity (m/s)</th>
+                    <th data-sortable="true">Acceleration (m/s<sup>2</sup>)</th>
+                    <th data-sortable="true">Gravity (g<sub>0</sub>)</th>
+                    <th data-sortable="true">Gravity-Type</th>
+                    <th data-sortable="true">RMS-Velocity (m/s)</th>
+                    <th data-sortable="true">MolecularWeight </th>
+                    <th data-sortable="true">VolatileGasInventory</th>
+                    <th data-sortable="true">Pressure (mbar)</th>
+                    <th data-sortable="true">Albedo</th>
+                    <th data-sortable="true">Hydrosphere (%)</th>
+                    <th data-sortable="true">CloudCover (%)</th>
+                    <th data-sortable="true">IceCover (%)</th>
+                    <th data-sortable="true">GreenhouseEffect</th>
+                    <th data-sortable="true">BoilPoint (&deg;)</th>
+                    <th data-sortable="true">
+                        Exospheric
+                        <i class="fas fa-thermometer-quarter"></i> (&deg;)
+                    </th>
+                    <th data-sortable="true">
+                        Estimated
+                        <i class="fas fa-thermometer-quarter"></i> (&deg;)
+                    </th>
+                    <th data-sortable="true">
+                        EstimatedTerrestrial
+                        <i class="fas fa-thermometer-quarter"></i> (&deg;)
+                    </th>
+                    <th data-sortable="true">Surface
+                        <i class="fas fa-thermometer-quarter"></i> (&deg;)
+                    </th>
+                    <th data-sortable="true">GreenhouseRise (&deg;)</th>
+                    <th data-sortable="true">Day
+                        <i class="fas fa-thermometer-quarter"></i> (&deg;)
+                    </th>
+                    <th data-sortable="true">Night
+                        <i class="fas fa-thermometer-quarter"></i> (&deg;)
+                    </th>
+                    <th data-sortable="true">Summer
+                        <i class="fas fa-thermometer-quarter"></i> (&deg;)
+                    </th>
+                    <th data-sortable="true">Winter
+                        <i class="fas fa-thermometer-quarter"></i> (&deg;)
+                    </th>
+                    <th data-sortable="true">Ice (%)</th>
+                    <th data-sortable="true">Rock (%)</th>
+                    <th data-sortable="true">Carbon (%)</th>
+                    <th data-sortable="true">Silicates (%)</th>
+                    <th data-sortable="true">Iron (%)</th>
+                    <th data-visible="false" data-field="json"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range $index, $planet := .Planets }}
+                <tr>
+                    <td data-sortable="true">{{ $index }}</td>
+                    {{ template "planet-table-entry.html" . }}
+                </tr>
+                {{ range $mindex, $moon := .Moons }}
+                <tr>
+                    <td data-sortable="true">{{ $index }}.{{ $mindex }}</td>
+                    {{ template "planet-table-entry.html" . }}
+                </tr>
+                {{ end }}
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    function planetDetailFormatter(index, row, element) {
+        if (!row.hasOwnProperty("json") || !row['json']) {
+            return `unable to find json for planet`
+        }
+
+        const planet = JSON.parse(row['json'])
+
+        if (!planet['atmosphere'] || planet['atmosphere'].length < 1) {
+            return `planet has no atmosphere`
+        }
+
+        const f = new Intl.NumberFormat('en-EN', { maximumFractionDigits: 3 })
+
+        setTimeout(() => {
+            $('#atmosphere').bootstrapTable({
+                sortable: true,
+                sortName: "num",
+                columns: [
+                    {
+                        sortable: true,
+                        field: "num",
+                        title: 'Number'
+                    },
+                    {
+                        sortable: true,
+                        field: "name",
+                        title: 'Name'
+                    },
+                    {
+                        sortable: true,
+                        field: "surfacePressure",
+                        title: 'Pressure',
+                        formatter: (value) => {
+                            console.log(value)
+                            return f.format(value)
+                        }
+                    }
+                ],
+                data: planet['atmosphere']
+            })
+        }, 10)
+
+        return '<div style="width: 10%"><table id="atmosphere"></table></div>'
+    }
+</script>

@@ -112,7 +112,7 @@ func (planetEnvironment *PlanetEnvironment) empiricalDensity(mass float64, orbit
 
 // volumeRadius calculates the radius from the volume. The mass is in units of solar masses, and the density is in units of grams/cc.
 // The radius returned is in units of km.
-func (planetEnvironment *PlanetEnvironment) volumeRadius(mass float64, density float64) float64 {
+func volumeRadius(mass float64, density float64) float64 {
 	mass = mass * SolarMassInGrams
 	volume := mass / density
 	return math.Pow((3.0*volume)/(4.0*math.Pi), (1.0/3.0)) / CMPerKM
@@ -120,7 +120,7 @@ func (planetEnvironment *PlanetEnvironment) volumeRadius(mass float64, density f
 
 // volumeDensity calculates the volume density. The mass passed in is in units of solar masses, and the equatorial radius is in km.
 // The density is returned in units of grams/cc.
-func (planetEnvironment *PlanetEnvironment) volumeDensity(mass float64, radius float64) float64 {
+func volumeDensity(mass float64, radius float64) float64 {
 	mass = mass * SolarMassInGrams
 	radiusInCm := radius * CMPerKM
 	volume := (4.0 * math.Pi * math.Pow(radiusInCm, 3.0)) / 3.0
@@ -527,7 +527,7 @@ func (planetEnvironment *PlanetEnvironment) planetAlbedo(waterFraction, cloudFra
 	return cloudPart + rockPart + waterPart + icePart
 }
 
-func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *persistence.Planet, sun *persistence.Sun, first bool, lastWater, lastClouds, lastIce, lastTemp, lastAlbedo float64) {
+func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *persistence.Planet, sun *persistence.Sun, first bool, lastWater, lastClouds, lastIce, lastTemp, lastAlbedo float64, doGases bool) {
 	if first {
 		if !planetEnvironment.isGasPlanet(planet) {
 			planet.Albedo = EarthAlbedo
@@ -543,7 +543,7 @@ func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *p
 
 	if planet.GreenhouseEffect && planet.MaxTemperature < planet.BoilPoint {
 		planet.GreenhouseEffect = false
-		accretedGas := (planet.GasMass / planet.Mass) < 0.000001
+		accretedGas := planet.GasMass > 0.0
 		planet.VolatileGasInventory = planetEnvironment.volInventory(
 			planet.Mass,
 			planet.EscapeVelocity,
@@ -560,12 +560,19 @@ func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *p
 	planet.CloudCover = planetEnvironment.cloudFraction(planet.SurfaceTemperature, planet.MolecularWeight, planet.Radius, planet.Hydrosphere)
 	planet.IceCover = planetEnvironment.iceFraction(planet.Hydrosphere, planet.SurfaceTemperature)
 
+	if planet.IceMassFraction > 0.1 && planet.Radius >= planetEnvironment.roundThreshold(planet.Density) && planet.SemiMajorAxis >= habitableZoneDistance(sun, MaximumGreenhouse, planet.Mass*SunMassInEarthMasses) {
+		planet.IceCover = 1.0
+	} else if planet.IceMassFraction > 0.0 && planet.Radius < planetEnvironment.roundThreshold(planet.Density) && planet.SemiMajorAxis >= habitableZoneDistance(sun, MaximumGreenhouse, planet.Mass*SunMassInEarthMasses) {
+		planet.IceCover = mathf.Clamp(planet.IceCover+planet.IceMassFraction, 0.0, 1.0)
+	}
+
 	if planet.GreenhouseEffect && planet.SurfacePressure > 0.0 {
 		planet.CloudCover = 1.0
 	}
 
 	boilOff := false
-	if planet.HighTemperature >= planet.BoilPoint && !first && !(mathf.CloseEquals(planet.Day, planet.OrbitPeriod*24.0) || planet.ResonantPeriod) {
+	if (planet.HighTemperature >= planet.BoilPoint && !first && !(mathf.CloseEquals(planet.Day, planet.OrbitPeriod*24.0) || planet.ResonantPeriod)) ||
+		(planet.MinTemperature >= planet.BoilPoint && !first) {
 		boilOff = true
 		planet.Hydrosphere = 0.0
 		if planet.MolecularWeight > WaterVapro {
@@ -581,6 +588,10 @@ func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *p
 
 	if !planetEnvironment.isGasPlanet(planet) {
 		planet.Albedo = planetEnvironment.planetAlbedo(planet.Hydrosphere, planet.CloudCover, planet.IceCover, planet.SurfacePressure)
+	}
+
+	if !planetEnvironment.isGasPlanet(planet) && doGases {
+		planet.Atmosphere = planetEnvironment.calculateGases(planet, sun, doGases)
 	}
 
 	effectiveTemp := planetEnvironment.effectiveTemp(sun.EcosphereRadius, planet.SemiMajorAxis, planet.Albedo)
@@ -601,10 +612,10 @@ func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *p
 	planetEnvironment.setPlanetTempRange(planet)
 }
 
-func (planetEnvironment *PlanetEnvironment) iterateAndSetSurfaceTemp(planet *persistence.Planet, sun *persistence.Sun) {
+func (planetEnvironment *PlanetEnvironment) iterateAndSetSurfaceTemp(planet *persistence.Planet, sun *persistence.Sun, doGases bool) {
 	initialTemp := planetEnvironment.estimatedTemp(sun.EcosphereRadius, planet.SemiMajorAxis, planet.Albedo)
 
-	planetEnvironment.calculateAndSetSurfaceTemp(planet, sun, true, 0.0, 0.0, 0.0, 0.0, 0.0)
+	planetEnvironment.calculateAndSetSurfaceTemp(planet, sun, true, 0.0, 0.0, 0.0, 0.0, 0.0, doGases)
 
 	for count := 0; count < 25; count++ {
 		lastWater := planet.Hydrosphere
@@ -613,7 +624,7 @@ func (planetEnvironment *PlanetEnvironment) iterateAndSetSurfaceTemp(planet *per
 		lastTemp := planet.SurfaceTemperature
 		lastAlbedo := planet.Albedo
 
-		planetEnvironment.calculateAndSetSurfaceTemp(planet, sun, false, lastWater, lastClouds, lastIce, lastTemp, lastAlbedo)
+		planetEnvironment.calculateAndSetSurfaceTemp(planet, sun, false, lastWater, lastClouds, lastIce, lastTemp, lastAlbedo, doGases)
 
 		if math.Abs(planet.SurfaceTemperature-lastTemp) < 0.25 {
 			break
@@ -623,7 +634,7 @@ func (planetEnvironment *PlanetEnvironment) iterateAndSetSurfaceTemp(planet *per
 	planet.GreenhouseRise = planet.SurfaceTemperature - initialTemp
 }
 
-func (planetEnvironment *PlanetEnvironment) calculateGases(planet *persistence.Planet, sun *persistence.Sun) []*types.Gas {
+func (planetEnvironment *PlanetEnvironment) calculateGases(planet *persistence.Planet, sun *persistence.Sun, doGases bool) []*types.Gas {
 	atmosphere := make([]*types.Gas, 0)
 
 	// no gases
@@ -636,7 +647,7 @@ func (planetEnvironment *PlanetEnvironment) calculateGases(planet *persistence.P
 	// check if the planet a gas planet
 	if gasPlanet {
 		planet.SurfacePressure = 10.0 * EarthSurfPersInMilliBars
-		planetEnvironment.iterateAndSetSurfaceTemp(planet, sun)
+		planetEnvironment.iterateAndSetSurfaceTemp(planet, sun, doGases)
 	}
 
 	totalAmount := 0.0
@@ -1109,14 +1120,14 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *persistence.Sun,
 		 *		planet->cloud_cover
 		 *		planet->ice_cover
 		 */
-		planetEnvironment.iterateAndSetSurfaceTemp(planet, sun)
+		planetEnvironment.iterateAndSetSurfaceTemp(planet, sun, doGases)
 
 		// assign the type of the planet
 		planetEnvironment.assignType(planet, sun, isMoon)
 	}
 
 	if doGases {
-		planet.Atmosphere = planetEnvironment.calculateGases(planet, sun)
+		planet.Atmosphere = planetEnvironment.calculateGases(planet, sun, doGases)
 	}
 
 	// verify if the planet Breathability

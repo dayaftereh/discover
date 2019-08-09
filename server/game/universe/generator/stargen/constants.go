@@ -10,6 +10,11 @@ const (
 	ChangeInErthAngVel      float64 = -1.3E-15 /* Units of radians/sec/year*/
 	DustDensityCoefficient  float64 = 2.0e-3   /* A in Dole's paper		*/
 
+	IceDensity    float64 = 1.46
+	CarbonDensity float64 = 3.22
+	RockDensity   float64 = 4.7825
+	IronDensity   float64 = 7.874
+
 	GasRetentionThreshold float64 = 6.0 /* ratio of esc vel to RMS vel */
 
 	AsteroidMassLimit    float64 = 0.001 /* Units of Earth Masses	*/

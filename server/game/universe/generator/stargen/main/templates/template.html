@@ -1,16 +1,22 @@
 <!doctype html>
 
-<html lang="en">
+<html lang="en" style="height: 100%;">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>{{ .Name }}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.css"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/fontawesome.min.css"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/solid.min.css"
+        crossorigin="anonymous">
 </head>
 
-<body>
-    <div class="container-fluid">
+<body style="height: 100%;">
+    <div class="container-fluid" style="overflow-y: auto; overflow-x: visible; height: 100%">
         <br>
 
         <!-- Sun -->
@@ -20,14 +26,13 @@
             </div>
         </div>
 
-        {{ range .Planets }}
         <br>
-        <div class="row">
+
+        <div class="row" style="width: 10000px">
             <div class="col-12">
-                {{template "planet.html" .}}
+                {{template "planet-table.html" . }}
             </div>
         </div>
-        {{ end }}
 
     </div>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" crossorigin="anonymous">
@@ -35,6 +40,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous">
     </script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous">
+    </script>
+    <script src="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.js" crossorigin="anonymous"></script>
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+
+        function luminosity(stellarMassRatio) {
+            var n = 0.5 * (2.0 - stellarMassRatio) + 4.4
+            if (stellarMassRatio < 1.0) {
+                n = 1.75 * (stellarMassRatio - 0.1) + 3.325
+            }
+            return Math.pow(stellarMassRatio, n)
+        }
     </script>
 </body>
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"math"
@@ -62,6 +63,14 @@ func defaultFuncMap() template.FuncMap {
 		},
 		"ironMassFraction": func(planet *types.Planet) float64 {
 			return 1.0 - (planet.RockMassFraction + planet.IceMassFraction)
+		},
+		"json": func(planet *types.Planet) string {
+			bytes, err := json.Marshal(planet)
+			if err != nil {
+				return err.Error()
+			}
+
+			return string(bytes)
 		},
 	}
 

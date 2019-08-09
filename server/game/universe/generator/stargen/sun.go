@@ -15,6 +15,26 @@ func luminosity(stellarMassRatio float64) float64 {
 	return (math.Pow(stellarMassRatio, n))
 }
 
+func massToLuminosity(mass float64) float64 {
+	if mass <= 0.6224 {
+		return 0.3815 * math.Pow(mass, 2.5185)
+	}
+
+	if mass <= 1.0 {
+		return math.Pow(mass, 4.551)
+	}
+
+	if mass <= 3.1623 {
+		return math.Pow(mass, 4.351)
+	}
+
+	if mass <= 16.0 {
+		return 2.7563 * math.Pow(mass, 3.4704)
+	}
+
+	return 42.321 * math.Pow(mass, 2.4853)
+}
+
 func NewRandomSun() *types.Sun {
 	// get a random stellar class
 	stellarClass := RandStellarClass()
@@ -33,7 +53,7 @@ func NewRandomSun() *types.Sun {
 
 func NewSun(mass float64) *types.Sun {
 	// calculate luminosity
-	luminosity := luminosity(mass)
+	luminosity := massToLuminosity(mass)
 
 	// calculate the life of the sun
 	life := 1e10 * (mass / luminosity)

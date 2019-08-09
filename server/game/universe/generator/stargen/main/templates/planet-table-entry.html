@@ -1,0 +1,200 @@
+<td data-sortable="true" data-width="350">
+    {{ .Type }}
+</td>
+
+<td data-sortable="true">
+    {{ .AtmosphereType }}
+</td>
+
+<td data-sortable="true">
+    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" data-placement="top"
+        title="{{au2KM .SemiMajorAxis | printf "%.3e" }} km">
+        {{printf "%.4f" .SemiMajorAxis}}
+    </span>
+</td>
+
+<td data-sortable="true">
+    {{ printf "%.5f" .Eccentricity }}
+</td>
+
+<td data-sortable="true">
+    {{ printf "%.1f" .AxialTilt }}
+</td>
+
+<td data-sortable="true">
+    {{ .OrbitZone }}
+</td>
+
+<td data-sortable="true">
+    {{  printf "%.2f" .OrbitPeriod }}
+</td>
+
+<td data-sortable="true">
+    {{  printf "%.2f" .Day }}
+</td>
+
+<td data-sortable="true">
+    {{  .ResonantPeriod }}
+</td>
+
+<td data-sortable="true">
+    {{  .GasGiant }}
+</td>
+
+
+<td data-sortable="true">
+    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" data-placement="top"
+        title="{{solarMass2KG .Mass | printf "%.3e" }} kg">
+        {{printf "%.8f" .Mass}}
+    </span>
+</td>
+
+<td data-sortable="true">
+    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" data-placement="top"
+        title="{{solarMass2KG .DustMass | printf "%.3e" }} kg">
+        {{printf "%.8f" .DustMass}}
+    </span>
+</td>
+
+<td data-sortable="true">
+    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" data-placement="top"
+        title="{{solarMass2KG .GasMass | printf "%.3e" }} kg">
+        {{printf "%.8f" .GasMass}}
+    </span>
+</td>
+
+<td data-sortable="true">
+    {{ printf "%.2f" .CoreRadius }}
+</td>
+
+<td data-sortable="true">
+    {{ printf "%.2f" .Radius }}
+</td>
+
+<td data-sortable="true">
+    {{ printf "%.2f" .Density }}
+</td>
+
+<td data-sortable="true">
+    {{ cmPerS2mPerS .EscapeVelocity | printf "%.3f"  }}
+</td>
+
+<td data-sortable="true">
+    {{ cmPerSSqr2mPerSSqr .SurfaceAcceleration | printf "%.3f" }}
+</td>
+
+<td data-sortable="true">
+    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-html="true" data-placement="top"
+        title="{{earthGravities2mPerSSqr .SurfaceGravity | printf "%.3f" }} m/s<sup>2</sup>">
+        {{printf "%.3f" .SurfaceGravity}}
+    </span>
+</td>
+
+<td data-sortable="true">
+    {{ if lt .SurfaceGravity 0.8 }}
+    Low-G
+    {{ else if gt .SurfaceGravity 1.2 }}
+    High-G
+    {{ else }}
+    Normal-G
+    {{ end }}
+</td>
+
+<td data-sortable="true">
+    {{ cmPerS2mPerS .RootMeanSquareVelocity |  printf "%.3f" }}
+</td>
+
+<td data-sortable="true">
+    {{ printf "%.4f" .MolecularWeight }}
+</td>
+
+<td data-sortable="true">
+    {{ infinity .VolatileGasInventory | printf "%.5f"  }}
+</td>
+
+<td data-sortable="true">
+    {{ printf "%.2f" .SurfacePressure }}
+</td>
+
+<td data-sortable="true">
+    {{ printf "%f" .Albedo }}
+</td>
+
+<td data-sortable="true">
+    {{ percent .Hydrosphere | printf "%.1f" }}
+</td>
+
+<td data-sortable="true">
+    {{ percent .CloudCover | printf "%.1f" }}
+</td>
+
+<td data-sortable="true">
+    {{ percent .IceCover | printf "%.1f" }}
+</td>
+
+<td data-sortable="true">
+    {{ .GreenhouseEffect  }}
+</td>
+
+<td data-sortable="true">
+    {{ kelvin2Degrees .BoilPoint | infinity | printf "%.2f" }}
+</td>
+
+<td data-sortable="true">
+    {{ kelvin2Degrees .ExosphericTemperature | infinity | printf "%.2f" }}
+</td>
+
+<td data-sortable="true">
+    {{ kelvin2Degrees .EstimatedTemperature | infinity | printf "%.2f" }}
+</td>
+
+<td data-sortable="true">
+    {{ kelvin2Degrees .EstimatedTerrestrialTemperature | infinity | printf "%.2f" }}
+</td>
+
+<td data-sortable="true">
+    {{ kelvin2Degrees .SurfaceTemperature | infinity | printf "%.2f" }}
+</td>
+
+<td data-sortable="true">
+    {{ kelvin2Degrees .GreenhouseRise | infinity | printf "%.2f" }}
+</td>
+
+<td data-sortable="true">
+    {{ kelvin2Degrees .HighTemperature | infinity | printf "%.2f" }}
+</td>
+
+<td data-sortable="true">
+    {{ kelvin2Degrees .LowTemperature | infinity | printf "%.2f" }}
+</td>
+
+<td data-sortable="true">
+    {{ kelvin2Degrees .MaxTemperature | infinity | printf "%.2f" }}
+</td>
+
+<td data-sortable="true">
+    {{ kelvin2Degrees .MinTemperature | infinity | printf "%.2f" }}
+</td>
+
+<td data-sortable="true">
+    {{ percent .IceMassFraction | printf "%.1f" }}
+</td>
+
+<td data-sortable="true">
+    {{ percent .RockMassFraction | printf "%.1f" }}
+</td>
+
+<td data-sortable="true">
+    {{ percent .CarbonMassFraction | printf "%.1f" }}
+</td>
+
+<td data-sortable="true">
+    {{ silicatesMassFraction . | percent | printf "%.1f" }}
+</td>
+
+<td data-sortable="true">
+    {{ ironMassFraction . | percent | printf "%.1f" }}
+</td>
+
+
+<td data-visible="false">{{ json . }}</td>
