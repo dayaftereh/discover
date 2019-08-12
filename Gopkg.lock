@@ -81,6 +81,30 @@
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
 
+[[projects]]
+  branch = "master"
+  digest = "1:e37135a75bbb4a7c1e68dc42f0b53a23dd5d9ca2698ff4803f4344c98b51ee27"
+  name = "gonum.org/v1/gonum"
+  packages = [
+    "blas",
+    "blas/blas64",
+    "blas/cblas128",
+    "blas/gonum",
+    "floats",
+    "internal/asm/c128",
+    "internal/asm/c64",
+    "internal/asm/f32",
+    "internal/asm/f64",
+    "internal/cmplx64",
+    "internal/math32",
+    "lapack",
+    "lapack/gonum",
+    "lapack/lapack64",
+    "mat",
+  ]
+  pruneopts = ""
+  revision = "ced62fe5104b907b6c16cb7e575c17b2e62ceddd"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -91,6 +115,7 @@
     "github.com/ojrac/opensimplex-go",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/assert",
+    "gonum.org/v1/gonum/mat",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

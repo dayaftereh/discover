@@ -528,6 +528,7 @@ func (planetEnvironment *PlanetEnvironment) planetAlbedo(waterFraction, cloudFra
 }
 
 func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *persistence.Planet, sun *persistence.Sun, first bool, lastWater, lastClouds, lastIce, lastTemp, lastAlbedo float64, doGases bool) {
+
 	if first {
 		if !planetEnvironment.isGasPlanet(planet) {
 			planet.Albedo = EarthAlbedo
@@ -543,16 +544,20 @@ func (planetEnvironment *PlanetEnvironment) calculateAndSetSurfaceTemp(planet *p
 
 	if planet.GreenhouseEffect && planet.MaxTemperature < planet.BoilPoint {
 		planet.GreenhouseEffect = false
+
+		fudgedRadius := fudgedRadius(planet)
+		fudgedEscapeVelocity := planetEnvironment.escapeVelocity(planet.Mass, fudgedRadius)
+
 		accretedGas := planet.GasMass > 0.0
 		planet.VolatileGasInventory = planetEnvironment.volInventory(
 			planet.Mass,
-			planet.EscapeVelocity,
+			fudgedEscapeVelocity,
 			planet.RootMeanSquareVelocity,
 			sun.Mass,
 			planet.OrbitZone,
 			planet.GreenhouseEffect,
 			accretedGas)
-		planet.SurfacePressure = planetEnvironment.pressure(planet.VolatileGasInventory, planet.Radius, planet.SurfaceGravity)
+		planet.SurfacePressure = planetEnvironment.pressure(planet.VolatileGasInventory, fudgedRadius, planet.SurfaceGravity)
 		planet.BoilPoint = planetEnvironment.boilingPoint(planet.SurfacePressure)
 	}
 
@@ -771,6 +776,46 @@ func (planetEnvironment *PlanetEnvironment) breathability(atmosphere []*types.Ga
 	return types.Unbreathable
 }
 
+func (planetEnvironment *PlanetEnvironment) calculateGasRadius(planet *persistence.Planet, sun *persistence.Sun) float64 {
+	mass := planet.Mass * SunMassInEarthMasses
+
+	var result float64
+	if mass < 17.0 {
+		result = miniNeptuneRadius(planet, sun)
+	} else if mass < 20.0 {
+		lower := miniNeptuneRadius(planet, sun)
+		upper := gasRadius(planet, sun)
+		result = rangeAdjust(mass, lower, upper, 17.0, 20.0)
+	} else {
+		result = gasRadius(planet, sun)
+	}
+
+	if result < planet.CoreRadius {
+		result = miniNeptuneRadius(planet, sun)
+	}
+
+	density := volumeDensity(planet.Mass, result)
+
+	for (density / EarthDensity) < 0.01 {
+		result *= 0.99
+		density = volumeDensity(planet.Mass, result)
+	}
+
+	return result
+}
+
+func (planetEnvironment *PlanetEnvironment) calculateGasGiantRadius(planet *persistence.Planet, sun *persistence.Sun) float64 {
+	if planet.CoreRadius <= 0.0 {
+		planet.CoreRadius = radiusImproved(planet.DustMass, planet)
+	}
+
+	if planet.GasGiant || planet.GasMass > 0.0 {
+		return planetEnvironment.calculateGasRadius(planet, sun)
+	}
+
+	return radiusImproved(planet.Mass, planet)
+}
+
 func (planetEnvironment *PlanetEnvironment) logistalTrend(a, b, c, x float64) float64 {
 	return c / (1 + (a * math.Exp(-1.0*b*x)))
 }
@@ -779,6 +824,11 @@ func (planetEnvironment *PlanetEnvironment) setGasGiantTemperatureAlbedo(planet 
 
 	temp3 := planetEnvironment.about(GasGiantAlbedo, 0.1)
 	planet.Albedo = temp3
+
+	temp4 := planetEnvironment.calculateGasGiantRadius(planet, sun)
+	planet.Radius = temp4
+
+	temp5, _ := planetEnvironment.dayLength(planet, sun)
 
 	temp1 := planetEnvironment.estimatedTemp(sun.EcosphereRadius, planet.SemiMajorAxis, planet.Albedo)
 	planet.EstimatedTemperature = temp1
@@ -807,6 +857,12 @@ func (planetEnvironment *PlanetEnvironment) setGasGiantTemperatureAlbedo(planet 
 		temp2 := planetEnvironment.estimatedTemp(sun.EcosphereRadius, planet.SemiMajorAxis, temp3)
 		temp1 = (temp2 + (temp1 * 2.0)) / 3.0
 
+		newRadius := planetEnvironment.calculateGasGiantRadius(planet, sun)
+		temp4 = (newRadius + (temp1 * 2.0)) / 3.0
+
+		newDay, _ := planetEnvironment.dayLength(planet, sun)
+		temp5 = (temp5 + (newDay * 2.0)) / 3.0
+
 		if temp1 > 900.0 && temp1 < 1400.0 {
 			if math.Abs(temp1-temp2) < 0.0025 && math.Abs(planet.Albedo-newAlbedo) < 0.001 {
 				break
@@ -818,7 +874,9 @@ func (planetEnvironment *PlanetEnvironment) setGasGiantTemperatureAlbedo(planet 
 		}
 	}
 
+	planet.Day = temp5
 	planet.Albedo = temp3
+	planet.Radius = temp4
 	planet.EstimatedTemperature = temp1
 }
 
@@ -1000,14 +1058,14 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *persistence.Sun,
 
 	planet.ExosphericTemperature = EarthExosphereTemp / math.Pow(planet.SemiMajorAxis/sun.EcosphereRadius, 2.0)
 	planet.RootMeanSquareVelocity = planetEnvironment.rootMeanSquareVelocityV2(MolNitrogen, planet.SemiMajorAxis)
-	planet.CoreRadius = planetEnvironment.kothariRadius(planet.DustMass, false, planet.OrbitZone)
+	planet.CoreRadius = radiusImproved(planet.DustMass, planet)
 
 	// Calculate the radius as a gas giant, to verify it will retain gas.
 	// Then if mass > Earth, it's at least 5% gas and retains He, it's
 	// some flavor of gas giant.
 
 	planet.Density = planetEnvironment.empiricalDensity(planet.Mass, planet.SemiMajorAxis, sun.EcosphereRadius, true)
-	planet.Radius = planetEnvironment.volumeRadius(planet.Mass, planet.Density)
+	planet.Radius = volumeRadius(planet.Mass, planet.Density)
 
 	planet.SurfaceAcceleration = planetEnvironment.acceleration(planet.Mass, planet.Radius)
 	planet.SurfaceGravity = planetEnvironment.gravity(planet.SurfaceAcceleration)
@@ -1032,8 +1090,8 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *persistence.Sun,
 		}
 	} else {
 		// If not, it's rocky.
-		planet.Radius = planetEnvironment.kothariRadius(planet.Mass, false, planet.OrbitZone)
-		planet.Density = planetEnvironment.volumeDensity(planet.Mass, planet.Radius)
+		planet.Radius = radiusImproved(planet.Mass, planet)
+		planet.Density = volumeDensity(planet.Mass, planet.Radius)
 
 		planet.SurfaceAcceleration = planetEnvironment.acceleration(planet.Mass, planet.Radius)
 		planet.SurfaceGravity = planetEnvironment.gravity(planet.SurfaceAcceleration)
@@ -1089,7 +1147,7 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *persistence.Sun,
 
 		planetEnvironment.setGasGiantTemperatureAlbedo(planet, sun, isMoon)
 
-		planet.Density = planetEnvironment.volumeDensity(planet.Mass, planet.Radius)
+		planet.Density = volumeDensity(planet.Mass, planet.Radius)
 		planet.EstimatedTerrestrialTemperature = planetEnvironment.estimatedTemp(sun.EcosphereRadius, planet.SemiMajorAxis, EarthAlbedo)
 	} else {
 		planet.EstimatedTemperature = planetEnvironment.estimatedTemp(sun.EcosphereRadius, planet.SemiMajorAxis, EarthAlbedo)
@@ -1101,10 +1159,13 @@ func (planetEnvironment *PlanetEnvironment) GeneratePlanet(sun *persistence.Sun,
 		planet.GreenhouseEffect = planetEnvironment.greenHouse(sun.EcosphereRadius, planet.SemiMajorAxis)
 
 		accretedGas := planet.GasMass > 0.0
-		planet.VolatileGasInventory = planetEnvironment.volInventory(planet.Mass, planet.EscapeVelocity, planet.RootMeanSquareVelocity,
+		fudgedRadius := fudgedRadius(planet)
+		fudgedEscapeVelocity := planetEnvironment.escapeVelocity(planet.Mass, fudgedRadius)
+
+		planet.VolatileGasInventory = planetEnvironment.volInventory(planet.Mass, fudgedEscapeVelocity, planet.RootMeanSquareVelocity,
 			sun.Mass, planet.OrbitZone, planet.GreenhouseEffect, accretedGas)
 
-		planet.SurfacePressure = planetEnvironment.pressure(planet.VolatileGasInventory, planet.Radius, planet.SurfaceGravity)
+		planet.SurfacePressure = planetEnvironment.pressure(planet.VolatileGasInventory, fudgedRadius, planet.SurfaceGravity)
 
 		if mathf.CloseZero(planet.SurfacePressure) {
 			planet.BoilPoint = 0.0

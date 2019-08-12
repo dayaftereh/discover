@@ -48,6 +48,16 @@ func lnTrend(a, b, x float64) float64 {
 	return a + (b * math.Log(x))
 }
 
+func eTrend(a, b, x float64) float64 {
+	return a + (b * math.Exp(x))
+}
+
+func eFix(x, y, w, z float64) (float64, float64) {
+	a := ((math.Exp(x) * z) - (math.Exp(w) * y)) / (math.Exp(x) - math.Exp(w))
+	b := (y - z) / (math.Exp(x) - math.Exp(w))
+	return a, b
+}
+
 func planetRadiusHelper2(planetMass, mass1, radius1, mass2, radius2 float64) float64 {
 	a, b := logFix(mass1, radius1, mass2, radius2)
 	radius := lnTrend(a, b, planetMass)
