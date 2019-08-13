@@ -145,14 +145,10 @@ func (planetEnvironment *PlanetEnvironment) dayLength(planet *persistence.Planet
 	planetaryMassInGrams := planet.Mass * SolarMassInGrams
 	equatorialRadiusInCM := planet.Radius * CMPerKM
 	yearInHours := planet.OrbitPeriod * 24.0
-	giant := (planet.Type == types.PlanetGasGiant || planet.Type == types.PlanetSubGasGiant || planet.Type == types.PlanetSubSubGasGiant)
 
 	stopped := false
 
-	k2 := 0.33
-	if giant {
-		k2 = 0.24
-	}
+	k2 := calculateMomentOfInertiaCoefficient(planet.Mass, planet.Radius)
 
 	baseAngularVelocity := math.Sqrt(2.0 * J * planetaryMassInGrams / (k2 * math.Pow(equatorialRadiusInCM, 2.0)))
 
@@ -173,7 +169,7 @@ func (planetEnvironment *PlanetEnvironment) dayLength(planet *persistence.Planet
 
 	if daysInAYear > yearInHours || stopped {
 		if planet.Eccentricity > 0.1 {
-			spinResonanceFactor := (1.0 - planet.Eccentricity) / (1.0 + planet.Eccentricity)
+			spinResonanceFactor := getSpinResonanceFactor(planet.Eccentricity)
 			return (spinResonanceFactor * yearInHours), true
 		}
 		return yearInHours, false
@@ -828,8 +824,6 @@ func (planetEnvironment *PlanetEnvironment) setGasGiantTemperatureAlbedo(planet 
 	temp4 := planetEnvironment.calculateGasGiantRadius(planet, sun)
 	planet.Radius = temp4
 
-	temp5, _ := planetEnvironment.dayLength(planet, sun)
-
 	temp1 := planetEnvironment.estimatedTemp(sun.EcosphereRadius, planet.SemiMajorAxis, planet.Albedo)
 	planet.EstimatedTemperature = temp1
 
@@ -856,12 +850,11 @@ func (planetEnvironment *PlanetEnvironment) setGasGiantTemperatureAlbedo(planet 
 		temp3 = ((newAlbedo * 2.0) + temp3) / 3.0
 		temp2 := planetEnvironment.estimatedTemp(sun.EcosphereRadius, planet.SemiMajorAxis, temp3)
 		temp1 = (temp2 + (temp1 * 2.0)) / 3.0
+		planet.EstimatedTemperature = temp1
 
 		newRadius := planetEnvironment.calculateGasGiantRadius(planet, sun)
 		temp4 = (newRadius + (temp1 * 2.0)) / 3.0
-
-		newDay, _ := planetEnvironment.dayLength(planet, sun)
-		temp5 = (temp5 + (newDay * 2.0)) / 3.0
+		planet.Radius = temp4
 
 		if temp1 > 900.0 && temp1 < 1400.0 {
 			if math.Abs(temp1-temp2) < 0.0025 && math.Abs(planet.Albedo-newAlbedo) < 0.001 {
@@ -874,7 +867,6 @@ func (planetEnvironment *PlanetEnvironment) setGasGiantTemperatureAlbedo(planet 
 		}
 	}
 
-	planet.Day = temp5
 	planet.Albedo = temp3
 	planet.Radius = temp4
 	planet.EstimatedTemperature = temp1
